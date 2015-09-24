@@ -5,15 +5,22 @@
  */
 package cz.cvut.fit.geotrip;
 
+import com.jidesoft.swing.RangeSlider;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.multi.MultiSliderUI;
 import org.mapsforge.core.graphics.GraphicFactory;
 import org.mapsforge.core.model.BoundingBox;
 import org.mapsforge.core.model.MapPosition;
@@ -66,6 +73,32 @@ public class MainFrame extends javax.swing.JFrame {
         mapView.setLocation(3, 7);
         mapView.setSize(panelMapa.getWidth()-6, panelMapa.getHeight()-11);
         panelMapa.add(mapView);
+    
+        RangeSlider rangeSlider = new RangeSlider(1,9,1,9);
+        rangeSlider.setPaintTicks(true);
+        rangeSlider.setPaintLabels(true);
+        rangeSlider.setMajorTickSpacing(2);
+        rangeSlider.setMinorTickSpacing(1);
+        rangeSlider.setSize(274, 40);
+        rangeSlider.setLocation(6, 16);
+        Hashtable labelTable = new Hashtable();
+        labelTable.put(1, new JLabel("1"));
+        labelTable.put(3, new JLabel("2"));
+        labelTable.put(5, new JLabel("3"));
+        labelTable.put(7, new JLabel("4"));
+        labelTable.put(9, new JLabel("5"));
+        rangeSlider.setLabelTable(labelTable);
+        jPanel7.add(rangeSlider);
+        
+        RangeSlider rangeSlider2 = new RangeSlider(1,9,1,9);
+        rangeSlider2.setPaintTicks(true);
+        rangeSlider2.setPaintLabels(true);
+        rangeSlider2.setMajorTickSpacing(2);
+        rangeSlider2.setMinorTickSpacing(1);
+        rangeSlider2.setSize(274, 40);
+        rangeSlider2.setLocation(6, 16);
+        rangeSlider2.setLabelTable(labelTable);
+        jPanel9.add(rangeSlider2);
         
         final BoundingBox boundingBox = addLayers(mapView, Arrays.asList(mapFiles));
         final Model model = mapView.getModel();
@@ -132,6 +165,10 @@ public class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        groupStav = new javax.swing.ButtonGroup();
+        groupVelikost = new javax.swing.ButtonGroup();
+        groupObtiznost = new javax.swing.ButtonGroup();
+        groupTeren = new javax.swing.ButtonGroup();
         jPanel8 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
@@ -144,9 +181,7 @@ public class MainFrame extends javax.swing.JFrame {
         checkVelka = new javax.swing.JCheckBox();
         checkOstatni = new javax.swing.JCheckBox();
         jPanel7 = new javax.swing.JPanel();
-        jSlider1 = new javax.swing.JSlider();
         jPanel9 = new javax.swing.JPanel();
-        jSlider2 = new javax.swing.JSlider();
         jPanel4 = new javax.swing.JPanel();
         jPanel10 = new javax.swing.JPanel();
         radioVelikostMala = new javax.swing.JRadioButton();
@@ -177,14 +212,15 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
-        jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder("Nastavení"));
-
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Filtr"));
 
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Stav"));
 
+        groupStav.add(radioVsechny);
         radioVsechny.setText("všechny");
 
+        groupStav.add(radioNenalezene);
+        radioNenalezene.setSelected(true);
         radioNenalezene.setText("nenalezené");
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
@@ -206,14 +242,19 @@ public class MainFrame extends javax.swing.JFrame {
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Velikost"));
 
+        checkMikro.setSelected(true);
         checkMikro.setText("mikro");
 
+        checkMala.setSelected(true);
         checkMala.setText("malá");
 
+        checkStredni.setSelected(true);
         checkStredni.setText("střední");
 
+        checkVelka.setSelected(true);
         checkVelka.setText("velká");
 
+        checkOstatni.setSelected(true);
         checkOstatni.setText("ostatní");
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
@@ -243,40 +284,29 @@ public class MainFrame extends javax.swing.JFrame {
 
         jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder("Obtížnost"));
 
-        jSlider1.setMajorTickSpacing(2);
-        jSlider1.setMaximum(9);
-        jSlider1.setMinimum(1);
-        jSlider1.setMinorTickSpacing(1);
-        jSlider1.setToolTipText("");
-
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGap(0, 274, Short.MAX_VALUE)
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGap(0, 40, Short.MAX_VALUE)
         );
 
         jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder("Terén"));
-
-        jSlider2.setMajorTickSpacing(2);
-        jSlider2.setMaximum(9);
-        jSlider2.setMinimum(1);
-        jSlider2.setMinorTickSpacing(1);
-        jSlider2.setValue(5);
+        jPanel9.setPreferredSize(new java.awt.Dimension(286, 63));
 
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSlider2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGap(0, 274, Short.MAX_VALUE)
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSlider2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGap(0, 40, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -284,9 +314,9 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -296,18 +326,23 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Preference"));
 
         jPanel10.setBorder(javax.swing.BorderFactory.createTitledBorder("Velikost"));
 
+        groupVelikost.add(radioVelikostMala);
         radioVelikostMala.setText("malá");
 
+        groupVelikost.add(radioVelikostVelka);
         radioVelikostVelka.setText("velká");
 
+        groupVelikost.add(radioVelikostNezalezi);
+        radioVelikostNezalezi.setSelected(true);
         radioVelikostNezalezi.setText("nezáleží");
 
         javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
@@ -315,11 +350,11 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel10Layout.setHorizontalGroup(
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel10Layout.createSequentialGroup()
+                .addComponent(radioVelikostNezalezi)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(radioVelikostMala)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(radioVelikostVelka)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(radioVelikostNezalezi)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel10Layout.setVerticalGroup(
@@ -332,10 +367,14 @@ public class MainFrame extends javax.swing.JFrame {
 
         jPanel11.setBorder(javax.swing.BorderFactory.createTitledBorder("Terén"));
 
+        groupTeren.add(radioTerenLehky);
         radioTerenLehky.setText("lehký");
 
+        groupTeren.add(radioTerenNarocny);
         radioTerenNarocny.setText("náročný");
 
+        groupTeren.add(radioTerenNezalezi);
+        radioTerenNezalezi.setSelected(true);
         radioTerenNezalezi.setText("nezáleží");
 
         javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
@@ -343,11 +382,11 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel11Layout.setHorizontalGroup(
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel11Layout.createSequentialGroup()
+                .addComponent(radioTerenNezalezi)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(radioTerenLehky)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(radioTerenNarocny)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(radioTerenNezalezi)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel11Layout.setVerticalGroup(
@@ -360,10 +399,14 @@ public class MainFrame extends javax.swing.JFrame {
 
         jPanel12.setBorder(javax.swing.BorderFactory.createTitledBorder("Obtížnost"));
 
+        groupObtiznost.add(radioObtiznostMala);
         radioObtiznostMala.setText("malá");
 
+        groupObtiznost.add(radioObtiznostVelka);
         radioObtiznostVelka.setText("velká");
 
+        groupObtiznost.add(radioObtiznostNezalezi);
+        radioObtiznostNezalezi.setSelected(true);
         radioObtiznostNezalezi.setText("nezáleží");
 
         javax.swing.GroupLayout jPanel12Layout = new javax.swing.GroupLayout(jPanel12);
@@ -371,11 +414,11 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel12Layout.setHorizontalGroup(
             jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel12Layout.createSequentialGroup()
+                .addComponent(radioObtiznostNezalezi)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(radioObtiznostMala)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(radioObtiznostVelka)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(radioObtiznostNezalezi)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel12Layout.setVerticalGroup(
@@ -404,11 +447,13 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        buttonNaplanovat.setLabel("Naplánovat");
+        buttonNaplanovat.setText("Naplánovat výlet");
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Výlet"));
 
         labelDelka.setText("Délka:");
+
+        fieldDelka.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
 
         labelTrasovani.setText("Trasa pro:");
 
@@ -451,21 +496,21 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel8Layout.setHorizontalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(buttonNaplanovat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(buttonNaplanovat)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         panelMapa.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -474,11 +519,11 @@ public class MainFrame extends javax.swing.JFrame {
         panelMapa.setLayout(panelMapaLayout);
         panelMapaLayout.setHorizontalGroup(
             panelMapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 455, Short.MAX_VALUE)
+            .addGap(0, 464, Short.MAX_VALUE)
         );
         panelMapaLayout.setVerticalGroup(
             panelMapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 534, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -488,7 +533,7 @@ public class MainFrame extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelMapa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -522,6 +567,10 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JCheckBox checkVelka;
     private javax.swing.JComboBox comboTrasovani;
     private javax.swing.JTextField fieldDelka;
+    private javax.swing.ButtonGroup groupObtiznost;
+    private javax.swing.ButtonGroup groupStav;
+    private javax.swing.ButtonGroup groupTeren;
+    private javax.swing.ButtonGroup groupVelikost;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel12;
@@ -533,8 +582,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
-    private javax.swing.JSlider jSlider1;
-    private javax.swing.JSlider jSlider2;
     private javax.swing.JLabel labelDelka;
     private javax.swing.JLabel labelKm;
     private javax.swing.JLabel labelTrasovani;

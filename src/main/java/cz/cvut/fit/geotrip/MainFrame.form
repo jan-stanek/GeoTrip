@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
+  <NonVisualComponents>
+    <Component class="javax.swing.ButtonGroup" name="groupStav">
+    </Component>
+    <Component class="javax.swing.ButtonGroup" name="groupVelikost">
+    </Component>
+    <Component class="javax.swing.ButtonGroup" name="groupObtiznost">
+    </Component>
+    <Component class="javax.swing.ButtonGroup" name="groupTeren">
+    </Component>
+  </NonVisualComponents>
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
@@ -32,7 +42,7 @@
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jPanel8" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Component id="panelMapa" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -53,21 +63,14 @@
   </Layout>
   <SubComponents>
     <Container class="javax.swing.JPanel" name="jPanel8">
-      <Properties>
-        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Nastaven&#xed;"/>
-          </Border>
-        </Property>
-      </Properties>
 
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Component id="jPanel4" alignment="0" max="32767" attributes="0"/>
-              <Component id="jPanel3" alignment="0" max="32767" attributes="0"/>
               <Component id="buttonNaplanovat" alignment="0" max="32767" attributes="0"/>
               <Component id="jPanel2" alignment="0" max="32767" attributes="0"/>
+              <Component id="jPanel3" alignment="0" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
@@ -75,12 +78,12 @@
               <Group type="102" alignment="0" attributes="0">
                   <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jPanel3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jPanel3" min="-2" pref="258" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jPanel4" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="buttonNaplanovat" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -99,9 +102,9 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jPanel9" alignment="0" max="32767" attributes="0"/>
-                  <Component id="jPanel7" alignment="0" max="32767" attributes="0"/>
                   <Component id="jPanel5" alignment="0" max="32767" attributes="0"/>
                   <Component id="jPanel6" alignment="0" max="32767" attributes="0"/>
+                  <Component id="jPanel7" alignment="0" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
@@ -112,8 +115,9 @@
                       <Component id="jPanel6" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jPanel7" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                       <Component id="jPanel9" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -151,11 +155,18 @@
               <SubComponents>
                 <Component class="javax.swing.JRadioButton" name="radioVsechny">
                   <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="groupStav"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="v&#x161;echny"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="radioNenalezene">
                   <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="groupStav"/>
+                    </Property>
+                    <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" value="nenalezen&#xe9;"/>
                   </Properties>
                 </Component>
@@ -201,26 +212,31 @@
               <SubComponents>
                 <Component class="javax.swing.JCheckBox" name="checkMikro">
                   <Properties>
+                    <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" value="mikro"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="checkMala">
                   <Properties>
+                    <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" value="mal&#xe1;"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="checkStredni">
                   <Properties>
+                    <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" value="st&#x159;edn&#xed;"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="checkVelka">
                   <Properties>
+                    <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" value="velk&#xe1;"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="checkOstatni">
                   <Properties>
+                    <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" value="ostatn&#xed;"/>
                   </Properties>
                 </Component>
@@ -238,26 +254,15 @@
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jSlider1" alignment="0" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="274" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jSlider1" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="40" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
               </Layout>
-              <SubComponents>
-                <Component class="javax.swing.JSlider" name="jSlider1">
-                  <Properties>
-                    <Property name="majorTickSpacing" type="int" value="2"/>
-                    <Property name="maximum" type="int" value="9"/>
-                    <Property name="minimum" type="int" value="1"/>
-                    <Property name="minorTickSpacing" type="int" value="1"/>
-                    <Property name="toolTipText" type="java.lang.String" value=""/>
-                  </Properties>
-                </Component>
-              </SubComponents>
             </Container>
             <Container class="javax.swing.JPanel" name="jPanel9">
               <Properties>
@@ -266,31 +271,23 @@
                     <TitledBorder title="Ter&#xe9;n"/>
                   </Border>
                 </Property>
+                <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[286, 63]"/>
+                </Property>
               </Properties>
 
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jSlider2" alignment="0" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="274" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jSlider2" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="40" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
               </Layout>
-              <SubComponents>
-                <Component class="javax.swing.JSlider" name="jSlider2">
-                  <Properties>
-                    <Property name="majorTickSpacing" type="int" value="2"/>
-                    <Property name="maximum" type="int" value="9"/>
-                    <Property name="minimum" type="int" value="1"/>
-                    <Property name="minorTickSpacing" type="int" value="1"/>
-                    <Property name="value" type="int" value="5"/>
-                  </Properties>
-                </Component>
-              </SubComponents>
             </Container>
           </SubComponents>
         </Container>
@@ -337,11 +334,11 @@
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
+                          <Component id="radioVelikostNezalezi" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="radioVelikostMala" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="radioVelikostVelka" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="radioVelikostNezalezi" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
@@ -359,16 +356,26 @@
               <SubComponents>
                 <Component class="javax.swing.JRadioButton" name="radioVelikostMala">
                   <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="groupVelikost"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="mal&#xe1;"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="radioVelikostVelka">
                   <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="groupVelikost"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="velk&#xe1;"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="radioVelikostNezalezi">
                   <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="groupVelikost"/>
+                    </Property>
+                    <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" value="nez&#xe1;le&#x17e;&#xed;"/>
                   </Properties>
                 </Component>
@@ -387,11 +394,11 @@
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
+                          <Component id="radioTerenNezalezi" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="radioTerenLehky" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="radioTerenNarocny" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="radioTerenNezalezi" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
@@ -409,16 +416,26 @@
               <SubComponents>
                 <Component class="javax.swing.JRadioButton" name="radioTerenLehky">
                   <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="groupTeren"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="lehk&#xfd;"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="radioTerenNarocny">
                   <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="groupTeren"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="n&#xe1;ro&#x10d;n&#xfd;"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="radioTerenNezalezi">
                   <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="groupTeren"/>
+                    </Property>
+                    <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" value="nez&#xe1;le&#x17e;&#xed;"/>
                   </Properties>
                 </Component>
@@ -437,11 +454,11 @@
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
+                          <Component id="radioObtiznostNezalezi" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="radioObtiznostMala" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="radioObtiznostVelka" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="radioObtiznostNezalezi" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
@@ -459,16 +476,26 @@
               <SubComponents>
                 <Component class="javax.swing.JRadioButton" name="radioObtiznostMala">
                   <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="groupObtiznost"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="mal&#xe1;"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="radioObtiznostVelka">
                   <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="groupObtiznost"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="velk&#xe1;"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="radioObtiznostNezalezi">
                   <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="groupObtiznost"/>
+                    </Property>
+                    <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" value="nez&#xe1;le&#x17e;&#xed;"/>
                   </Properties>
                 </Component>
@@ -478,7 +505,7 @@
         </Container>
         <Component class="javax.swing.JButton" name="buttonNaplanovat">
           <Properties>
-            <Property name="label" type="java.lang.String" value="Napl&#xe1;novat"/>
+            <Property name="text" type="java.lang.String" value="Napl&#xe1;novat v&#xfd;let"/>
           </Properties>
         </Component>
         <Container class="javax.swing.JPanel" name="jPanel2">
@@ -535,6 +562,9 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="fieldDelka">
+              <Properties>
+                <Property name="horizontalAlignment" type="int" value="4"/>
+              </Properties>
             </Component>
             <Component class="javax.swing.JLabel" name="labelTrasovani">
               <Properties>
@@ -576,12 +606,12 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <EmptySpace min="0" pref="455" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="464" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <EmptySpace min="0" pref="534" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
