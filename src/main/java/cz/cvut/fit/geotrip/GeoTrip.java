@@ -5,6 +5,7 @@
  */
 package cz.cvut.fit.geotrip;
 
+import cz.cvut.fit.geotrip.geopoint.GeoPoint;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -38,7 +39,10 @@ import org.mapsforge.map.swing.view.MapView;
  * @author jan
  */
 public class GeoTrip {
-
+    
+    private static MainFrame mainFrame;
+    
+    public static GeoPoint ref;
     
     /**
      * @param args the command line arguments
@@ -48,13 +52,57 @@ public class GeoTrip {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) { }
         
-        
-        MainFrame mainFrame = new MainFrame();
+        mainFrame = new MainFrame();
         mainFrame.setVisible(true);
+        
+        GeoTrip geoTrip = new GeoTrip();
+    }
+
+    private GeoTrip() {
+        ReadBuffer.setMaximumBufferSize(6500000);
+
+        File dir = new File("D:\\Stahování\\GeoTrip");
+        File[] mapFiles = dir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith(".map");
+            }
+        });        
+        
+        addMapFiles(Arrays.asList(mapFiles));
+    }
+    
+    private void addMapFiles(List<File> mapFiles) {
+        Layers layers = mainFrame.mapView.getLayerManager().getLayers();
+
+        BoundingBox result = null;
+        for (int i = 0; i < mapFiles.size(); i++) {
+            File mapFile = mapFiles.get(i);
+            TileRendererLayer tileRendererLayer = createTileRendererLayer(createTileCache(i), mainFrame.mapViewModel.mapViewPosition, true, true, mapFile);
+            BoundingBox tmp = tileRendererLayer.getMapDataStore().boundingBox();
+            result = result == null ? tmp : result.extend(tmp);
+            layers.add(tileRendererLayer);
+        }
+        
+        mainFrame.boundingBox = result;
+    }
+
+    private void addCaches() {
+        Layers layers = mainFrame.mapView.getLayerManager().getLayers();
         
         
     }
-
-
     
+    private TileCache createTileCache(int index) {
+        TileCache firstLevelTileCache = new InMemoryTileCache(128);
+        File cacheDirectory = new File(System.getProperty("java.io.tmpdir"), "mapsforge" + index);
+        TileCache secondLevelTileCache = new FileSystemTileCache(1024, cacheDirectory, mainFrame.GRAPHIC_FACTORY);
+        return new TwoLevelTileCache(firstLevelTileCache, secondLevelTileCache);
+    }
+
+    private TileRendererLayer createTileRendererLayer(TileCache tileCache, MapViewPosition mapViewPosition, boolean isTransparent, boolean renderLabels, File mapFile) {
+        TileRendererLayer tileRendererLayer = new TileRendererLayer(tileCache, new MapFile(mapFile), mapViewPosition, isTransparent, renderLabels, mainFrame.GRAPHIC_FACTORY);
+        tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.OSMARENDER);
+        return tileRendererLayer;
+    }
 }

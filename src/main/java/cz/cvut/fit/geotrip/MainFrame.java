@@ -6,6 +6,7 @@
 package cz.cvut.fit.geotrip;
 
 import com.jidesoft.swing.RangeSlider;
+import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -15,8 +16,10 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import javafx.scene.AccessibleRole;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -46,115 +49,92 @@ import org.mapsforge.map.swing.view.MapView;
  * @author jan
  */
 public class MainFrame extends javax.swing.JFrame {
-   
+       
+    public static final GraphicFactory GRAPHIC_FACTORY = AwtGraphicFactory.INSTANCE;
+    
+    public MapView mapView;
+    public Model mapViewModel;
+    public BoundingBox boundingBox;
+    
+    private byte zoomMin = 0;
+    private byte zoomMax = 20;
+    
+    private RangeSlider sliderObtiznost;
+    private RangeSlider sliderTeren;
+    
+        
     /**
-     * Creates new form MainFram
+     * Creates MainFrame
      */
-    
-    private static final GraphicFactory GRAPHIC_FACTORY = AwtGraphicFactory.INSTANCE;
-    private static MapView mapView;
-    
     public MainFrame() {
         initComponents();
 
-        panelMapa.setBorder(new CompoundBorder(new EmptyBorder(6, 2, 2, 2), panelMapa.getBorder()));
-        
-        ReadBuffer.setMaximumBufferSize(6500000);
+        addMapView();
+        addRangeSliders();
+    }
 
-        File dir = new File("D:\\Stahování\\GeoTrip");
-        File[] mapFiles = dir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.toLowerCase().endsWith(".map");
-            }
-        });
-        
-        mapView = createMapView();
-        mapView.setLocation(3, 7);
-        mapView.setSize(panelMapa.getWidth()-6, panelMapa.getHeight()-11);
-        panelMapa.add(mapView);
+    private void addMapView() {
+        panelPravy.setBorder(new CompoundBorder(new EmptyBorder(6, 2, 2, 2), panelPravy.getBorder()));
     
-        RangeSlider rangeSlider = new RangeSlider(1,9,1,9);
-        rangeSlider.setPaintTicks(true);
-        rangeSlider.setPaintLabels(true);
-        rangeSlider.setMajorTickSpacing(2);
-        rangeSlider.setMinorTickSpacing(1);
-        rangeSlider.setSize(274, 40);
-        rangeSlider.setLocation(6, 16);
+        createMapView();
+        mapView.setSize(panelMapa.getWidth(), panelMapa.getHeight());
+        panelMapa.add(mapView);
+    }
+
+    private void addRangeSliders() {
         Hashtable labelTable = new Hashtable();
         labelTable.put(1, new JLabel("1"));
         labelTable.put(3, new JLabel("2"));
         labelTable.put(5, new JLabel("3"));
         labelTable.put(7, new JLabel("4"));
         labelTable.put(9, new JLabel("5"));
-        rangeSlider.setLabelTable(labelTable);
-        jPanel7.add(rangeSlider);
+
+        sliderObtiznost = new RangeSlider(1,9,1,9);
+        sliderObtiznost.setPaintTicks(true);
+        sliderObtiznost.setPaintLabels(true);
+        sliderObtiznost.setMajorTickSpacing(2);
+        sliderObtiznost.setMinorTickSpacing(1);
+        sliderObtiznost.setSize(267, 40);
+        sliderObtiznost.setLocation(6, 16);
+        sliderObtiznost.setLabelTable(labelTable);
+        panelFiltrObtiznost.add(sliderObtiznost);
         
-        RangeSlider rangeSlider2 = new RangeSlider(1,9,1,9);
-        rangeSlider2.setPaintTicks(true);
-        rangeSlider2.setPaintLabels(true);
-        rangeSlider2.setMajorTickSpacing(2);
-        rangeSlider2.setMinorTickSpacing(1);
-        rangeSlider2.setSize(274, 40);
-        rangeSlider2.setLocation(6, 16);
-        rangeSlider2.setLabelTable(labelTable);
-        jPanel9.add(rangeSlider2);
+        sliderTeren = new RangeSlider(1,9,1,9);
+        sliderTeren.setPaintTicks(true);
+        sliderTeren.setPaintLabels(true);
+        sliderTeren.setMajorTickSpacing(2);
+        sliderTeren.setMinorTickSpacing(1);
+        sliderTeren.setSize(267, 40);
+        sliderTeren.setLocation(6, 16);
+        sliderTeren.setLabelTable(labelTable);
+        panelFiltrTeren.add(sliderTeren);
+    }
+    
+    private void createMapView() {
+        mapView = new MapView();
+        mapViewModel = mapView.getModel();
+        mapView.getMapScaleBar().setVisible(true);
         
-        final BoundingBox boundingBox = addLayers(mapView, Arrays.asList(mapFiles));
-        final Model model = mapView.getModel();
+        mapView.addComponentListener(new MapViewComponentListener(mapView, mapViewModel.mapViewDimension));
+
+        MouseEventListener mouseEventListener = new MouseEventListener(mapViewModel);
+        mapView.addMouseListener(mouseEventListener);
+        mapView.addMouseMotionListener(mouseEventListener);
         
-        this.addWindowListener(new WindowAdapter() {
+        mapView.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             @Override
-            public void windowOpened(WindowEvent e) {
-                byte zoomLevel = LatLongUtils.zoomForBounds(model.mapViewDimension.getDimension(), boundingBox, model.displayModel.getTileSize());
-                model.mapViewPosition.setMapPosition(new MapPosition(boundingBox.getCenterPoint(), zoomLevel));
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                byte zoom = (byte)(mapViewModel.mapViewPosition.getZoomLevel() - evt.getWheelRotation());
+                if (zoom < zoomMin)
+                    zoom = zoomMin;
+                if (zoom > zoomMax)
+                    zoom = zoomMax;
+                mapViewModel.mapViewPosition.setZoomLevel(zoom);
+                sliderZoom.setValue(zoom);
             }
         });
     }
-
-    private static MapView createMapView() {
-        MapView mapView = new MapView();
-        mapView.getMapScaleBar().setVisible(true);
-        
-        mapView.addComponentListener(new MapViewComponentListener(mapView, mapView.getModel().mapViewDimension));
-
-        MouseEventListener mouseEventListener = new MouseEventListener(mapView.getModel());
-        mapView.addMouseListener(mouseEventListener);
-        mapView.addMouseMotionListener(mouseEventListener);
-        mapView.addMouseWheelListener(mouseEventListener);
-
-        return mapView;
-    }
     
-    private static BoundingBox addLayers(MapView mapView, List<File> mapFiles) {
-        Layers layers = mapView.getLayerManager().getLayers();
-
-        BoundingBox result = null;
-        for (int i = 0; i < mapFiles.size(); i++) {
-            File mapFile = mapFiles.get(i);
-            TileRendererLayer tileRendererLayer = createTileRendererLayer(createTileCache(i), mapView.getModel().mapViewPosition, true, true, mapFile);
-            BoundingBox boundingBox = tileRendererLayer.getMapDataStore().boundingBox();
-            result = result == null ? boundingBox : result.extend(boundingBox);
-            layers.add(tileRendererLayer);
-        }
-        
-        //addCaches(layers);
-        
-        return result;
-    }
-
-    private static TileCache createTileCache(int index) {
-        TileCache firstLevelTileCache = new InMemoryTileCache(128);
-        File cacheDirectory = new File(System.getProperty("java.io.tmpdir"), "mapsforge" + index);
-        TileCache secondLevelTileCache = new FileSystemTileCache(1024, cacheDirectory, GRAPHIC_FACTORY);
-        return new TwoLevelTileCache(firstLevelTileCache, secondLevelTileCache);
-    }
-
-    private static TileRendererLayer createTileRendererLayer(TileCache tileCache, MapViewPosition mapViewPosition, boolean isTransparent, boolean renderLabels, File mapFile) {
-        TileRendererLayer tileRendererLayer = new TileRendererLayer(tileCache, new MapFile(mapFile), mapViewPosition, isTransparent, renderLabels, GRAPHIC_FACTORY);
-        tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.OSMARENDER);
-        return tileRendererLayer;
-    }
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -169,40 +149,42 @@ public class MainFrame extends javax.swing.JFrame {
         groupVelikost = new javax.swing.ButtonGroup();
         groupObtiznost = new javax.swing.ButtonGroup();
         groupTeren = new javax.swing.ButtonGroup();
-        jPanel8 = new javax.swing.JPanel();
-        jPanel3 = new javax.swing.JPanel();
-        jPanel5 = new javax.swing.JPanel();
+        panelLevy = new javax.swing.JPanel();
+        panelFiltr = new javax.swing.JPanel();
+        panelFiltrStav = new javax.swing.JPanel();
         radioVsechny = new javax.swing.JRadioButton();
         radioNenalezene = new javax.swing.JRadioButton();
-        jPanel6 = new javax.swing.JPanel();
+        panelFiltrVelikost = new javax.swing.JPanel();
         checkMikro = new javax.swing.JCheckBox();
         checkMala = new javax.swing.JCheckBox();
         checkStredni = new javax.swing.JCheckBox();
         checkVelka = new javax.swing.JCheckBox();
         checkOstatni = new javax.swing.JCheckBox();
-        jPanel7 = new javax.swing.JPanel();
-        jPanel9 = new javax.swing.JPanel();
-        jPanel4 = new javax.swing.JPanel();
-        jPanel10 = new javax.swing.JPanel();
+        panelFiltrObtiznost = new javax.swing.JPanel();
+        panelFiltrTeren = new javax.swing.JPanel();
+        panelPreference = new javax.swing.JPanel();
+        panelPreferenceVelikost = new javax.swing.JPanel();
         radioVelikostMala = new javax.swing.JRadioButton();
         radioVelikostVelka = new javax.swing.JRadioButton();
         radioVelikostNezalezi = new javax.swing.JRadioButton();
-        jPanel11 = new javax.swing.JPanel();
+        panelPreferenceTeren = new javax.swing.JPanel();
         radioTerenLehky = new javax.swing.JRadioButton();
         radioTerenNarocny = new javax.swing.JRadioButton();
         radioTerenNezalezi = new javax.swing.JRadioButton();
-        jPanel12 = new javax.swing.JPanel();
+        panelPreferenceObtiznost = new javax.swing.JPanel();
         radioObtiznostMala = new javax.swing.JRadioButton();
         radioObtiznostVelka = new javax.swing.JRadioButton();
         radioObtiznostNezalezi = new javax.swing.JRadioButton();
         buttonNaplanovat = new javax.swing.JButton();
-        jPanel2 = new javax.swing.JPanel();
+        panelVylet = new javax.swing.JPanel();
         labelDelka = new javax.swing.JLabel();
         fieldDelka = new javax.swing.JTextField();
         labelTrasovani = new javax.swing.JLabel();
         comboTrasovani = new javax.swing.JComboBox();
         labelKm = new javax.swing.JLabel();
+        panelPravy = new javax.swing.JPanel();
         panelMapa = new javax.swing.JPanel();
+        sliderZoom = new javax.swing.JSlider();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(800, 560));
@@ -211,10 +193,15 @@ public class MainFrame extends javax.swing.JFrame {
                 MainFrame.this.componentResized(evt);
             }
         });
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Filtr"));
+        panelFiltr.setBorder(javax.swing.BorderFactory.createTitledBorder("Filtr"));
 
-        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Stav"));
+        panelFiltrStav.setBorder(javax.swing.BorderFactory.createTitledBorder("Stav"));
 
         groupStav.add(radioVsechny);
         radioVsechny.setText("všechny");
@@ -223,24 +210,24 @@ public class MainFrame extends javax.swing.JFrame {
         radioNenalezene.setSelected(true);
         radioNenalezene.setText("nenalezené");
 
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
+        javax.swing.GroupLayout panelFiltrStavLayout = new javax.swing.GroupLayout(panelFiltrStav);
+        panelFiltrStav.setLayout(panelFiltrStavLayout);
+        panelFiltrStavLayout.setHorizontalGroup(
+            panelFiltrStavLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelFiltrStavLayout.createSequentialGroup()
                 .addComponent(radioVsechny)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(radioNenalezene)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+        panelFiltrStavLayout.setVerticalGroup(
+            panelFiltrStavLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelFiltrStavLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                 .addComponent(radioVsechny)
                 .addComponent(radioNenalezene))
         );
 
-        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Velikost"));
+        panelFiltrVelikost.setBorder(javax.swing.BorderFactory.createTitledBorder("Velikost"));
 
         checkMikro.setSelected(true);
         checkMikro.setText("mikro");
@@ -257,11 +244,11 @@ public class MainFrame extends javax.swing.JFrame {
         checkOstatni.setSelected(true);
         checkOstatni.setText("ostatní");
 
-        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
+        javax.swing.GroupLayout panelFiltrVelikostLayout = new javax.swing.GroupLayout(panelFiltrVelikost);
+        panelFiltrVelikost.setLayout(panelFiltrVelikostLayout);
+        panelFiltrVelikostLayout.setHorizontalGroup(
+            panelFiltrVelikostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelFiltrVelikostLayout.createSequentialGroup()
                 .addComponent(checkMikro)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(checkMala)
@@ -272,9 +259,9 @@ public class MainFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(checkOstatni))
         );
-        jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+        panelFiltrVelikostLayout.setVerticalGroup(
+            panelFiltrVelikostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelFiltrVelikostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                 .addComponent(checkMikro)
                 .addComponent(checkMala)
                 .addComponent(checkStredni)
@@ -282,58 +269,58 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(checkOstatni))
         );
 
-        jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder("Obtížnost"));
+        panelFiltrObtiznost.setBorder(javax.swing.BorderFactory.createTitledBorder("Obtížnost"));
 
-        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
-        jPanel7.setLayout(jPanel7Layout);
-        jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 274, Short.MAX_VALUE)
+        javax.swing.GroupLayout panelFiltrObtiznostLayout = new javax.swing.GroupLayout(panelFiltrObtiznost);
+        panelFiltrObtiznost.setLayout(panelFiltrObtiznostLayout);
+        panelFiltrObtiznostLayout.setHorizontalGroup(
+            panelFiltrObtiznostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
-        jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        panelFiltrObtiznostLayout.setVerticalGroup(
+            panelFiltrObtiznostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 40, Short.MAX_VALUE)
         );
 
-        jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder("Terén"));
-        jPanel9.setPreferredSize(new java.awt.Dimension(286, 63));
+        panelFiltrTeren.setBorder(javax.swing.BorderFactory.createTitledBorder("Terén"));
+        panelFiltrTeren.setPreferredSize(new java.awt.Dimension(286, 63));
 
-        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
-        jPanel9.setLayout(jPanel9Layout);
-        jPanel9Layout.setHorizontalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 274, Short.MAX_VALUE)
+        javax.swing.GroupLayout panelFiltrTerenLayout = new javax.swing.GroupLayout(panelFiltrTeren);
+        panelFiltrTeren.setLayout(panelFiltrTerenLayout);
+        panelFiltrTerenLayout.setHorizontalGroup(
+            panelFiltrTerenLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
-        jPanel9Layout.setVerticalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        panelFiltrTerenLayout.setVerticalGroup(
+            panelFiltrTerenLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 40, Short.MAX_VALUE)
         );
 
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        javax.swing.GroupLayout panelFiltrLayout = new javax.swing.GroupLayout(panelFiltr);
+        panelFiltr.setLayout(panelFiltrLayout);
+        panelFiltrLayout.setHorizontalGroup(
+            panelFiltrLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(panelFiltrTeren, javax.swing.GroupLayout.DEFAULT_SIZE, 279, Short.MAX_VALUE)
+            .addComponent(panelFiltrObtiznost, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(panelFiltrStav, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(panelFiltrVelikost, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        panelFiltrLayout.setVerticalGroup(
+            panelFiltrLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelFiltrLayout.createSequentialGroup()
+                .addComponent(panelFiltrStav, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(panelFiltrVelikost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(panelFiltrObtiznost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(panelFiltrTeren, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
-        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Preference"));
+        panelPreference.setBorder(javax.swing.BorderFactory.createTitledBorder("Preference"));
 
-        jPanel10.setBorder(javax.swing.BorderFactory.createTitledBorder("Velikost"));
+        panelPreferenceVelikost.setBorder(javax.swing.BorderFactory.createTitledBorder("Velikost"));
 
         groupVelikost.add(radioVelikostMala);
         radioVelikostMala.setText("malá");
@@ -345,11 +332,11 @@ public class MainFrame extends javax.swing.JFrame {
         radioVelikostNezalezi.setSelected(true);
         radioVelikostNezalezi.setText("nezáleží");
 
-        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
-        jPanel10.setLayout(jPanel10Layout);
-        jPanel10Layout.setHorizontalGroup(
-            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel10Layout.createSequentialGroup()
+        javax.swing.GroupLayout panelPreferenceVelikostLayout = new javax.swing.GroupLayout(panelPreferenceVelikost);
+        panelPreferenceVelikost.setLayout(panelPreferenceVelikostLayout);
+        panelPreferenceVelikostLayout.setHorizontalGroup(
+            panelPreferenceVelikostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelPreferenceVelikostLayout.createSequentialGroup()
                 .addComponent(radioVelikostNezalezi)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(radioVelikostMala)
@@ -357,15 +344,15 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(radioVelikostVelka)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jPanel10Layout.setVerticalGroup(
-            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+        panelPreferenceVelikostLayout.setVerticalGroup(
+            panelPreferenceVelikostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelPreferenceVelikostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                 .addComponent(radioVelikostMala)
                 .addComponent(radioVelikostVelka)
                 .addComponent(radioVelikostNezalezi))
         );
 
-        jPanel11.setBorder(javax.swing.BorderFactory.createTitledBorder("Terén"));
+        panelPreferenceTeren.setBorder(javax.swing.BorderFactory.createTitledBorder("Terén"));
 
         groupTeren.add(radioTerenLehky);
         radioTerenLehky.setText("lehký");
@@ -377,11 +364,11 @@ public class MainFrame extends javax.swing.JFrame {
         radioTerenNezalezi.setSelected(true);
         radioTerenNezalezi.setText("nezáleží");
 
-        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
-        jPanel11.setLayout(jPanel11Layout);
-        jPanel11Layout.setHorizontalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel11Layout.createSequentialGroup()
+        javax.swing.GroupLayout panelPreferenceTerenLayout = new javax.swing.GroupLayout(panelPreferenceTeren);
+        panelPreferenceTeren.setLayout(panelPreferenceTerenLayout);
+        panelPreferenceTerenLayout.setHorizontalGroup(
+            panelPreferenceTerenLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelPreferenceTerenLayout.createSequentialGroup()
                 .addComponent(radioTerenNezalezi)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(radioTerenLehky)
@@ -389,15 +376,15 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(radioTerenNarocny)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jPanel11Layout.setVerticalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+        panelPreferenceTerenLayout.setVerticalGroup(
+            panelPreferenceTerenLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelPreferenceTerenLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                 .addComponent(radioTerenLehky)
                 .addComponent(radioTerenNarocny)
                 .addComponent(radioTerenNezalezi))
         );
 
-        jPanel12.setBorder(javax.swing.BorderFactory.createTitledBorder("Obtížnost"));
+        panelPreferenceObtiznost.setBorder(javax.swing.BorderFactory.createTitledBorder("Obtížnost"));
 
         groupObtiznost.add(radioObtiznostMala);
         radioObtiznostMala.setText("malá");
@@ -409,11 +396,11 @@ public class MainFrame extends javax.swing.JFrame {
         radioObtiznostNezalezi.setSelected(true);
         radioObtiznostNezalezi.setText("nezáleží");
 
-        javax.swing.GroupLayout jPanel12Layout = new javax.swing.GroupLayout(jPanel12);
-        jPanel12.setLayout(jPanel12Layout);
-        jPanel12Layout.setHorizontalGroup(
-            jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel12Layout.createSequentialGroup()
+        javax.swing.GroupLayout panelPreferenceObtiznostLayout = new javax.swing.GroupLayout(panelPreferenceObtiznost);
+        panelPreferenceObtiznost.setLayout(panelPreferenceObtiznostLayout);
+        panelPreferenceObtiznostLayout.setHorizontalGroup(
+            panelPreferenceObtiznostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelPreferenceObtiznostLayout.createSequentialGroup()
                 .addComponent(radioObtiznostNezalezi)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(radioObtiznostMala)
@@ -421,37 +408,37 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(radioObtiznostVelka)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jPanel12Layout.setVerticalGroup(
-            jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+        panelPreferenceObtiznostLayout.setVerticalGroup(
+            panelPreferenceObtiznostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelPreferenceObtiznostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                 .addComponent(radioObtiznostMala)
                 .addComponent(radioObtiznostVelka)
                 .addComponent(radioObtiznostNezalezi))
         );
 
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        javax.swing.GroupLayout panelPreferenceLayout = new javax.swing.GroupLayout(panelPreference);
+        panelPreference.setLayout(panelPreferenceLayout);
+        panelPreferenceLayout.setHorizontalGroup(
+            panelPreferenceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(panelPreferenceVelikost, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(panelPreferenceObtiznost, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(panelPreferenceTeren, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        panelPreferenceLayout.setVerticalGroup(
+            panelPreferenceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelPreferenceLayout.createSequentialGroup()
+                .addComponent(panelPreferenceVelikost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(panelPreferenceObtiznost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(panelPreferenceTeren, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         buttonNaplanovat.setText("Naplánovat výlet");
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Výlet"));
+        panelVylet.setBorder(javax.swing.BorderFactory.createTitledBorder("Výlet"));
 
-        labelDelka.setText("Délka:");
+        labelDelka.setText("Maximální délka:");
 
         fieldDelka.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
 
@@ -461,80 +448,108 @@ public class MainFrame extends javax.swing.JFrame {
 
         labelKm.setText("km");
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout panelVyletLayout = new javax.swing.GroupLayout(panelVylet);
+        panelVylet.setLayout(panelVyletLayout);
+        panelVyletLayout.setHorizontalGroup(
+            panelVyletLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelVyletLayout.createSequentialGroup()
+                .addGroup(panelVyletLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(labelDelka)
                     .addComponent(labelTrasovani))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(comboTrasovani, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(fieldDelka, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(4, 4, 4)
+                .addGroup(panelVyletLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelVyletLayout.createSequentialGroup()
+                        .addComponent(fieldDelka)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(labelKm)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addComponent(labelKm))
+                    .addComponent(comboTrasovani, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+        panelVyletLayout.setVerticalGroup(
+            panelVyletLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelVyletLayout.createSequentialGroup()
+                .addGroup(panelVyletLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(fieldDelka, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(labelDelka)
                     .addComponent(labelKm))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(panelVyletLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(comboTrasovani, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(labelTrasovani)))
         );
 
-        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
-        jPanel8.setLayout(jPanel8Layout);
-        jPanel8Layout.setHorizontalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        javax.swing.GroupLayout panelLevyLayout = new javax.swing.GroupLayout(panelLevy);
+        panelLevy.setLayout(panelLevyLayout);
+        panelLevyLayout.setHorizontalGroup(
+            panelLevyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(buttonNaplanovat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(panelVylet, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(panelFiltr, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(panelPreference, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
-        jPanel8Layout.setVerticalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel8Layout.createSequentialGroup()
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        panelLevyLayout.setVerticalGroup(
+            panelLevyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelLevyLayout.createSequentialGroup()
+                .addComponent(panelVylet, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(panelFiltr, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(panelPreference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(buttonNaplanovat)
                 .addContainerGap())
         );
 
-        panelMapa.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        panelPravy.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        sliderZoom.setMajorTickSpacing(1);
+        sliderZoom.setMaximum(20);
+        sliderZoom.setOrientation(javax.swing.JSlider.VERTICAL);
+        sliderZoom.setSnapToTicks(true);
+        sliderZoom.setValue(0);
+        sliderZoom.setOpaque(false);
+        sliderZoom.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                sliderZoomStateChanged(evt);
+            }
+        });
 
         javax.swing.GroupLayout panelMapaLayout = new javax.swing.GroupLayout(panelMapa);
         panelMapa.setLayout(panelMapaLayout);
         panelMapaLayout.setHorizontalGroup(
             panelMapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 464, Short.MAX_VALUE)
+            .addGroup(panelMapaLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(sliderZoom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(470, Short.MAX_VALUE))
         );
         panelMapaLayout.setVerticalGroup(
             panelMapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(panelMapaLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(sliderZoom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout panelPravyLayout = new javax.swing.GroupLayout(panelPravy);
+        panelPravy.setLayout(panelPravyLayout);
+        panelPravyLayout.setHorizontalGroup(
+            panelPravyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(panelMapa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        panelPravyLayout.setVerticalGroup(
+            panelPravyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(panelMapa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(panelLevy, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(panelMapa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(panelPravy, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -542,8 +557,8 @@ public class MainFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(panelMapa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(panelLevy, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(panelPravy, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -551,9 +566,21 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void componentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_componentResized
-        mapView.setSize(panelMapa.getWidth()-6, panelMapa.getHeight()-11);
+        mapView.setSize(panelMapa.getWidth(), panelMapa.getHeight());
     }//GEN-LAST:event_componentResized
 
+    private void sliderZoomStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderZoomStateChanged
+        mapView.getModel().mapViewPosition.setZoomLevel((byte)sliderZoom.getValue());
+    }//GEN-LAST:event_sliderZoomStateChanged
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        byte zoomLevel = zoomMin = LatLongUtils.zoomForBounds(mapViewModel.mapViewDimension.getDimension(), boundingBox, mapViewModel.displayModel.getTileSize());
+        mapViewModel.mapViewPosition.setMapPosition(new MapPosition(boundingBox.getCenterPoint(), zoomLevel));
+                
+        sliderZoom.setValue(zoomLevel);
+        sliderZoom.setMinimum(zoomMin);
+        sliderZoom.setMaximum(zoomMax);
+    }//GEN-LAST:event_formWindowOpened
     /**
      * @param args the command line arguments
      */
@@ -571,21 +598,22 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.ButtonGroup groupStav;
     private javax.swing.ButtonGroup groupTeren;
     private javax.swing.ButtonGroup groupVelikost;
-    private javax.swing.JPanel jPanel10;
-    private javax.swing.JPanel jPanel11;
-    private javax.swing.JPanel jPanel12;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanel6;
-    private javax.swing.JPanel jPanel7;
-    private javax.swing.JPanel jPanel8;
-    private javax.swing.JPanel jPanel9;
     private javax.swing.JLabel labelDelka;
     private javax.swing.JLabel labelKm;
     private javax.swing.JLabel labelTrasovani;
-    public javax.swing.JPanel panelMapa;
+    private javax.swing.JPanel panelFiltr;
+    private javax.swing.JPanel panelFiltrObtiznost;
+    private javax.swing.JPanel panelFiltrStav;
+    private javax.swing.JPanel panelFiltrTeren;
+    private javax.swing.JPanel panelFiltrVelikost;
+    private javax.swing.JPanel panelLevy;
+    private javax.swing.JPanel panelMapa;
+    private javax.swing.JPanel panelPravy;
+    private javax.swing.JPanel panelPreference;
+    private javax.swing.JPanel panelPreferenceObtiznost;
+    private javax.swing.JPanel panelPreferenceTeren;
+    private javax.swing.JPanel panelPreferenceVelikost;
+    private javax.swing.JPanel panelVylet;
     private javax.swing.JRadioButton radioNenalezene;
     private javax.swing.JRadioButton radioObtiznostMala;
     private javax.swing.JRadioButton radioObtiznostNezalezi;
@@ -597,5 +625,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JRadioButton radioVelikostNezalezi;
     private javax.swing.JRadioButton radioVelikostVelka;
     private javax.swing.JRadioButton radioVsechny;
+    private javax.swing.JSlider sliderZoom;
     // End of variables declaration//GEN-END:variables
 }
