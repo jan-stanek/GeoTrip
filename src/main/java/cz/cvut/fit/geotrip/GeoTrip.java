@@ -5,6 +5,7 @@
  */
 package cz.cvut.fit.geotrip;
 
+import cz.cvut.fit.geotrip.geopoint.CacheStorage;
 import cz.cvut.fit.geotrip.geopoint.GeoPoint;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -70,6 +71,13 @@ public class GeoTrip {
         });        
         
         addMapFiles(Arrays.asList(mapFiles));
+        
+        GpxReader gpxReader = new GpxReader();
+        ref = gpxReader.readRef();
+        
+        CacheStorage cacheStorage = new CacheStorage();
+        cacheStorage.addCaches(gpxReader.readCaches());
+                
     }
     
     private void addMapFiles(List<File> mapFiles) {

@@ -42,5 +42,10 @@
             <artifactId>mapsforge-map-awt</artifactId>
             <version>0.5.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.jidesoft</groupId>
+            <artifactId>jide-oss</artifactId>
+            <version>3.6.10</version>
+        </dependency>
     </dependencies>
 </project>
