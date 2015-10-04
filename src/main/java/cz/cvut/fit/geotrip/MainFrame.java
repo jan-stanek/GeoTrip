@@ -5,7 +5,13 @@
  */
 package cz.cvut.fit.geotrip;
 
+import com.graphhopper.GHRequest;
+import com.graphhopper.GHResponse;
+import com.graphhopper.GraphHopper;
+import com.graphhopper.routing.AlgorithmOptions;
 import com.jidesoft.swing.RangeSlider;
+import cz.cvut.fit.geotrip.geopoint.Cache;
+import cz.cvut.fit.geotrip.geopoint.CacheContainer;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -23,9 +29,14 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.plaf.multi.MultiSliderUI;
 import org.mapsforge.core.graphics.GraphicFactory;
+import org.mapsforge.core.graphics.Paint;
+import org.mapsforge.core.graphics.Style;
 import org.mapsforge.core.model.BoundingBox;
+import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 import org.mapsforge.core.util.LatLongUtils;
 import org.mapsforge.map.awt.AwtGraphicFactory;
@@ -34,6 +45,8 @@ import org.mapsforge.map.layer.cache.FileSystemTileCache;
 import org.mapsforge.map.layer.cache.InMemoryTileCache;
 import org.mapsforge.map.layer.cache.TileCache;
 import org.mapsforge.map.layer.cache.TwoLevelTileCache;
+import org.mapsforge.map.layer.overlay.FixedPixelCircle;
+import org.mapsforge.map.layer.overlay.Polyline;
 import org.mapsforge.map.layer.renderer.TileRendererLayer;
 import org.mapsforge.map.model.MapViewPosition;
 import org.mapsforge.map.model.Model;
@@ -50,6 +63,7 @@ import org.mapsforge.map.swing.view.MapView;
  */
 public class MainFrame extends javax.swing.JFrame {
        
+    GeoTrip geotrip;
     public static final GraphicFactory GRAPHIC_FACTORY = AwtGraphicFactory.INSTANCE;
     
     public MapView mapView;
@@ -58,6 +72,7 @@ public class MainFrame extends javax.swing.JFrame {
     
     private byte zoomMin = 0;
     private byte zoomMax = 20;
+    private final byte ZOOM_DEFAULT = 13;
     
     private RangeSlider sliderObtiznost;
     private RangeSlider sliderTeren;
@@ -66,7 +81,9 @@ public class MainFrame extends javax.swing.JFrame {
     /**
      * Creates MainFrame
      */
-    public MainFrame() {
+    public MainFrame(GeoTrip geotrip) {
+        this.geotrip = geotrip;
+        
         initComponents();
 
         addMapView();
@@ -135,6 +152,31 @@ public class MainFrame extends javax.swing.JFrame {
         });
     }
     
+    public void zoomToRef() {
+        zoomTo(ZOOM_DEFAULT);
+        mapViewModel.mapViewPosition.setCenter(geotrip.ref.coordinates);
+    }
+    
+    private void zoomTo(byte zoom) {
+        mapViewModel.mapViewPosition.setZoomLevel(zoom);
+        sliderZoom.setValue(zoom);
+    }
+    
+    private void filter() {
+        int container = 0;
+        if (checkMikro.isSelected())
+            container |= CacheContainer.MICRO.getValue();
+        if (checkMala.isSelected())
+            container |= CacheContainer.SMALL.getValue();
+        if (checkStredni.isSelected())
+            container |= CacheContainer.REGULAR.getValue();
+        if (checkVelka.isSelected())
+            container |= CacheContainer.LARGE.getValue();
+        if (checkOstatni.isSelected())
+            container |= CacheContainer.OTHER.getValue();
+                
+        geotrip.filter(radioVsechny.isSelected(), container, sliderObtiznost.getLowValue(), sliderObtiznost.getHighValue(), sliderTeren.getLowValue(), sliderTeren.getHighValue());
+    }
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -435,6 +477,11 @@ public class MainFrame extends javax.swing.JFrame {
         );
 
         buttonNaplanovat.setText("Naplánovat výlet");
+        buttonNaplanovat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonNaplanovatActionPerformed(evt);
+            }
+        });
 
         panelVylet.setBorder(javax.swing.BorderFactory.createTitledBorder("Výlet"));
 
@@ -581,10 +628,11 @@ public class MainFrame extends javax.swing.JFrame {
         sliderZoom.setMinimum(zoomMin);
         sliderZoom.setMaximum(zoomMax);
     }//GEN-LAST:event_formWindowOpened
-    /**
-     * @param args the command line arguments
-     */
 
+    private void buttonNaplanovatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonNaplanovatActionPerformed
+        filter();
+    }//GEN-LAST:event_buttonNaplanovatActionPerformed
+   
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonNaplanovat;
     private javax.swing.JCheckBox checkMala;

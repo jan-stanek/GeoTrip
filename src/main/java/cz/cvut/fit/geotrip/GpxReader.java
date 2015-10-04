@@ -6,7 +6,7 @@
 package cz.cvut.fit.geotrip;
 
 import cz.cvut.fit.geotrip.geopoint.Cache;
-import cz.cvut.fit.geotrip.geopoint.CacheSize;
+import cz.cvut.fit.geotrip.geopoint.CacheContainer;
 import cz.cvut.fit.geotrip.geopoint.GeoPoint;
 import java.io.File;
 import java.io.IOException;
@@ -72,22 +72,22 @@ public class GpxReader {
             Element e = waypoint.getChild("extensions", rootNS).getChild("cache", n);
             
             String size = e.getChildText("container", n);
-            CacheSize cacheSize;
+            CacheContainer cacheSize;
             switch(size) {
                 case "Micro":
-                    cacheSize = CacheSize.MICRO;
+                    cacheSize = CacheContainer.MICRO;
                     break;
                 case "Small":
-                    cacheSize = CacheSize.SMALL;
+                    cacheSize = CacheContainer.SMALL;
                     break;
                 case "Regular":
-                    cacheSize = CacheSize.REGULAR;
+                    cacheSize = CacheContainer.REGULAR;
                     break;
                 case "Large":
-                    cacheSize = CacheSize.LARGE;
+                    cacheSize = CacheContainer.LARGE;
                     break;
                 case "Other":
-                    cacheSize = CacheSize.OTHER;
+                    cacheSize = CacheContainer.OTHER;
                     break;
                 default:
                     continue;
@@ -109,7 +109,7 @@ public class GpxReader {
                 }
             }
             
-            caches.add(new Cache(new LatLong(lat, lon), name, CacheSize.SMALL, difficulty, terrain, favorites, found));
+            caches.add(new Cache(new LatLong(lat, lon), name, CacheContainer.SMALL, difficulty, terrain, favorites, found));
         }
         
         return caches;
