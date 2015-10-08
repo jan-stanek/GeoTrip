@@ -72,22 +72,22 @@ public class GpxReader {
             Element e = waypoint.getChild("extensions", rootNS).getChild("cache", n);
             
             String size = e.getChildText("container", n);
-            CacheContainer cacheSize;
+            CacheContainer container;
             switch(size) {
                 case "Micro":
-                    cacheSize = CacheContainer.MICRO;
+                    container = CacheContainer.MICRO;
                     break;
                 case "Small":
-                    cacheSize = CacheContainer.SMALL;
+                    container = CacheContainer.SMALL;
                     break;
                 case "Regular":
-                    cacheSize = CacheContainer.REGULAR;
+                    container = CacheContainer.REGULAR;
                     break;
                 case "Large":
-                    cacheSize = CacheContainer.LARGE;
+                    container = CacheContainer.LARGE;
                     break;
                 case "Other":
-                    cacheSize = CacheContainer.OTHER;
+                    container = CacheContainer.OTHER;
                     break;
                 default:
                     continue;
@@ -109,7 +109,7 @@ public class GpxReader {
                 }
             }
             
-            caches.add(new Cache(new LatLong(lat, lon), name, CacheContainer.SMALL, difficulty, terrain, favorites, found));
+            caches.add(new Cache(new LatLong(lat, lon), name, container, difficulty, terrain, favorites, found));
         }
         
         return caches;

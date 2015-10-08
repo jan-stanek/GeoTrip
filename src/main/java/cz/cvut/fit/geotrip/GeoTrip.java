@@ -15,15 +15,24 @@ import cz.cvut.fit.geotrip.geopoint.GeoPoint;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import static java.util.Collections.list;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import org.mapsforge.core.graphics.Bitmap;
+import org.mapsforge.core.graphics.Canvas;
+
 import org.mapsforge.core.graphics.Color;
 import org.mapsforge.core.graphics.GraphicFactory;
 import org.mapsforge.core.graphics.Paint;
@@ -31,6 +40,7 @@ import org.mapsforge.core.graphics.Style;
 import org.mapsforge.core.model.BoundingBox;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
+import org.mapsforge.core.model.Tile;
 import org.mapsforge.core.util.LatLongUtils;
 import org.mapsforge.map.awt.AwtGraphicFactory;
 import org.mapsforge.map.layer.Layer;
@@ -40,6 +50,7 @@ import org.mapsforge.map.layer.cache.InMemoryTileCache;
 import org.mapsforge.map.layer.cache.TileCache;
 import org.mapsforge.map.layer.cache.TwoLevelTileCache;
 import org.mapsforge.map.layer.overlay.FixedPixelCircle;
+import org.mapsforge.map.layer.overlay.Marker;
 import org.mapsforge.map.layer.overlay.Polyline;
 import org.mapsforge.map.layer.renderer.TileRendererLayer;
 import org.mapsforge.map.model.MapViewPosition;
@@ -61,7 +72,7 @@ public class GeoTrip {
     
     public static GeoPoint ref;
 
-    private List<File> mapFiles;
+    private List<Layer> mapLayers;
     private CacheStorage cacheStorage;
     
     /**
@@ -81,8 +92,7 @@ public class GeoTrip {
 
         ReadBuffer.setMaximumBufferSize(6500000);
 
-        findMapFiles("D:\\Stahování\\GeoTrip");      
-        addMapFiles(mapFiles);
+        addMapFiles(findMapFiles("D:\\Stahování\\GeoTrip"));
         
         GpxReader gpxReader = new GpxReader();
         ref = gpxReader.readRef();
@@ -98,7 +108,7 @@ public class GeoTrip {
         
     }
     
-    private void findMapFiles(String folder) {
+    private List<File> findMapFiles(String folder) {
         File dir = new File(folder);
          
         File[] arr = dir.listFiles(new FilenameFilter() {
@@ -108,28 +118,29 @@ public class GeoTrip {
             }
         });  
         
-        mapFiles = Arrays.asList(arr);
+        return Arrays.asList(arr);
     }
     
     private void addMapFiles(List<File> mapFiles) {
         Layers layers = mainFrame.mapView.getLayerManager().getLayers();
-
+        mapLayers = new LinkedList<>();
+        
         BoundingBox result = null;
         for (int i = 0; i < mapFiles.size(); i++) {
             File mapFile = mapFiles.get(i);
             TileRendererLayer tileRendererLayer = createTileRendererLayer(createTileCache(i), mainFrame.mapViewModel.mapViewPosition, true, true, mapFile);
             BoundingBox tmp = tileRendererLayer.getMapDataStore().boundingBox();
             result = result == null ? tmp : result.extend(tmp);
-            layers.add(tileRendererLayer);
+            mapLayers.add(tileRendererLayer);
         }
         
-        mainFrame.boundingBox = result;
+        layers.addAll(mapLayers);
     }
 
     private TileCache createTileCache(int index) {
         TileCache firstLevelTileCache = new InMemoryTileCache(128);
         File cacheDirectory = new File(System.getProperty("java.io.tmpdir"), "mapsforge" + index);
-        TileCache secondLevelTileCache = new FileSystemTileCache(1024, cacheDirectory, mainFrame.GRAPHIC_FACTORY);
+        TileCache secondLevelTileCache = new FileSystemTileCache(1024, cacheDirectory, MainFrame.GRAPHIC_FACTORY);
         return new TwoLevelTileCache(firstLevelTileCache, secondLevelTileCache);
     }
 
@@ -142,19 +153,26 @@ public class GeoTrip {
     private void addRef() {
         Layers layers = mainFrame.mapView.getLayerManager().getLayers();
         
-        Paint paint = mainFrame.GRAPHIC_FACTORY.createPaint();
-        paint.setColor(org.mapsforge.core.graphics.Color.RED);
+        Paint paint = MainFrame.GRAPHIC_FACTORY.createPaint();
+        paint.setColor(Color.RED);
         
+        Bitmap b = MainFrame.GRAPHIC_FACTORY.createBitmap(10, 10);
+        Canvas c = MainFrame.GRAPHIC_FACTORY.createCanvas();
+       
+        
+
+        
+        Marker marker = new Marker(ref.coordinates, b, 10, 10);
         FixedPixelCircle circle = new FixedPixelCircle(ref.coordinates, 10, paint, null);
         
-        layers.add(circle);
+        layers.add(marker);
     }
     
     private void addCaches(List<Cache> caches) {
         Layers layers = mainFrame.mapView.getLayerManager().getLayers();
         
         Paint paint = MainFrame.GRAPHIC_FACTORY.createPaint();
-        paint.setColor(org.mapsforge.core.graphics.Color.BLUE);
+        paint.setColor(Color.BLUE);
         
         FixedPixelCircle circle;
         
@@ -167,8 +185,8 @@ public class GeoTrip {
     public void filter(boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow, int terrainHigh) {
         Layers layers = mainFrame.mapView.getLayerManager().getLayers();
         layers.clear();
-        addMapFiles(mapFiles);
+        layers.addAll(mapLayers);
         addRef();
-        addCaches(cacheStorage.getCacheList());
+        addCaches(cacheStorage.getFilteredList(found, container, difficultyLow, difficultyHigh, terrainLow, terrainHigh));
     }
 }

@@ -70,8 +70,8 @@ public class MainFrame extends javax.swing.JFrame {
     public Model mapViewModel;
     public BoundingBox boundingBox;
     
-    private byte zoomMin = 0;
-    private byte zoomMax = 20;
+    private final byte ZOOM_MIN = 6;
+    private final byte ZOOM_MAX = 20;
     private final byte ZOOM_DEFAULT = 13;
     
     private RangeSlider sliderObtiznost;
@@ -96,6 +96,12 @@ public class MainFrame extends javax.swing.JFrame {
         createMapView();
         mapView.setSize(panelMapa.getWidth(), panelMapa.getHeight());
         panelMapa.add(mapView);
+        
+        mapViewModel.mapViewPosition.setZoomLevelMin(ZOOM_MIN);
+        mapViewModel.mapViewPosition.setZoomLevelMax(ZOOM_MAX);
+        
+        sliderZoom.setMinimum(ZOOM_MIN);
+        sliderZoom.setMaximum(ZOOM_MAX);
     }
 
     private void addRangeSliders() {
@@ -142,10 +148,6 @@ public class MainFrame extends javax.swing.JFrame {
             @Override
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 byte zoom = (byte)(mapViewModel.mapViewPosition.getZoomLevel() - evt.getWheelRotation());
-                if (zoom < zoomMin)
-                    zoom = zoomMin;
-                if (zoom > zoomMax)
-                    zoom = zoomMax;
                 mapViewModel.mapViewPosition.setZoomLevel(zoom);
                 sliderZoom.setValue(zoom);
             }
@@ -227,6 +229,8 @@ public class MainFrame extends javax.swing.JFrame {
         panelPravy = new javax.swing.JPanel();
         panelMapa = new javax.swing.JPanel();
         sliderZoom = new javax.swing.JSlider();
+        buttonZoomPlus = new javax.swing.JButton();
+        buttonZoomMinus = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(800, 560));
@@ -235,21 +239,16 @@ public class MainFrame extends javax.swing.JFrame {
                 MainFrame.this.componentResized(evt);
             }
         });
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowOpened(java.awt.event.WindowEvent evt) {
-                formWindowOpened(evt);
-            }
-        });
 
         panelFiltr.setBorder(javax.swing.BorderFactory.createTitledBorder("Filtr"));
 
         panelFiltrStav.setBorder(javax.swing.BorderFactory.createTitledBorder("Stav"));
 
         groupStav.add(radioVsechny);
+        radioVsechny.setSelected(true);
         radioVsechny.setText("všechny");
 
         groupStav.add(radioNenalezene);
-        radioNenalezene.setSelected(true);
         radioNenalezene.setText("nenalezené");
 
         javax.swing.GroupLayout panelFiltrStavLayout = new javax.swing.GroupLayout(panelFiltrStav);
@@ -560,21 +559,52 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        buttonZoomPlus.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        buttonZoomPlus.setForeground(new java.awt.Color(0, 102, 255));
+        buttonZoomPlus.setText("+");
+        buttonZoomPlus.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
+        buttonZoomPlus.setContentAreaFilled(false);
+        buttonZoomPlus.setPreferredSize(new java.awt.Dimension(20, 20));
+        buttonZoomPlus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonZoomPlusActionPerformed(evt);
+            }
+        });
+
+        buttonZoomMinus.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        buttonZoomMinus.setForeground(new java.awt.Color(0, 102, 255));
+        buttonZoomMinus.setText("−");
+        buttonZoomMinus.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
+        buttonZoomMinus.setContentAreaFilled(false);
+        buttonZoomMinus.setPreferredSize(new java.awt.Dimension(20, 20));
+        buttonZoomMinus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonZoomMinusActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelMapaLayout = new javax.swing.GroupLayout(panelMapa);
         panelMapa.setLayout(panelMapaLayout);
         panelMapaLayout.setHorizontalGroup(
             panelMapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelMapaLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(sliderZoom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(470, Short.MAX_VALUE))
+                .addGroup(panelMapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(sliderZoom, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(buttonZoomPlus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(buttonZoomMinus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(446, Short.MAX_VALUE))
         );
         panelMapaLayout.setVerticalGroup(
             panelMapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelMapaLayout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(buttonZoomPlus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sliderZoom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(buttonZoomMinus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout panelPravyLayout = new javax.swing.GroupLayout(panelPravy);
@@ -613,28 +643,36 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void componentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_componentResized
-        mapView.setSize(panelMapa.getWidth(), panelMapa.getHeight());
+        if (mapView != null)
+            mapView.setSize(panelMapa.getWidth(), panelMapa.getHeight());
     }//GEN-LAST:event_componentResized
 
     private void sliderZoomStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderZoomStateChanged
         mapView.getModel().mapViewPosition.setZoomLevel((byte)sliderZoom.getValue());
     }//GEN-LAST:event_sliderZoomStateChanged
 
-    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        byte zoomLevel = zoomMin = LatLongUtils.zoomForBounds(mapViewModel.mapViewDimension.getDimension(), boundingBox, mapViewModel.displayModel.getTileSize());
-        mapViewModel.mapViewPosition.setMapPosition(new MapPosition(boundingBox.getCenterPoint(), zoomLevel));
-                
-        sliderZoom.setValue(zoomLevel);
-        sliderZoom.setMinimum(zoomMin);
-        sliderZoom.setMaximum(zoomMax);
-    }//GEN-LAST:event_formWindowOpened
-
     private void buttonNaplanovatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonNaplanovatActionPerformed
         filter();
     }//GEN-LAST:event_buttonNaplanovatActionPerformed
+
+    private void buttonZoomPlusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonZoomPlusActionPerformed
+        byte zoomLevel = mapView.getModel().mapViewPosition.getZoomLevel();
+        zoomLevel++;
+        sliderZoom.setValue(zoomLevel);
+        mapView.getModel().mapViewPosition.setZoomLevel(zoomLevel);
+    }//GEN-LAST:event_buttonZoomPlusActionPerformed
+
+    private void buttonZoomMinusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonZoomMinusActionPerformed
+        byte zoomLevel = mapView.getModel().mapViewPosition.getZoomLevel();
+        zoomLevel--;
+        sliderZoom.setValue(zoomLevel);
+        mapView.getModel().mapViewPosition.setZoomLevel(zoomLevel);
+    }//GEN-LAST:event_buttonZoomMinusActionPerformed
    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonNaplanovat;
+    private javax.swing.JButton buttonZoomMinus;
+    private javax.swing.JButton buttonZoomPlus;
     private javax.swing.JCheckBox checkMala;
     private javax.swing.JCheckBox checkMikro;
     private javax.swing.JCheckBox checkOstatni;

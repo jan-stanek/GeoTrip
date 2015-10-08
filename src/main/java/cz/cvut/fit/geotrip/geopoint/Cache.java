@@ -14,17 +14,17 @@ import org.mapsforge.core.model.LatLong;
  */
 public class Cache extends GeoPoint {
     
-    public final CacheContainer size;
+    public final CacheContainer container;
     public final int difficulty;
     public final int terrain;
     public final int favorites;
     public final boolean found;
     public final double distance;
 
-    public Cache(LatLong coordinates, String name, CacheContainer size, int difficulty, int terrain, int favorites, boolean found) {
+    public Cache(LatLong coordinates, String name, CacheContainer container, int difficulty, int terrain, int favorites, boolean found) {
         super(coordinates, name);
         
-        this.size = size;
+        this.container = container;
         this.difficulty = difficulty;
         this.terrain = terrain;
         this.favorites = favorites;

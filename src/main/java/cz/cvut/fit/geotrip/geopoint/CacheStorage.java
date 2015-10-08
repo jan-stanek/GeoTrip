@@ -27,4 +27,25 @@ public class CacheStorage {
         return caches;
     }
     
+    public List<Cache> getFilteredList(boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow, int terrainHigh) {
+        List<Cache> list = new LinkedList<>();
+        
+        for (Cache cache : caches) {
+            if (!found && cache.found)
+                continue;
+            
+            if ((cache.container.getValue() & container) == 0)
+                continue;
+            
+            if (cache.difficulty < difficultyLow || cache.difficulty > difficultyHigh)
+                continue;
+            
+            if (cache.terrain < terrainLow || cache.terrain > terrainHigh)
+                continue;
+            
+            list.add(cache);
+        }
+        
+        return list;
+    }
 }
