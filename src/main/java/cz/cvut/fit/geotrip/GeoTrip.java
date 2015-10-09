@@ -40,8 +40,10 @@ import org.mapsforge.core.graphics.Style;
 import org.mapsforge.core.model.BoundingBox;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
+import org.mapsforge.core.model.Point;
 import org.mapsforge.core.model.Tile;
 import org.mapsforge.core.util.LatLongUtils;
+import org.mapsforge.map.awt.AwtBitmap;
 import org.mapsforge.map.awt.AwtGraphicFactory;
 import org.mapsforge.map.layer.Layer;
 import org.mapsforge.map.layer.Layers;
@@ -49,6 +51,7 @@ import org.mapsforge.map.layer.cache.FileSystemTileCache;
 import org.mapsforge.map.layer.cache.InMemoryTileCache;
 import org.mapsforge.map.layer.cache.TileCache;
 import org.mapsforge.map.layer.cache.TwoLevelTileCache;
+import org.mapsforge.map.layer.labels.LabelLayer;
 import org.mapsforge.map.layer.overlay.FixedPixelCircle;
 import org.mapsforge.map.layer.overlay.Marker;
 import org.mapsforge.map.layer.overlay.Polyline;
@@ -61,6 +64,7 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme;
 import org.mapsforge.map.swing.controller.MapViewComponentListener;
 import org.mapsforge.map.swing.controller.MouseEventListener;
 import org.mapsforge.map.swing.view.MapView;
+import org.mapsforge.map.util.MapViewProjection;
 
 /**
  *
@@ -74,6 +78,8 @@ public class GeoTrip {
 
     private List<Layer> mapLayers;
     private CacheStorage cacheStorage;
+    private Layers layers;
+    private Bitmap iconFound, iconNotFound, iconRef;
     
     /**
      * @param args the command line arguments
@@ -92,13 +98,18 @@ public class GeoTrip {
 
         ReadBuffer.setMaximumBufferSize(6500000);
 
+        layers = mainFrame.mapView.getLayerManager().getLayers();
+        
         addMapFiles(findMapFiles("D:\\Stahování\\GeoTrip"));
+        
         
         GpxReader gpxReader = new GpxReader();
         ref = gpxReader.readRef();
         
         cacheStorage = new CacheStorage();
         cacheStorage.addCaches(gpxReader.readCaches());
+        
+        loadIcons();
         
         addRef();
         mainFrame.zoomToRef();
@@ -122,7 +133,6 @@ public class GeoTrip {
     }
     
     private void addMapFiles(List<File> mapFiles) {
-        Layers layers = mainFrame.mapView.getLayerManager().getLayers();
         mapLayers = new LinkedList<>();
         
         BoundingBox result = null;
@@ -151,42 +161,59 @@ public class GeoTrip {
     }
     
     private void addRef() {
-        Layers layers = mainFrame.mapView.getLayerManager().getLayers();
-        
-        Paint paint = MainFrame.GRAPHIC_FACTORY.createPaint();
-        paint.setColor(Color.RED);
-        
-        Bitmap b = MainFrame.GRAPHIC_FACTORY.createBitmap(10, 10);
-        Canvas c = MainFrame.GRAPHIC_FACTORY.createCanvas();
-       
-        
-
-        
-        Marker marker = new Marker(ref.coordinates, b, 10, 10);
-        FixedPixelCircle circle = new FixedPixelCircle(ref.coordinates, 10, paint, null);
-        
+        Marker marker = new Marker(ref.coordinates, iconRef, 0, -iconRef.getHeight()/2);
         layers.add(marker);
     }
     
     private void addCaches(List<Cache> caches) {
-        Layers layers = mainFrame.mapView.getLayerManager().getLayers();
+        cacheStorage.clearCacheLayers();
         
-        Paint paint = MainFrame.GRAPHIC_FACTORY.createPaint();
-        paint.setColor(Color.BLUE);
-        
-        FixedPixelCircle circle;
-        
+        Marker marker;
+        int markerVerticalOffset = -iconFound.getHeight()/2;
+               
         for (Cache cache : caches) {
-            circle = new FixedPixelCircle(cache.coordinates, 10, paint, null);
-            layers.add(circle);
+            marker = new Marker(cache.coordinates, cache.found ? iconFound : iconNotFound, 0, markerVerticalOffset) {
+                @Override
+                public boolean onTap(LatLong cacheLatLong, Point cachePosition, Point clickPosition) {
+                    double dX = cachePosition.x - clickPosition.x;
+                    double dY = cachePosition.y - clickPosition.y;
+                    if (dY < getBitmap().getHeight() && dY > 3 && Math.abs(dX) <= getBitmap().getWidth()/2)
+                        return true;
+                    return false;
+                }
+            };
+            layers.add(marker);
+            cacheStorage.addCacheLayer(cache, marker);
         }
+    }
+
+    private void loadIcons() {
+        try (FileInputStream iconFoundIS = new FileInputStream("D:\\Stahování\\GeoTrip\\cache_found.png");
+                InputStream iconNotFoundIS = new FileInputStream("D:\\Stahování\\GeoTrip\\cache_notfound.png");
+                InputStream iconRefIS = new FileInputStream("D:\\Stahování\\GeoTrip\\ref.png");) {
+            iconFound = MainFrame.GRAPHIC_FACTORY.createResourceBitmap(iconFoundIS, 0);
+            iconNotFound = MainFrame.GRAPHIC_FACTORY.createResourceBitmap(iconNotFoundIS, 0);
+            iconRef = MainFrame.GRAPHIC_FACTORY.createResourceBitmap(iconRefIS, 0);
+        } catch (IOException ex) {
+            Logger.getLogger(GeoTrip.class.getName()).log(Level.SEVERE, null, ex);
+        } 
     }
     
     public void filter(boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow, int terrainHigh) {
-        Layers layers = mainFrame.mapView.getLayerManager().getLayers();
         layers.clear();
         layers.addAll(mapLayers);
         addRef();
         addCaches(cacheStorage.getFilteredList(found, container, difficultyLow, difficultyHigh, terrainLow, terrainHigh));
+    }
+    
+    public void showInfo(Layer layer) {
+        Cache cache = cacheStorage.getCacheByLayer(layer);
+        MapViewProjection mvp = new MapViewProjection(mainFrame.mapView);
+        Point pos = mvp.toPixels(cache.coordinates);
+        mainFrame.showInfo(cache.name);
+    }
+    
+    public Layers getLayers() {
+        return layers;
     }
 }

@@ -5,8 +5,11 @@
  */
 package cz.cvut.fit.geotrip.geopoint;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import org.mapsforge.map.layer.Layer;
 
 /**
  *
@@ -14,9 +17,11 @@ import java.util.List;
  */
 public class CacheStorage {
     private List<Cache> caches;
+    private Map<Layer, Cache> cacheLayers;
 
     public CacheStorage() {
         caches = new LinkedList<>();
+        cacheLayers = new HashMap<>();
     }
 
     public void addCaches(List<Cache> list) {
@@ -47,5 +52,17 @@ public class CacheStorage {
         }
         
         return list;
+    }
+    
+    public void addCacheLayer(Cache cache, Layer layer) {
+        cacheLayers.put(layer, cache);
+    }
+    
+    public Cache getCacheByLayer(Layer layer) {
+        return cacheLayers.get(layer);
+    }
+    
+    public void clearCacheLayers() {
+        cacheLayers.clear();
     }
 }

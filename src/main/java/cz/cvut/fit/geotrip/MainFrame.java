@@ -13,6 +13,7 @@ import com.jidesoft.swing.RangeSlider;
 import cz.cvut.fit.geotrip.geopoint.Cache;
 import cz.cvut.fit.geotrip.geopoint.CacheContainer;
 import java.awt.Color;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -38,13 +39,16 @@ import org.mapsforge.core.graphics.Style;
 import org.mapsforge.core.model.BoundingBox;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
+import org.mapsforge.core.model.Point;
 import org.mapsforge.core.util.LatLongUtils;
 import org.mapsforge.map.awt.AwtGraphicFactory;
+import org.mapsforge.map.layer.Layer;
 import org.mapsforge.map.layer.Layers;
 import org.mapsforge.map.layer.cache.FileSystemTileCache;
 import org.mapsforge.map.layer.cache.InMemoryTileCache;
 import org.mapsforge.map.layer.cache.TileCache;
 import org.mapsforge.map.layer.cache.TwoLevelTileCache;
+import org.mapsforge.map.layer.overlay.Circle;
 import org.mapsforge.map.layer.overlay.FixedPixelCircle;
 import org.mapsforge.map.layer.overlay.Polyline;
 import org.mapsforge.map.layer.renderer.TileRendererLayer;
@@ -53,37 +57,39 @@ import org.mapsforge.map.model.Model;
 import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.reader.ReadBuffer;
 import org.mapsforge.map.rendertheme.InternalRenderTheme;
+import org.mapsforge.map.scalebar.DistanceUnitAdapter;
+import org.mapsforge.map.scalebar.MapScaleBar;
 import org.mapsforge.map.swing.controller.MapViewComponentListener;
 import org.mapsforge.map.swing.controller.MouseEventListener;
 import org.mapsforge.map.swing.view.MapView;
+import org.mapsforge.map.util.MapViewProjection;
 
 /**
  *
  * @author jan
  */
 public class MainFrame extends javax.swing.JFrame {
-       
+
     GeoTrip geotrip;
     public static final GraphicFactory GRAPHIC_FACTORY = AwtGraphicFactory.INSTANCE;
-    
+
     public MapView mapView;
     public Model mapViewModel;
     public BoundingBox boundingBox;
-    
+
     private final byte ZOOM_MIN = 6;
     private final byte ZOOM_MAX = 20;
     private final byte ZOOM_DEFAULT = 13;
-    
+
     private RangeSlider sliderObtiznost;
     private RangeSlider sliderTeren;
-    
-        
+
     /**
      * Creates MainFrame
      */
     public MainFrame(GeoTrip geotrip) {
         this.geotrip = geotrip;
-        
+
         initComponents();
 
         addMapView();
@@ -92,14 +98,14 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void addMapView() {
         panelPravy.setBorder(new CompoundBorder(new EmptyBorder(6, 2, 2, 2), panelPravy.getBorder()));
-    
+
         createMapView();
         mapView.setSize(panelMapa.getWidth(), panelMapa.getHeight());
         panelMapa.add(mapView);
-        
+
         mapViewModel.mapViewPosition.setZoomLevelMin(ZOOM_MIN);
         mapViewModel.mapViewPosition.setZoomLevelMax(ZOOM_MAX);
-        
+
         sliderZoom.setMinimum(ZOOM_MIN);
         sliderZoom.setMaximum(ZOOM_MAX);
     }
@@ -112,7 +118,7 @@ public class MainFrame extends javax.swing.JFrame {
         labelTable.put(7, new JLabel("4"));
         labelTable.put(9, new JLabel("5"));
 
-        sliderObtiznost = new RangeSlider(1,9,1,9);
+        sliderObtiznost = new RangeSlider(1, 9, 1, 9);
         sliderObtiznost.setPaintTicks(true);
         sliderObtiznost.setPaintLabels(true);
         sliderObtiznost.setMajorTickSpacing(2);
@@ -121,8 +127,8 @@ public class MainFrame extends javax.swing.JFrame {
         sliderObtiznost.setLocation(6, 16);
         sliderObtiznost.setLabelTable(labelTable);
         panelFiltrObtiznost.add(sliderObtiznost);
-        
-        sliderTeren = new RangeSlider(1,9,1,9);
+
+        sliderTeren = new RangeSlider(1, 9, 1, 9);
         sliderTeren.setPaintTicks(true);
         sliderTeren.setPaintLabels(true);
         sliderTeren.setMajorTickSpacing(2);
@@ -132,54 +138,100 @@ public class MainFrame extends javax.swing.JFrame {
         sliderTeren.setLabelTable(labelTable);
         panelFiltrTeren.add(sliderTeren);
     }
-    
+
     private void createMapView() {
         mapView = new MapView();
         mapViewModel = mapView.getModel();
         mapView.getMapScaleBar().setVisible(true);
-        
+       
         mapView.addComponentListener(new MapViewComponentListener(mapView, mapViewModel.mapViewDimension));
 
         MouseEventListener mouseEventListener = new MouseEventListener(mapViewModel);
-        mapView.addMouseListener(mouseEventListener);
         mapView.addMouseMotionListener(mouseEventListener);
-        
+
+        mapView.addMouseListener(new java.awt.event.MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Layers layers = geotrip.getLayers();
+                MapViewProjection mapViewProjection = new MapViewProjection(mapView);
+                
+                for (int i = layers.size() - 1; i >= 0; --i) {
+                    Layer layer = layers.get(i);
+                    Point layerPosition = mapViewProjection.toPixels(layer.getPosition());
+                    Point clickPosition = new Point(e.getX(), e.getY());
+                    if (layer.onTap(layer.getPosition(), layerPosition, clickPosition)) {
+                        geotrip.showInfo(layer);
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) { }
+
+            @Override
+            public void mouseReleased(MouseEvent e) { }
+
+            @Override
+            public void mouseEntered(MouseEvent e) { }
+
+            @Override
+            public void mouseExited(MouseEvent e) { }
+        });
+
+        mapView.addMouseListener(mouseEventListener);
+
         mapView.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             @Override
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-                byte zoom = (byte)(mapViewModel.mapViewPosition.getZoomLevel() - evt.getWheelRotation());
+                byte zoom = (byte) (mapViewModel.mapViewPosition.getZoomLevel() - evt.getWheelRotation());
                 mapViewModel.mapViewPosition.setZoomLevel(zoom);
                 sliderZoom.setValue(zoom);
             }
         });
+
+        mapView.addMouseListener(mouseEventListener);
     }
-    
+
     public void zoomToRef() {
         zoomTo(ZOOM_DEFAULT);
         mapViewModel.mapViewPosition.setCenter(geotrip.ref.coordinates);
     }
-    
+
     private void zoomTo(byte zoom) {
         mapViewModel.mapViewPosition.setZoomLevel(zoom);
         sliderZoom.setValue(zoom);
     }
-    
+
     private void filter() {
         int container = 0;
-        if (checkMikro.isSelected())
+        if (checkMikro.isSelected()) {
             container |= CacheContainer.MICRO.getValue();
-        if (checkMala.isSelected())
+        }
+        if (checkMala.isSelected()) {
             container |= CacheContainer.SMALL.getValue();
-        if (checkStredni.isSelected())
+        }
+        if (checkStredni.isSelected()) {
             container |= CacheContainer.REGULAR.getValue();
-        if (checkVelka.isSelected())
+        }
+        if (checkVelka.isSelected()) {
             container |= CacheContainer.LARGE.getValue();
-        if (checkOstatni.isSelected())
+        }
+        if (checkOstatni.isSelected()) {
             container |= CacheContainer.OTHER.getValue();
-                
+        }
+
         geotrip.filter(radioVsechny.isSelected(), container, sliderObtiznost.getLowValue(), sliderObtiznost.getHighValue(), sliderTeren.getLowValue(), sliderTeren.getHighValue());
     }
     
+    public void showInfo(String name) {
+        
+    }
+    
+    public void hideInfo() {
+        
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -590,9 +642,9 @@ public class MainFrame extends javax.swing.JFrame {
             .addGroup(panelMapaLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(panelMapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sliderZoom, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(buttonZoomPlus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(buttonZoomMinus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(buttonZoomMinus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(sliderZoom, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(446, Short.MAX_VALUE))
         );
         panelMapaLayout.setVerticalGroup(
@@ -643,12 +695,13 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void componentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_componentResized
-        if (mapView != null)
+        if (mapView != null) {
             mapView.setSize(panelMapa.getWidth(), panelMapa.getHeight());
+        }
     }//GEN-LAST:event_componentResized
 
     private void sliderZoomStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderZoomStateChanged
-        mapView.getModel().mapViewPosition.setZoomLevel((byte)sliderZoom.getValue());
+        mapView.getModel().mapViewPosition.setZoomLevel((byte) sliderZoom.getValue());
     }//GEN-LAST:event_sliderZoomStateChanged
 
     private void buttonNaplanovatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonNaplanovatActionPerformed
@@ -668,7 +721,7 @@ public class MainFrame extends javax.swing.JFrame {
         sliderZoom.setValue(zoomLevel);
         mapView.getModel().mapViewPosition.setZoomLevel(zoomLevel);
     }//GEN-LAST:event_buttonZoomMinusActionPerformed
-   
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonNaplanovat;
     private javax.swing.JButton buttonZoomMinus;
