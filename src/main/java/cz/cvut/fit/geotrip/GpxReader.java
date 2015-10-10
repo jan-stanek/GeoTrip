@@ -69,10 +69,11 @@ public class GpxReader {
                 found = true;
         
             String link = waypoint.getChild("link", rootNS).getAttributeValue("href");
-            String name = waypoint.getChild("link", rootNS).getChildText("text", rootNS);
             
             Namespace n = Namespace.getNamespace("groundspeak", "http://www.groundspeak.com/cache/1/0");
             Element e = waypoint.getChild("extensions", rootNS).getChild("cache", n);
+            
+            String name = e.getChildText("name", n);
             
             String size = e.getChildText("container", n);
             CacheContainer container;
