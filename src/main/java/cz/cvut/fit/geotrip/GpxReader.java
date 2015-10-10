@@ -58,14 +58,17 @@ public class GpxReader {
         List<Element> waypoints = document.getRootElement().getChildren("wpt", rootNS);
         
         for (Element waypoint : waypoints) {
-            double lat = Double.parseDouble(waypoint.getAttribute("lat").getValue());
-            double lon = Double.parseDouble(waypoint.getAttribute("lon").getValue());
+            double lat = Double.parseDouble(waypoint.getAttributeValue("lat"));
+            double lon = Double.parseDouble(waypoint.getAttributeValue("lon"));
+            
+            String id = waypoint.getChildText("name", rootNS);
             
             boolean found = false;
             String foundString = waypoint.getChildText("sym", rootNS);
             if (foundString.equals("Geocache Found"))
                 found = true;
         
+            String link = waypoint.getChild("link", rootNS).getAttributeValue("href");
             String name = waypoint.getChild("link", rootNS).getChildText("text", rootNS);
             
             Namespace n = Namespace.getNamespace("groundspeak", "http://www.groundspeak.com/cache/1/0");
@@ -109,7 +112,7 @@ public class GpxReader {
                 }
             }
             
-            caches.add(new Cache(new LatLong(lat, lon), name, container, difficulty, terrain, favorites, found));
+            caches.add(new Cache(new LatLong(lat, lon), name, container, difficulty, terrain, favorites, found, id, link));
         }
         
         return caches;

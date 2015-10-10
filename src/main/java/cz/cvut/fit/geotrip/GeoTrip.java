@@ -208,9 +208,7 @@ public class GeoTrip {
     
     public void showInfo(Layer layer) {
         Cache cache = cacheStorage.getCacheByLayer(layer);
-        MapViewProjection mvp = new MapViewProjection(mainFrame.mapView);
-        Point pos = mvp.toPixels(cache.coordinates);
-        mainFrame.showInfo(cache.name);
+        mainFrame.showInfo(cache.name, cache.formatCoordinates(), cache.container, cache.difficulty, cache.terrain, cache.id);
     }
     
     public Layers getLayers() {

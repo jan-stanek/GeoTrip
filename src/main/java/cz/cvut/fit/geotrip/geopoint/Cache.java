@@ -19,9 +19,11 @@ public class Cache extends GeoPoint {
     public final int terrain;
     public final int favorites;
     public final boolean found;
+    public final String id;
+    public final String link;
     public final double distance;
-
-    public Cache(LatLong coordinates, String name, CacheContainer container, int difficulty, int terrain, int favorites, boolean found) {
+    
+    public Cache(LatLong coordinates, String name, CacheContainer container, int difficulty, int terrain, int favorites, boolean found, String id, String link) {
         super(coordinates, name);
         
         this.container = container;
@@ -29,6 +31,8 @@ public class Cache extends GeoPoint {
         this.terrain = terrain;
         this.favorites = favorites;
         this.found = found;
+        this.id = id;
+        this.link = link;
         
         distance = countDistance(GeoTrip.ref);
     }

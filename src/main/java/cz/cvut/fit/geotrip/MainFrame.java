@@ -13,11 +13,15 @@ import com.jidesoft.swing.RangeSlider;
 import cz.cvut.fit.geotrip.geopoint.Cache;
 import cz.cvut.fit.geotrip.geopoint.CacheContainer;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -92,6 +96,10 @@ public class MainFrame extends javax.swing.JFrame {
 
         initComponents();
 
+        panelInfo.setVisible(false);
+        
+        
+        
         addMapView();
         addRangeSliders();
     }
@@ -126,6 +134,7 @@ public class MainFrame extends javax.swing.JFrame {
         sliderObtiznost.setSize(267, 40);
         sliderObtiznost.setLocation(6, 16);
         sliderObtiznost.setLabelTable(labelTable);
+        sliderObtiznost.setFocusable(false);
         panelFiltrObtiznost.add(sliderObtiznost);
 
         sliderTeren = new RangeSlider(1, 9, 1, 9);
@@ -136,6 +145,7 @@ public class MainFrame extends javax.swing.JFrame {
         sliderTeren.setSize(267, 40);
         sliderTeren.setLocation(6, 16);
         sliderTeren.setLabelTable(labelTable);
+        sliderTeren.setFocusable(false);
         panelFiltrTeren.add(sliderTeren);
     }
 
@@ -152,6 +162,8 @@ public class MainFrame extends javax.swing.JFrame {
         mapView.addMouseListener(new java.awt.event.MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                hideInfo();
+                
                 Layers layers = geotrip.getLayers();
                 MapViewProjection mapViewProjection = new MapViewProjection(mapView);
                 
@@ -224,12 +236,25 @@ public class MainFrame extends javax.swing.JFrame {
         geotrip.filter(radioVsechny.isSelected(), container, sliderObtiznost.getLowValue(), sliderObtiznost.getHighValue(), sliderTeren.getLowValue(), sliderTeren.getHighValue());
     }
     
-    public void showInfo(String name) {
+    public void showInfo(String name, String coordinates, CacheContainer container, int difficulty, int terrain, String id) {
+        textNazev.setText(name);
+        textNazev.setCaretPosition(0);
         
+        textSouradnice.setText(coordinates);
+        
+        textVelikost.setText(container.getName());
+        
+        textObtiznost.setText(new DecimalFormat("#.#").format((difficulty + 1) / 2.0));
+        
+        textTeren.setText(new DecimalFormat("#.#").format((terrain + 1) / 2.0));
+        
+        labelLink.setText(id);
+        
+        panelInfo.setVisible(true);
     }
     
     public void hideInfo() {
-        
+        panelInfo.setVisible(false);
     }
 
     /**
@@ -283,6 +308,16 @@ public class MainFrame extends javax.swing.JFrame {
         sliderZoom = new javax.swing.JSlider();
         buttonZoomPlus = new javax.swing.JButton();
         buttonZoomMinus = new javax.swing.JButton();
+        panelInfo = new javax.swing.JPanel();
+        textNazev = new javax.swing.JTextField();
+        textSouradnice = new javax.swing.JTextField();
+        labelVelikost = new javax.swing.JLabel();
+        textVelikost = new javax.swing.JTextField();
+        labelObtiznost = new javax.swing.JLabel();
+        textObtiznost = new javax.swing.JTextField();
+        labelTeren = new javax.swing.JLabel();
+        textTeren = new javax.swing.JTextField();
+        labelLink = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(800, 560));
@@ -604,6 +639,7 @@ public class MainFrame extends javax.swing.JFrame {
         sliderZoom.setOrientation(javax.swing.JSlider.VERTICAL);
         sliderZoom.setSnapToTicks(true);
         sliderZoom.setValue(0);
+        sliderZoom.setFocusable(false);
         sliderZoom.setOpaque(false);
         sliderZoom.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -616,6 +652,7 @@ public class MainFrame extends javax.swing.JFrame {
         buttonZoomPlus.setText("+");
         buttonZoomPlus.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
         buttonZoomPlus.setContentAreaFilled(false);
+        buttonZoomPlus.setFocusable(false);
         buttonZoomPlus.setPreferredSize(new java.awt.Dimension(20, 20));
         buttonZoomPlus.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -628,12 +665,93 @@ public class MainFrame extends javax.swing.JFrame {
         buttonZoomMinus.setText("−");
         buttonZoomMinus.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
         buttonZoomMinus.setContentAreaFilled(false);
+        buttonZoomMinus.setFocusable(false);
         buttonZoomMinus.setPreferredSize(new java.awt.Dimension(20, 20));
         buttonZoomMinus.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonZoomMinusActionPerformed(evt);
             }
         });
+
+        panelInfo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+
+        textNazev.setEditable(false);
+        textNazev.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        textNazev.setText("název");
+        textNazev.setBorder(null);
+
+        textSouradnice.setEditable(false);
+        textSouradnice.setText("gps");
+        textSouradnice.setBorder(null);
+
+        labelVelikost.setText("Velikost: ");
+
+        textVelikost.setEditable(false);
+        textVelikost.setText("ostatní");
+        textVelikost.setBorder(null);
+
+        labelObtiznost.setText("Obtížnost: ");
+
+        textObtiznost.setEditable(false);
+        textObtiznost.setText("1,5");
+        textObtiznost.setBorder(null);
+
+        labelTeren.setText("Terén: ");
+
+        textTeren.setEditable(false);
+        textTeren.setText("1,5");
+        textTeren.setBorder(null);
+
+        labelLink.setText("odkaz");
+
+        javax.swing.GroupLayout panelInfoLayout = new javax.swing.GroupLayout(panelInfo);
+        panelInfo.setLayout(panelInfoLayout);
+        panelInfoLayout.setHorizontalGroup(
+            panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelInfoLayout.createSequentialGroup()
+                        .addComponent(labelVelikost)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(textVelikost, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelObtiznost)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(textObtiznost, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelTeren)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(textTeren, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(panelInfoLayout.createSequentialGroup()
+                        .addGroup(panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(textNazev, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInfoLayout.createSequentialGroup()
+                                .addComponent(textSouradnice)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(labelLink, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+        );
+        panelInfoLayout.setVerticalGroup(
+            panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(textNazev, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(textSouradnice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(labelLink))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(labelVelikost)
+                    .addComponent(textVelikost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(labelObtiznost)
+                    .addComponent(textObtiznost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(labelTeren)
+                    .addComponent(textTeren, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout panelMapaLayout = new javax.swing.GroupLayout(panelMapa);
         panelMapa.setLayout(panelMapaLayout);
@@ -645,7 +763,11 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(buttonZoomPlus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(buttonZoomMinus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(sliderZoom, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(446, Short.MAX_VALUE))
+                .addContainerGap(472, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelMapaLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(panelInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         panelMapaLayout.setVerticalGroup(
             panelMapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -656,7 +778,9 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(sliderZoom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(buttonZoomMinus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(panelInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout panelPravyLayout = new javax.swing.GroupLayout(panelPravy);
@@ -739,12 +863,17 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.ButtonGroup groupVelikost;
     private javax.swing.JLabel labelDelka;
     private javax.swing.JLabel labelKm;
+    private javax.swing.JLabel labelLink;
+    private javax.swing.JLabel labelObtiznost;
+    private javax.swing.JLabel labelTeren;
     private javax.swing.JLabel labelTrasovani;
+    private javax.swing.JLabel labelVelikost;
     private javax.swing.JPanel panelFiltr;
     private javax.swing.JPanel panelFiltrObtiznost;
     private javax.swing.JPanel panelFiltrStav;
     private javax.swing.JPanel panelFiltrTeren;
     private javax.swing.JPanel panelFiltrVelikost;
+    private javax.swing.JPanel panelInfo;
     private javax.swing.JPanel panelLevy;
     private javax.swing.JPanel panelMapa;
     private javax.swing.JPanel panelPravy;
@@ -765,5 +894,10 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JRadioButton radioVelikostVelka;
     private javax.swing.JRadioButton radioVsechny;
     private javax.swing.JSlider sliderZoom;
+    private javax.swing.JTextField textNazev;
+    private javax.swing.JTextField textObtiznost;
+    private javax.swing.JTextField textSouradnice;
+    private javax.swing.JTextField textTeren;
+    private javax.swing.JTextField textVelikost;
     // End of variables declaration//GEN-END:variables
 }
