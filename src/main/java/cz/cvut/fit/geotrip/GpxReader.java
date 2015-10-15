@@ -5,7 +5,7 @@
  */
 package cz.cvut.fit.geotrip;
 
-import cz.cvut.fit.geotrip.geopoint.Cache;
+import cz.cvut.fit.geotrip.geopoint.GeoCache;
 import cz.cvut.fit.geotrip.geopoint.CacheContainer;
 import cz.cvut.fit.geotrip.geopoint.GeoPoint;
 import java.io.File;
@@ -29,7 +29,7 @@ public class GpxReader {
     private Document document;
 
     public GpxReader() {
-        File inputFile = new File("D:\\Stahování\\GeoTrip\\data.gpx");
+        File inputFile = new File("data\\caches.gpx");
         SAXBuilder saxBuilder = new SAXBuilder();
         try {
             document = saxBuilder.build(inputFile);
@@ -51,8 +51,8 @@ public class GpxReader {
         return new GeoPoint(new LatLong(lat, lon), name);
     }
     
-    public List<Cache> readCaches() {
-        List<Cache> caches = new ArrayList<>();
+    public List<GeoCache> readCaches() {
+        List<GeoCache> caches = new ArrayList<>();
         
         Namespace rootNS = document.getRootElement().getNamespace();
         List<Element> waypoints = document.getRootElement().getChildren("wpt", rootNS);
@@ -113,7 +113,7 @@ public class GpxReader {
                 }
             }
             
-            caches.add(new Cache(new LatLong(lat, lon), name, container, difficulty, terrain, favorites, found, id, link));
+            caches.add(new GeoCache(new LatLong(lat, lon), name, container, difficulty, terrain, favorites, found, id, link));
         }
         
         return caches;

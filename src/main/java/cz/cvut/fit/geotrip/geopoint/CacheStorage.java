@@ -16,53 +16,39 @@ import org.mapsforge.map.layer.Layer;
  * @author jan
  */
 public class CacheStorage {
-    private List<Cache> caches;
-    private Map<Layer, Cache> cacheLayers;
+    private List<GeoCache> caches;
 
     public CacheStorage() {
         caches = new LinkedList<>();
-        cacheLayers = new HashMap<>();
     }
 
-    public void addCaches(List<Cache> list) {
+    public void addCaches(List<GeoCache> list) {
         caches.addAll(list);
     }
     
-    public List<Cache> getCacheList() {
+    public List<GeoCache> getCacheList() {
         return caches;
     }
     
-    public List<Cache> getFilteredList(boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow, int terrainHigh) {
-        List<Cache> list = new LinkedList<>();
+    public List<GeoCache> getFilteredList(boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow, int terrainHigh) {
+        List<GeoCache> list = new LinkedList<>();
         
-        for (Cache cache : caches) {
-            if (!found && cache.found)
+        for (GeoCache cache : caches) {
+            if (!found && cache.isFound())
                 continue;
             
-            if ((cache.container.getValue() & container) == 0)
+            if ((cache.getContainer().getValue() & container) == 0)
                 continue;
             
-            if (cache.difficulty < difficultyLow || cache.difficulty > difficultyHigh)
+            if (cache.getDifficulty() < difficultyLow || cache.getDifficulty() > difficultyHigh)
                 continue;
             
-            if (cache.terrain < terrainLow || cache.terrain > terrainHigh)
+            if (cache.getTerrain() < terrainLow || cache.getTerrain() > terrainHigh)
                 continue;
             
             list.add(cache);
         }
         
         return list;
-    }
-    
-    public void addCacheLayer(Cache cache, Layer layer) {
-        cacheLayers.put(layer, cache);
-    }
-    
-    public Cache getCacheByLayer(Layer layer) {
-        return cacheLayers.get(layer);
-    }
-    
-    public void clearCacheLayers() {
-        cacheLayers.clear();
     }
 }

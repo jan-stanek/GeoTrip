@@ -5,6 +5,9 @@
  */
 package cz.cvut.fit.geotrip.geopoint;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import org.mapsforge.core.model.LatLong;
 
 /**
@@ -12,12 +15,28 @@ import org.mapsforge.core.model.LatLong;
  * @author jan
  */
 public class GeoPoint {
-    public final LatLong coordinates;
-    public final String name;
+    private final LatLong coordinates;
+    private final String name;
     
     public GeoPoint(LatLong coordinates, String name) {
         this.coordinates = coordinates;
         this.name = name;
+    }
+    
+    public LatLong getCoordinates() {
+        return coordinates;
+    }
+    
+    public double getLat() {
+        return coordinates.latitude;
+    }
+    
+    public double getLon() {
+        return coordinates.longitude;
+    }
+    
+    public String getName() {
+        return name;
     }
     
     public double countDistance(GeoPoint point) {
@@ -56,6 +75,10 @@ public class GeoPoint {
         
         char lonSign = lat < 0 ? 'W' : 'E';
         
-        return String.format("%d°%d'%.3f\"%c, %d°%d'%.3f\"%c", latDegrees, latMinutes, latSeconds, latSign, lonDegrees, lonMinutes, lonSeconds, lonSign);
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols(Locale.getDefault());
+        dfs.setDecimalSeparator('.');
+        DecimalFormat df = new DecimalFormat("0.000", dfs);
+                
+        return String.format("%d°%d'%s\"%c, %d°%d'%s\"%c", latDegrees, latMinutes, df.format(latSeconds), latSign, lonDegrees, lonMinutes, df.format(lonSeconds), lonSign);
     }
 }

@@ -9,62 +9,23 @@ import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.routing.AlgorithmOptions;
-import cz.cvut.fit.geotrip.geopoint.Cache;
+import com.graphhopper.routing.util.EncodingManager;
+import com.graphhopper.util.PointList;
+import cz.cvut.fit.geotrip.geopoint.GeoCache;
 import cz.cvut.fit.geotrip.geopoint.CacheStorage;
 import cz.cvut.fit.geotrip.geopoint.GeoPoint;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import static java.util.Collections.list;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.prefs.Preferences;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import org.mapsforge.core.graphics.Bitmap;
-import org.mapsforge.core.graphics.Canvas;
-
-import org.mapsforge.core.graphics.Color;
-import org.mapsforge.core.graphics.GraphicFactory;
-import org.mapsforge.core.graphics.Paint;
-import org.mapsforge.core.graphics.Style;
 import org.mapsforge.core.model.BoundingBox;
-import org.mapsforge.core.model.LatLong;
-import org.mapsforge.core.model.MapPosition;
-import org.mapsforge.core.model.Point;
-import org.mapsforge.core.model.Tile;
-import org.mapsforge.core.util.LatLongUtils;
-import org.mapsforge.map.awt.AwtBitmap;
-import org.mapsforge.map.awt.AwtGraphicFactory;
 import org.mapsforge.map.layer.Layer;
-import org.mapsforge.map.layer.Layers;
-import org.mapsforge.map.layer.cache.FileSystemTileCache;
-import org.mapsforge.map.layer.cache.InMemoryTileCache;
-import org.mapsforge.map.layer.cache.TileCache;
-import org.mapsforge.map.layer.cache.TwoLevelTileCache;
-import org.mapsforge.map.layer.labels.LabelLayer;
-import org.mapsforge.map.layer.overlay.FixedPixelCircle;
 import org.mapsforge.map.layer.overlay.Marker;
-import org.mapsforge.map.layer.overlay.Polyline;
-import org.mapsforge.map.layer.renderer.TileRendererLayer;
-import org.mapsforge.map.model.MapViewPosition;
-import org.mapsforge.map.model.Model;
-import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.reader.ReadBuffer;
-import org.mapsforge.map.rendertheme.InternalRenderTheme;
-import org.mapsforge.map.swing.controller.MapViewComponentListener;
-import org.mapsforge.map.swing.controller.MouseEventListener;
-import org.mapsforge.map.swing.view.MapView;
-import org.mapsforge.map.util.MapViewProjection;
 
 /**
  *
@@ -74,13 +35,13 @@ public class GeoTrip {
     
     private MainFrame mainFrame;
     
-    public static GeoPoint ref;
+    private static GeoPoint refPoint;
 
-    private List<Layer> mapLayers;
     private CacheStorage cacheStorage;
-    private Layers layers;
-    private Bitmap iconFound, iconNotFound, iconRef;
+    private Map<Layer, GeoCache> layersCache;
     
+    private String mapName;
+        
     /**
      * @param args the command line arguments
      */
@@ -98,120 +59,116 @@ public class GeoTrip {
 
         ReadBuffer.setMaximumBufferSize(6500000);
 
-        layers = mainFrame.mapView.getLayerManager().getLayers();
-        
-        addMapFiles(findMapFiles("D:\\Stahování\\GeoTrip"));
-        
+        loadSettings();
         
         GpxReader gpxReader = new GpxReader();
-        ref = gpxReader.readRef();
+        refPoint = gpxReader.readRef();
         
         cacheStorage = new CacheStorage();
         cacheStorage.addCaches(gpxReader.readCaches());
         
-        loadIcons();
+        mainFrame.addRefMarker(refPoint.getCoordinates());
+        mainFrame.moveTo(refPoint.getCoordinates());
         
-        addRef();
-        mainFrame.zoomToRef();
+        layersCache = new HashMap<>();
         
         addCaches(cacheStorage.getCacheList());
-        
-        
     }
     
-    private List<File> findMapFiles(String folder) {
-        File dir = new File(folder);
-         
-        File[] arr = dir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.toLowerCase().endsWith(".map");
-            }
-        });  
+    public void loadSettings() {
+        Preferences prefs = Preferences.userNodeForPackage(GeoTrip.class);
         
-        return Arrays.asList(arr);
+        mapName = prefs.get("map", null);
+        loadMap();
+        
+        changeLanguage(prefs.get("map", "en"));
     }
     
-    private void addMapFiles(List<File> mapFiles) {
-        mapLayers = new LinkedList<>();
-        
-        BoundingBox result = null;
-        for (int i = 0; i < mapFiles.size(); i++) {
-            File mapFile = mapFiles.get(i);
-            TileRendererLayer tileRendererLayer = createTileRendererLayer(createTileCache(i), mainFrame.mapViewModel.mapViewPosition, true, true, mapFile);
-            BoundingBox tmp = tileRendererLayer.getMapDataStore().boundingBox();
-            result = result == null ? tmp : result.extend(tmp);
-            mapLayers.add(tileRendererLayer);
+    private void loadMap() {
+        if (mapName == null) {
+            JOptionPane.showMessageDialog(null, "Pridejte mapu do slozky data/maps a vyberte ji v nastaveni.", "Chybejici mapa", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+  
+        File mapFile = new File("data/maps/" + mapName + ".map");
+        if (!mapFile.exists()) {
+            JOptionPane.showMessageDialog(null, "Soubor s mapou nenalezen.", "Chybejici mapa", JOptionPane.ERROR_MESSAGE);
+            return;
         }
         
-        layers.addAll(mapLayers);
-    }
-
-    private TileCache createTileCache(int index) {
-        TileCache firstLevelTileCache = new InMemoryTileCache(128);
-        File cacheDirectory = new File(System.getProperty("java.io.tmpdir"), "mapsforge" + index);
-        TileCache secondLevelTileCache = new FileSystemTileCache(1024, cacheDirectory, MainFrame.GRAPHIC_FACTORY);
-        return new TwoLevelTileCache(firstLevelTileCache, secondLevelTileCache);
-    }
-
-    private TileRendererLayer createTileRendererLayer(TileCache tileCache, MapViewPosition mapViewPosition, boolean isTransparent, boolean renderLabels, File mapFile) {
-        TileRendererLayer tileRendererLayer = new TileRendererLayer(tileCache, new MapFile(mapFile), mapViewPosition, isTransparent, renderLabels, mainFrame.GRAPHIC_FACTORY);
-        tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.OSMARENDER);
-        return tileRendererLayer;
+        mainFrame.loadMap(mapFile);
     }
     
-    private void addRef() {
-        Marker marker = new Marker(ref.coordinates, iconRef, 0, -iconRef.getHeight()/2);
-        layers.add(marker);
+    private void changeLanguage(String language) {
+        
     }
     
-    private void addCaches(List<Cache> caches) {
-        cacheStorage.clearCacheLayers();
+    private void addCaches(List<GeoCache> caches) {
+        layersCache.clear();
         
         Marker marker;
-        int markerVerticalOffset = -iconFound.getHeight()/2;
-               
-        for (Cache cache : caches) {
-            marker = new Marker(cache.coordinates, cache.found ? iconFound : iconNotFound, 0, markerVerticalOffset) {
-                @Override
-                public boolean onTap(LatLong cacheLatLong, Point cachePosition, Point clickPosition) {
-                    double dX = cachePosition.x - clickPosition.x;
-                    double dY = cachePosition.y - clickPosition.y;
-                    if (dY < getBitmap().getHeight() && dY > 3 && Math.abs(dX) <= getBitmap().getWidth()/2)
-                        return true;
-                    return false;
-                }
-            };
-            layers.add(marker);
-            cacheStorage.addCacheLayer(cache, marker);
+        for (GeoCache cache : caches) {
+            marker = mainFrame.addCacheMarker(cache.getCoordinates(), cache.isFound());
+            layersCache.put(marker, cache);
         }
     }
 
-    private void loadIcons() {
-        try (FileInputStream iconFoundIS = new FileInputStream("D:\\Stahování\\GeoTrip\\cache_found.png");
-                InputStream iconNotFoundIS = new FileInputStream("D:\\Stahování\\GeoTrip\\cache_notfound.png");
-                InputStream iconRefIS = new FileInputStream("D:\\Stahování\\GeoTrip\\ref.png");) {
-            iconFound = MainFrame.GRAPHIC_FACTORY.createResourceBitmap(iconFoundIS, 0);
-            iconNotFound = MainFrame.GRAPHIC_FACTORY.createResourceBitmap(iconNotFoundIS, 0);
-            iconRef = MainFrame.GRAPHIC_FACTORY.createResourceBitmap(iconRefIS, 0);
-        } catch (IOException ex) {
-            Logger.getLogger(GeoTrip.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+    public void filter(int distance, String vehicle, boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow, int terrainHigh) {
+        mainFrame.removeCacheMarkers();
+        
+        List<GeoCache> filteredList = cacheStorage.getFilteredList(found, container, difficultyLow, difficultyHigh, terrainLow, terrainHigh);
+        addCaches(filteredList);
+        
+        GraphHopper gh = new GraphHopper().setEncodingManager(new EncodingManager(vehicle)).forDesktop();
+        gh.load("data/gh/" + mapName + "/" + vehicle);
+       
+        PointList pl = new PointList();
+        GHRequest req;
+        GHResponse resp;
+        
+        BoundingBox bb = new BoundingBox(refPoint.getLat(), refPoint.getLon(), refPoint.getLat(), refPoint.getLon());
+        
+        req = new GHRequest(refPoint.getLat(), refPoint.getLon(), filteredList.get(0).getLat(), filteredList.get(0).getLon());
+        req.setAlgorithm(AlgorithmOptions.ASTAR_BI);
+        req.getHints().put("instructions", false);
+        req.setVehicle(vehicle);
+        resp = gh.route(req);
+        pl.add(refPoint.getLat(), refPoint.getLon());
+        pl.add(resp.getPoints());
+        
+        int i;
+        for (i = 1; i < filteredList.size(); i++) {
+            req = new GHRequest(filteredList.get(i-1).getLat(), filteredList.get(i-1).getLon(), filteredList.get(i).getLat(), filteredList.get(i).getLon());
+            req.setAlgorithm(AlgorithmOptions.ASTAR_BI);
+            req.getHints().put("instructions", false);
+            req.setVehicle(vehicle);
+            resp = gh.route(req);
+            pl.add(filteredList.get(i-1).getLat(), filteredList.get(i-1).getLon());
+            pl.add(resp.getPoints());
+            bb = bb.extend(new BoundingBox(filteredList.get(i).getLat(), filteredList.get(i).getLon(), filteredList.get(i).getLat(), filteredList.get(i).getLon()));
+        }
+        
+        req = new GHRequest(filteredList.get(i-1).getLat(), filteredList.get(i-1).getLon(), refPoint.getLat(), refPoint.getLon());
+        req.setAlgorithm(AlgorithmOptions.ASTAR_BI);
+        req.getHints().put("instructions", false);
+        req.setVehicle(vehicle);
+        resp = gh.route(req);
+        pl.add(filteredList.get(i-1).getLat(), filteredList.get(i-1).getLon());
+        pl.add(resp.getPoints());
+        pl.add(refPoint.getLat(), refPoint.getLon());
+        bb = bb.extend(new BoundingBox(filteredList.get(i-1).getLat(), filteredList.get(i-1).getLon(), filteredList.get(i-1).getLat(), filteredList.get(i-1).getLon()));
+        
+        mainFrame.removeRoute();
+        mainFrame.addRoute(pl);
+        mainFrame.zoomTo(bb);
     }
     
-    public void filter(boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow, int terrainHigh) {
-        layers.clear();
-        layers.addAll(mapLayers);
-        addRef();
-        addCaches(cacheStorage.getFilteredList(found, container, difficultyLow, difficultyHigh, terrainLow, terrainHigh));
+    public void showCacheInfo(Layer layer) {
+        GeoCache cache = layersCache.get(layer);
+        mainFrame.showCacheInfo(cache.getName(), cache.formatCoordinates(), cache.getContainer(), cache.getDifficulty(), cache.getTerrain(), cache.getId(), cache.getLink());
     }
     
-    public void showInfo(Layer layer) {
-        Cache cache = cacheStorage.getCacheByLayer(layer);
-        mainFrame.showInfo(cache.name, cache.formatCoordinates(), cache.container, cache.difficulty, cache.terrain, cache.id);
-    }
-    
-    public Layers getLayers() {
-        return layers;
+    public static GeoPoint getRefPoint() {
+        return refPoint;
     }
 }
