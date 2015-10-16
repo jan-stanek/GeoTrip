@@ -7,6 +7,7 @@ package cz.cvut.fit.geotrip;
 
 import com.graphhopper.GraphHopper;
 import com.graphhopper.routing.util.EncodingManager;
+import java.awt.Frame;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,10 +22,15 @@ public class MapLoadDialog extends javax.swing.JDialog {
     /**
      * Creates new form MapImportDialog
      */
-    public MapLoadDialog(java.awt.Frame parent, boolean modal, String mapName) {
+    public MapLoadDialog(Frame parent, boolean modal, String mapName) {
         super(parent, modal);
+        
         initComponents();
 
+        this.setLocation(parent.getLocation().x + parent.getSize().width / 2 - this.getSize().width / 2, 
+                parent.getLocation().y + parent.getSize().height / 2 - this.getSize().height / 2);
+
+        
         initGraphHoppers(mapName);
         labelInfo.setText("Načítám mapu: " + mapName + "... (může trvat několik minut)");
     }

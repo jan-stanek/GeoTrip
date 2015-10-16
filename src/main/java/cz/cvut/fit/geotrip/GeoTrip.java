@@ -17,7 +17,9 @@ import cz.cvut.fit.geotrip.geopoint.GeoPoint;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -41,6 +43,8 @@ public class GeoTrip {
     private Map<Layer, GeoCache> layersCache;
     
     private String mapName;
+    
+    private Preferences prefs;
         
     /**
      * @param args the command line arguments
@@ -54,12 +58,14 @@ public class GeoTrip {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) { }
         
+        loadSettings();
+        
         mainFrame = new MainFrame(this);
         mainFrame.setVisible(true);
 
         ReadBuffer.setMaximumBufferSize(6500000);
 
-        loadSettings();
+        loadMap();
         
         GpxReader gpxReader = new GpxReader();
         refPoint = gpxReader.readRef();
@@ -75,32 +81,33 @@ public class GeoTrip {
         addCaches(cacheStorage.getCacheList());
     }
     
-    public void loadSettings() {
-        Preferences prefs = Preferences.userNodeForPackage(GeoTrip.class);
+    private void loadSettings() {
+        prefs = Preferences.userNodeForPackage(GeoTrip.class);
         
-        mapName = prefs.get("map", null);
-        loadMap();
-        
-        changeLanguage(prefs.get("map", "en"));
+        changeLanguage(prefs.get("language", "en-US"));
     }
     
-    private void loadMap() {
+    public void loadMap() {
+        changeLanguage(prefs.get("language", "en-US"));
+        mapName = prefs.get("map", null);
+        
         if (mapName == null) {
-            JOptionPane.showMessageDialog(null, "Pridejte mapu do slozky data/maps a vyberte ji v nastaveni.", "Chybejici mapa", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(mainFrame, "Pridejte mapu do slozky data/maps a vyberte ji v nastaveni.", "Chybejici mapa", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
   
         File mapFile = new File("data/maps/" + mapName + ".map");
-        if (!mapFile.exists()) {
-            JOptionPane.showMessageDialog(null, "Soubor s mapou nenalezen.", "Chybejici mapa", JOptionPane.ERROR_MESSAGE);
+        File osmFile = new File("data/maps/" + mapName + ".osm.pbf");
+        if (!mapFile.exists() || !osmFile.exists()) {
+            JOptionPane.showMessageDialog(mainFrame, "Soubor s mapou nenalezen.", "Chybejici mapa", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
-        mainFrame.loadMap(mapFile);
+        mainFrame.addMap(mapFile);
     }
     
     private void changeLanguage(String language) {
-        
+        Locale.setDefault(Locale.forLanguageTag(language));
     }
     
     private void addCaches(List<GeoCache> caches) {

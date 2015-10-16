@@ -244,13 +244,13 @@ public class MainFrame extends javax.swing.JFrame {
             if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
                 desktop.browse(uri);
             else
-                JOptionPane.showMessageDialog(null, "Odkaz se nepodařilo otevřít.", "Chyba prohlížeče", ERROR);
+                JOptionPane.showMessageDialog(this, "Odkaz se nepodařilo otevřít.", "Chyba prohlížeče", ERROR);
         } catch (URISyntaxException | IOException ex) {
-            JOptionPane.showMessageDialog(null, "Odkaz se nepodařilo otevřít.", "Chyba", ERROR);
+            JOptionPane.showMessageDialog(this, "Odkaz se nepodařilo otevřít.", "Chyba", ERROR);
         }
     }
 
-    public void loadMap(File mapFile) {
+    public void addMap(File mapFile) {
         if (mapLayer != null)
             layers.remove(mapLayer);
         
@@ -488,7 +488,7 @@ public class MainFrame extends javax.swing.JFrame {
         checkRegular.setText(bundle.getString("containerRegular")); // NOI18N
 
         checkLarge.setSelected(true);
-        checkLarge.setText("velká");
+        checkLarge.setText(bundle.getString("containerLarge")); // NOI18N
         checkLarge.setActionCommand(bundle.getString("containerLarge")); // NOI18N
 
         checkOther.setSelected(true);
@@ -774,13 +774,13 @@ public class MainFrame extends javax.swing.JFrame {
         labelDifficulty.setText(bundle.getString("infoDifficulty")); // NOI18N
 
         textDifficulty.setEditable(false);
-        textDifficulty.setText("1,5");
+        textDifficulty.setText("0");
         textDifficulty.setBorder(null);
 
         labelTerrain.setText(bundle.getString("infoTerrain")); // NOI18N
 
         textTerrain.setEditable(false);
-        textTerrain.setText("1,5");
+        textTerrain.setText("0");
         textTerrain.setBorder(null);
 
         buttonLink.setBorder(null);
@@ -978,11 +978,8 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_buttonZoomMinusActionPerformed
 
     private void menuSettingsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuSettingsMouseClicked
-        SettingsDialog settingsDialog = new SettingsDialog(this, true);
-        settingsDialog.setLocation(this.getLocation().x + this.getSize().width / 2 - settingsDialog.getSize().width / 2,
-                this.getLocation().y + this.getSize().height / 2 - settingsDialog.getSize().height / 2);
+        SettingsDialog settingsDialog = new SettingsDialog(this, true, geotrip);
         settingsDialog.setVisible(true);
-        geotrip.loadSettings();
     }//GEN-LAST:event_menuSettingsMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

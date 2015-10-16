@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -20,13 +21,18 @@ import java.util.regex.Pattern;
 public class SettingsDialog extends javax.swing.JDialog {
 
     Frame parent;
+    GeoTrip geoTrip;
     
-    public SettingsDialog(Frame parent, boolean modal) {
+    public SettingsDialog(Frame parent, boolean modal, GeoTrip geoTrip) {
         super(parent, modal);
         this.parent = parent;
+        this.geoTrip = geoTrip;
         
         initComponents();
-        
+
+        this.setLocation(parent.getLocation().x + parent.getSize().width / 2 - this.getSize().width / 2, 
+                parent.getLocation().y + parent.getSize().height / 2 - this.getSize().height / 2);
+
         findMaps();
     }
 
@@ -167,22 +173,29 @@ public class SettingsDialog extends javax.swing.JDialog {
     private void buttonOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonOkActionPerformed
         Preferences prefs = Preferences.userNodeForPackage(GeoTrip.class);
         
+        String language;
         switch(comboLanguage.getSelectedItem().toString()) {
-            case "English":
-                prefs.put("language", "en");
-                break;
             case "Čeština":
-                prefs.put("language", "cs");
+                language = "cs-CZ";
                 break;
+            default:
+                language = "en-US";
+                break;
+        }
+        if (!language.equals(prefs.get("language", null))) {
+            prefs.put("language", language);
+            JOptionPane.showMessageDialog(parent, "Jazyk bude zmenen pri dalsim spusteni aplikace.", "Zmena jazyka", JOptionPane.INFORMATION_MESSAGE);
         }
         
         String mapName = comboMap.getSelectedItem().toString();
-        prefs.put("map", mapName);
-        
-        MapLoadDialog mapLoadDialog = new MapLoadDialog(parent, true, mapName);
-        mapLoadDialog.setLocation(this.getLocation().x + this.getSize().width / 2 - mapLoadDialog.getSize().width / 2,
-                this.getLocation().y + this.getSize().height / 2 - mapLoadDialog.getSize().height / 2);
-        mapLoadDialog.setVisible(true);
+        if (!mapName.equals(prefs.get("map", null))) {
+            prefs.put("map", mapName);
+
+            MapLoadDialog mapLoadDialog = new MapLoadDialog(parent, true, mapName);
+            mapLoadDialog.setVisible(true);
+
+            geoTrip.loadMap();
+        }
         
         dispose();
     }//GEN-LAST:event_buttonOkActionPerformed
