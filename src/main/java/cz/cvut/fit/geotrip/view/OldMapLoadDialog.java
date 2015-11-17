@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.cvut.fit.geotrip;
+package cz.cvut.fit.geotrip.view;
 
 import com.graphhopper.GraphHopper;
 import com.graphhopper.routing.util.EncodingManager;
@@ -17,12 +17,12 @@ import javax.swing.SwingUtilities;
  *
  * @author jan
  */
-public class MapLoadDialog extends javax.swing.JDialog {
+public class OldMapLoadDialog extends javax.swing.JDialog {
 
     /**
      * Creates new form MapImportDialog
      */
-    public MapLoadDialog(Frame parent, boolean modal, String mapName) {
+    public OldMapLoadDialog(Frame parent, boolean modal, String mapName) {
         super(parent, modal);
         
         initComponents();
@@ -52,7 +52,7 @@ public class MapLoadDialog extends javax.swing.JDialog {
                     t2.join();
                     t3.join();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(MapLoadDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(OldMapLoadDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 dispose();

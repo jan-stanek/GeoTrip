@@ -1,15 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package cz.cvut.fit.geotrip.geopoint;
+package cz.cvut.fit.geotrip.data;
 
 /**
  *
  * @author jan
  */
 public enum CacheContainer {
+
     MICRO(1, "mikro"),
     SMALL(2, "malá"),
     REGULAR(4, "střední"),
@@ -18,6 +14,7 @@ public enum CacheContainer {
     
     private final int value;
     private final String name;
+
     
     private CacheContainer(int value, String name) {
         this.value = value;
@@ -31,4 +28,5 @@ public enum CacheContainer {
     public String getName() {
         return name;
     }
+
 }

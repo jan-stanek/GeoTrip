@@ -1,11 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package cz.cvut.fit.geotrip.geopoint;
+package cz.cvut.fit.geotrip.data;
 
-import cz.cvut.fit.geotrip.GeoTrip;
+import java.text.DecimalFormat;
 import org.mapsforge.core.model.LatLong;
 
 /**
@@ -21,9 +16,10 @@ public class GeoCache extends GeoPoint {
     private final boolean found;
     private final String id;
     private final String link;
-    private final double distance;
+
     
-    public GeoCache(LatLong coordinates, String name, CacheContainer container, int difficulty, int terrain, int favorites, boolean found, String id, String link) {
+    public GeoCache(LatLong coordinates, String name, CacheContainer container, int difficulty,
+            int terrain, int favorites, boolean found, String id, String link) {
         super(coordinates, name);
         
         this.container = container;
@@ -33,12 +29,10 @@ public class GeoCache extends GeoPoint {
         this.found = found;
         this.id = id;
         this.link = link;
-        
-        distance = countDistance(GeoTrip.getRefPoint());
     }
 
-    public double getDistance() {
-        return distance;
+    public double getDistance(GeoPoint geoPoint) {
+        return countDistance(geoPoint);
     }
 
     public CacheContainer getContainer() {
@@ -67,6 +61,14 @@ public class GeoCache extends GeoPoint {
 
     public String getLink() {
         return link;
+    }
+    
+    public String getDifficultyString() {
+        return new DecimalFormat("#.#").format((difficulty + 1) / 2.0);
+    }
+    
+    public String getTerrainString() {
+        return new DecimalFormat("#.#").format((terrain + 1) / 2.0);
     }
 }
 

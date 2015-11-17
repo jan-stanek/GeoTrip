@@ -1,9 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package cz.cvut.fit.geotrip.geopoint;
+package cz.cvut.fit.geotrip.data;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -15,6 +10,7 @@ import org.mapsforge.core.model.LatLong;
  * @author jan
  */
 public class GeoPoint {
+
     private final LatLong coordinates;
     private final String name;
     
@@ -47,7 +43,7 @@ public class GeoPoint {
         return countDistance(point.latitude, point.longitude);
     }
 
-    private double countDistance(double refLat, double refLon) {
+    public double countDistance(double refLat, double refLon) {
         double lat = coordinates.latitude;
         double lon = coordinates.longitude;
         
@@ -59,7 +55,7 @@ public class GeoPoint {
         return 6378000 * c;
     }
     
-    public String formatCoordinates() {
+    public String getCoordinatesString() {
         double lat = coordinates.latitude;
         double lon = coordinates.longitude;
         

@@ -29,16 +29,20 @@
             </MenuItem>
           </SubComponents>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="menuSettings">
+        <Menu class="javax.swing.JMenu" name="menuMap">
           <Properties>
+            <Property name="text" type="java.lang.String" value="Mapa"/>
             <Property name="actionCommand" type="java.lang.String" value="Settings"/>
-            <Property name="label" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="texts.properties" key="menuSettigns" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
-            </Property>
           </Properties>
-          <Events>
-            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="menuSettingsMouseClicked"/>
-          </Events>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="menuImportMap">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Importovat mapu"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="separator">
+            </MenuItem>
+          </SubComponents>
         </Menu>
       </SubComponents>
     </Menu>

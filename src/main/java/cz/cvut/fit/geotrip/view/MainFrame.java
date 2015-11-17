@@ -3,56 +3,41 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.cvut.fit.geotrip;
+package cz.cvut.fit.geotrip.view;
 
-import com.graphhopper.util.PointList;
 import com.jidesoft.swing.RangeSlider;
-import cz.cvut.fit.geotrip.geopoint.CacheContainer;
+import cz.cvut.fit.geotrip.controller.Controller;
+import cz.cvut.fit.geotrip.controller.MapSelectAction;
+import cz.cvut.fit.geotrip.data.CacheContainer;
+import cz.cvut.fit.geotrip.data.GeoCache;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.DecimalFormat;
 import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import org.mapsforge.core.graphics.Bitmap;
 import org.mapsforge.core.graphics.GraphicFactory;
-import org.mapsforge.core.graphics.Paint;
-import org.mapsforge.core.graphics.Style;
 import org.mapsforge.core.model.BoundingBox;
 import org.mapsforge.core.model.LatLong;
-import org.mapsforge.core.model.Point;
 import org.mapsforge.core.util.LatLongUtils;
 import org.mapsforge.map.awt.AwtGraphicFactory;
-import org.mapsforge.map.layer.Layer;
-import org.mapsforge.map.layer.Layers;
-import org.mapsforge.map.layer.cache.FileSystemTileCache;
-import org.mapsforge.map.layer.cache.InMemoryTileCache;
-import org.mapsforge.map.layer.cache.TileCache;
-import org.mapsforge.map.layer.cache.TwoLevelTileCache;
-import org.mapsforge.map.layer.overlay.Marker;
-import org.mapsforge.map.layer.overlay.Polyline;
-import org.mapsforge.map.layer.renderer.TileRendererLayer;
-import org.mapsforge.map.model.MapViewPosition;
 import org.mapsforge.map.model.Model;
-import org.mapsforge.map.reader.MapFile;
-import org.mapsforge.map.rendertheme.InternalRenderTheme;
 import org.mapsforge.map.swing.controller.MapViewComponentListener;
 import org.mapsforge.map.swing.controller.MouseEventListener;
 import org.mapsforge.map.swing.view.MapView;
-import org.mapsforge.map.util.MapViewProjection;
 
 /**
  *
@@ -60,7 +45,8 @@ import org.mapsforge.map.util.MapViewProjection;
  */
 public class MainFrame extends javax.swing.JFrame {
 
-    private final GeoTrip geotrip;
+    private Controller controller;
+    
     private static final GraphicFactory GRAPHIC_FACTORY = AwtGraphicFactory.INSTANCE;
 
     private MapView mapView;
@@ -70,43 +56,53 @@ public class MainFrame extends javax.swing.JFrame {
     private final byte ZOOM_MAX = 20;
     private final byte ZOOM_DEFAULT = 13;
 
-    private RangeSlider sliderObtiznost;
-    private RangeSlider sliderTeren;
+    private RangeSlider sliderDifficulty;
+    private RangeSlider sliderTerrain;
 
-    private Layers layers;
-    private Layer mapLayer = null;
-    private List<Layer> cacheLayers;
-    private Layer routeLayer = null;
-    private Bitmap iconFound, iconNotFound, iconRef;
 
-    
-    public MainFrame(GeoTrip geotrip) {
-        this.geotrip = geotrip;
-        
+    public MainFrame() {
         initComponents();
-        
+ 
         setIcon(getClass().getClassLoader().getResource("icon.png"));
-                
-        hideCacheInfo();
-        
-        addMapView();
-        
-        addRangeSliders();
-        
-        loadMarkersIcons();
-        
-        cacheLayers = new LinkedList<>();
     }
     
+    public void load() {
+        addRangeSliders();
+        hideCacheInfo();
+        createMapView();
+        controller.addMaps();
+        
+        moveMapTo(controller.getRef().getCoordinates());
+    }
+    
+    public void registerController(Controller controller) {
+        this.controller = controller;
+    }
+
     private void setIcon(URL img) {
         ImageIcon icon = new ImageIcon(img);
         this.setIconImage(icon.getImage());
     }
-    
-    private void addMapView() {
+
+    private void createMapView() {
         panelRight.setBorder(new CompoundBorder(new EmptyBorder(6, 2, 2, 2), panelRight.getBorder()));
 
-        createMapView();
+        mapView = new MapView();
+        mapViewModel = mapView.getModel();
+        mapView.getMapScaleBar().setVisible(true);
+        
+        controller.setLayers(mapView.getLayerManager().getLayers());
+       
+        mapView.addComponentListener(new MapViewComponentListener(mapView, mapViewModel.mapViewDimension));
+
+        MouseEventListener mouseEventListener = new MouseEventListener(mapViewModel);
+        MapViewMouseListener mapViewMouseListener = new MapViewMouseListener(controller, mapView);
+        MapViewMouseWheelListener mapViewMouseWheelListener = new MapViewMouseWheelListener(controller);
+        mapView.addMouseMotionListener(mouseEventListener);
+        mapView.addMouseListener(mapViewMouseListener);
+        mapView.addMouseListener(mouseEventListener);
+        mapView.addMouseWheelListener(mapViewMouseWheelListener);
+
         mapView.setSize(panelMap.getWidth(), panelMap.getHeight());
         panelMap.add(mapView);
 
@@ -116,57 +112,10 @@ public class MainFrame extends javax.swing.JFrame {
         sliderZoom.setMinimum(ZOOM_MIN);
         sliderZoom.setMaximum(ZOOM_MAX);
         sliderZoom.setValue(ZOOM_DEFAULT);
-    }
-
-    private void createMapView() {
-        mapView = new MapView();
-        mapViewModel = mapView.getModel();
-        mapView.getMapScaleBar().setVisible(true);
         
-        layers = mapView.getLayerManager().getLayers();
-       
-        mapView.addComponentListener(new MapViewComponentListener(mapView, mapViewModel.mapViewDimension));
-
-        MouseEventListener mouseEventListener = new MouseEventListener(mapViewModel);
-        mapView.addMouseMotionListener(mouseEventListener);
-        mapView.addMouseListener(new java.awt.event.MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                hideCacheInfo();
-                
-                MapViewProjection mapViewProjection = new MapViewProjection(mapView);
-                
-                for (int i = layers.size() - 1; i >= 0; --i) {
-                    Layer layer = layers.get(i);
-                    Point layerPosition = mapViewProjection.toPixels(layer.getPosition());
-                    Point clickPosition = new Point(e.getX(), e.getY());
-                    if (layer.onTap(layer.getPosition(), layerPosition, clickPosition)) {
-                        geotrip.showCacheInfo(layer);
-                        break;
-                    }
-                }
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) { }
-
-            @Override
-            public void mouseReleased(MouseEvent e) { }
-
-            @Override
-            public void mouseEntered(MouseEvent e) { }
-
-            @Override
-            public void mouseExited(MouseEvent e) { }
-        });
-        mapView.addMouseListener(mouseEventListener);
-        mapView.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-            @Override
-            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-                byte zoom = (byte) (mapViewModel.mapViewPosition.getZoomLevel() - evt.getWheelRotation());
-                sliderZoom.setValue(zoom);
-            }
-        });
+        controller.setMapViewPosition(mapViewModel.mapViewPosition);
+        
+        setLookAndFeel();
     }
      
     private void addRangeSliders() {
@@ -177,62 +126,70 @@ public class MainFrame extends javax.swing.JFrame {
         labelTable.put(7, new JLabel("4"));
         labelTable.put(9, new JLabel("5"));
 
-        sliderObtiznost = new RangeSlider(1, 9, 1, 9);
-        sliderObtiznost.setPaintTicks(true);
-        sliderObtiznost.setPaintLabels(true);
-        sliderObtiznost.setMajorTickSpacing(2);
-        sliderObtiznost.setMinorTickSpacing(1);
-        sliderObtiznost.setSize(267, 40);
-        sliderObtiznost.setLocation(6, 16);
-        sliderObtiznost.setLabelTable(labelTable);
-        sliderObtiznost.setFocusable(false);
-        panelFilterDifficulty.add(sliderObtiznost);
+        sliderDifficulty = new RangeSlider(1, 9, 1, 9);
+        sliderDifficulty.setPaintTicks(true);
+        sliderDifficulty.setPaintLabels(true);
+        sliderDifficulty.setMajorTickSpacing(2);
+        sliderDifficulty.setMinorTickSpacing(1);
+        sliderDifficulty.setSize(267, 40);
+        sliderDifficulty.setLocation(6, 16);
+        sliderDifficulty.setLabelTable(labelTable);
+        sliderDifficulty.setFocusable(false);
+        panelFilterDifficulty.add(sliderDifficulty);
 
-        sliderTeren = new RangeSlider(1, 9, 1, 9);
-        sliderTeren.setPaintTicks(true);
-        sliderTeren.setPaintLabels(true);
-        sliderTeren.setMajorTickSpacing(2);
-        sliderTeren.setMinorTickSpacing(1);
-        sliderTeren.setSize(267, 40);
-        sliderTeren.setLocation(6, 16);
-        sliderTeren.setLabelTable(labelTable);
-        sliderTeren.setFocusable(false);
-        panelFilterTerrain.add(sliderTeren);
+        sliderTerrain = new RangeSlider(1, 9, 1, 9);
+        sliderTerrain.setPaintTicks(true);
+        sliderTerrain.setPaintLabels(true);
+        sliderTerrain.setMajorTickSpacing(2);
+        sliderTerrain.setMinorTickSpacing(1);
+        sliderTerrain.setSize(267, 40);
+        sliderTerrain.setLocation(6, 16);
+        sliderTerrain.setLabelTable(labelTable);
+        sliderTerrain.setFocusable(false);
+        panelFilterTerrain.add(sliderTerrain);
     }
  
-    public void moveTo(LatLong coordinates) {
+    public void moveMapTo(LatLong coordinates) {
         mapViewModel.mapViewPosition.setCenter(coordinates);
     }
     
-    public void zoomTo(BoundingBox boundingBox) {
-        moveTo(boundingBox.getCenterPoint());
+    public void zoomMapTo(BoundingBox boundingBox) {
+        moveMapTo(boundingBox.getCenterPoint());
         byte zoomLevel = LatLongUtils.zoomForBounds(mapViewModel.mapViewDimension.getDimension(), boundingBox, mapViewModel.displayModel.getTileSize());
         sliderZoom.setValue(zoomLevel);
     }
 
-    public void showCacheInfo(String name, String coordinates, CacheContainer container, int difficulty, int terrain, String id, final String link) {
-        textName.setText(name);
+    public int getZoomLevel() {
+        return sliderZoom.getValue();
+    }
+
+    public void setZoomLevel(int zoom) {
+        sliderZoom.setValue(zoom);
+    }
+
+    public void showCacheInfo(final GeoCache cache) {
+        textName.setText(cache.getName());
         textName.setCaretPosition(0);
         
-        textCoordinates.setText(coordinates);
-        textContainer.setText(container.getName());
-        textDifficulty.setText(new DecimalFormat("#.#").format((difficulty + 1) / 2.0));
-        textTerrain.setText(new DecimalFormat("#.#").format((terrain + 1) / 2.0));
+        textCoordinates.setText(cache.getCoordinatesString());
+        textContainer.setText(cache.getContainer().getName());
+        textDifficulty.setText(cache.getDifficultyString());
+        textTerrain.setText(cache.getTerrainString());
         
-        buttonLink.setText("<html><a href=\"\">" + id + "</a></html>");
+        buttonLink.setText("<html><a href=\"\">" + cache.getId() + "</a></html>");
         for (ActionListener al : buttonLink.getActionListeners())
             buttonLink.removeActionListener(al);
         buttonLink.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                openUrl(link);
+                openUrl(cache.getLink());
             }
         });
         
         panelInfo.setVisible(true);
     }
     
-    private void hideCacheInfo() {
+    public void hideCacheInfo() {
         panelInfo.setVisible(false);
     }
     
@@ -249,85 +206,16 @@ public class MainFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Odkaz se nepodařilo otevřít.", "Chyba", ERROR);
         }
     }
-
-    public void addMap(File mapFile) {
-        if (mapLayer != null)
-            layers.remove(mapLayer);
-        
-        TileRendererLayer tileRendererLayer = createTileRendererLayer(createTileCache(0), mapViewModel.mapViewPosition, true, true, mapFile);
-        mapLayer = tileRendererLayer;
-        layers.add(0, mapLayer);
+    
+    public void addMapItem(String name) {
+        MapSelectAction mapSelectAction = new MapSelectAction(controller, name);
+        menuMap.add(new JMenuItem(mapSelectAction));
     }
     
-    private TileCache createTileCache(int index) {
-        TileCache firstLevelTileCache = new InMemoryTileCache(128);
-        File cacheDirectory = new File(System.getProperty("java.io.tmpdir"), "mapsforge" + index);
-        TileCache secondLevelTileCache = new FileSystemTileCache(1024, cacheDirectory, GRAPHIC_FACTORY);
-        return new TwoLevelTileCache(firstLevelTileCache, secondLevelTileCache);
-    }
-
-    private TileRendererLayer createTileRendererLayer(TileCache tileCache, MapViewPosition mapViewPosition, boolean isTransparent, boolean renderLabels, File mapFile) {
-        TileRendererLayer tileRendererLayer = new TileRendererLayer(tileCache, new MapFile(mapFile), mapViewPosition, isTransparent, renderLabels, GRAPHIC_FACTORY);
-        tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.OSMARENDER);
-        return tileRendererLayer;
-    }
-    
-    public void addRefMarker(LatLong coordinates) {
-        Marker marker = new Marker(coordinates, iconRef, 0, -iconRef.getHeight()/2);
-        layers.add(marker);
-    }
-        
-    public Marker addCacheMarker(LatLong coordinates, boolean found) {
-        Marker marker = new Marker(coordinates, found ? iconFound : iconNotFound, 0, -iconRef.getHeight()/2) {
-            @Override
-            public boolean onTap(LatLong cacheLatLong, Point cachePosition, Point clickPosition) {
-                double dX = cachePosition.x - clickPosition.x;
-                double dY = cachePosition.y - clickPosition.y;
-                return dY < getBitmap().getHeight() && dY > 3 && Math.abs(dX) <= getBitmap().getWidth()/2;
-            }
-        };
-        layers.add(marker);
-        cacheLayers.add(marker);
-        return marker;
-    }
-    
-    public void removeCacheMarkers() {
-        for (Layer layer : cacheLayers)
-            layers.remove(layer);
-        hideCacheInfo();
-    }
-    
-    public void addRoute(PointList pl) {
-        Paint paint = GRAPHIC_FACTORY.createPaint();
-        paint.setColor(org.mapsforge.core.graphics.Color.BLACK);
-        paint.setStrokeWidth(5);
-        paint.setStyle(Style.STROKE);
-    
-        Polyline polyline = new Polyline(paint, GRAPHIC_FACTORY);
-        
-        for (int i = 0; i < pl.size(); i++)
-            polyline.getLatLongs().add(new LatLong(pl.getLat(i), pl.getLon(i)));
-        
-        layers.add(1, polyline);
-        routeLayer = polyline;
-    }
-
-    public void removeRoute() {
-        if (routeLayer != null)
-            layers.remove(routeLayer);
-        routeLayer = null;
-    }
-    
-    private void loadMarkersIcons() {
-        try (InputStream iconFoundIS = getClass().getClassLoader().getResourceAsStream("markers/found.png");
-                InputStream iconNotFoundIS = getClass().getClassLoader().getResourceAsStream("markers/notfound.png");
-                InputStream iconRefIS = getClass().getClassLoader().getResourceAsStream("markers/ref.png");) {
-            iconFound = MainFrame.GRAPHIC_FACTORY.createResourceBitmap(iconFoundIS, 0);
-            iconNotFound = MainFrame.GRAPHIC_FACTORY.createResourceBitmap(iconNotFoundIS, 0);
-            iconRef = MainFrame.GRAPHIC_FACTORY.createResourceBitmap(iconRefIS, 0);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } 
+    private void setLookAndFeel() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) { }
     }
     
     /**
@@ -394,7 +282,9 @@ public class MainFrame extends javax.swing.JFrame {
         menu = new javax.swing.JMenuBar();
         menuFile = new javax.swing.JMenu();
         menuExport = new javax.swing.JMenuItem();
-        menuSettings = new javax.swing.JMenu();
+        menuMap = new javax.swing.JMenu();
+        menuImportMap = new javax.swing.JMenuItem();
+        separator = new javax.swing.JPopupMenu.Separator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("GeoTrip");
@@ -889,14 +779,14 @@ public class MainFrame extends javax.swing.JFrame {
 
         menu.add(menuFile);
 
-        menuSettings.setActionCommand("Settings");
-        menuSettings.setLabel(bundle.getString("menuSettigns")); // NOI18N
-        menuSettings.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                menuSettingsMouseClicked(evt);
-            }
-        });
-        menu.add(menuSettings);
+        menuMap.setText("Mapa");
+        menuMap.setActionCommand("Settings");
+
+        menuImportMap.setText("Importovat mapu");
+        menuMap.add(menuImportMap);
+        menuMap.add(separator);
+
+        menu.add(menuMap);
 
         setJMenuBar(menu);
 
@@ -925,9 +815,8 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void componentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_componentResized
-        if (mapView != null) {
+        if (mapView != null) 
             mapView.setSize(panelMap.getWidth(), panelMap.getHeight());
-        }
     }//GEN-LAST:event_componentResized
 
     private void sliderZoomStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderZoomStateChanged
@@ -938,7 +827,6 @@ public class MainFrame extends javax.swing.JFrame {
         int distance = Integer.parseInt(fieldDelka.getText());
         
         String vehicle = "";
-        
         switch(comboRouting.getSelectedItem().toString()) {
             case "chůze":
                 vehicle = "foot";
@@ -964,23 +852,16 @@ public class MainFrame extends javax.swing.JFrame {
         if (checkOther.isSelected())
             container |= CacheContainer.OTHER.getValue();
 
-        geotrip.filter(distance, vehicle, radioAll.isSelected(), container, sliderObtiznost.getLowValue(), sliderObtiznost.getHighValue(), sliderTeren.getLowValue(), sliderTeren.getHighValue());
+        controller.planTrip(distance, vehicle, radioAll.isSelected(), container, sliderDifficulty.getLowValue(), sliderDifficulty.getHighValue(), sliderTerrain.getLowValue(), sliderTerrain.getHighValue());
     }//GEN-LAST:event_buttonPlanActionPerformed
 
     private void buttonZoomPlusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonZoomPlusActionPerformed
-        byte zoomLevel = mapView.getModel().mapViewPosition.getZoomLevel();
-        sliderZoom.setValue(zoomLevel + 1);
+        sliderZoom.setValue(getZoomLevel() + 1);
     }//GEN-LAST:event_buttonZoomPlusActionPerformed
 
     private void buttonZoomMinusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonZoomMinusActionPerformed
-        byte zoomLevel = mapView.getModel().mapViewPosition.getZoomLevel();
-        sliderZoom.setValue(zoomLevel - 1);
+        sliderZoom.setValue(getZoomLevel() - 1);
     }//GEN-LAST:event_buttonZoomMinusActionPerformed
-
-    private void menuSettingsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuSettingsMouseClicked
-        SettingsDialog settingsDialog = new SettingsDialog(this, true, geotrip);
-        settingsDialog.setVisible(true);
-    }//GEN-LAST:event_menuSettingsMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonLink;
@@ -1007,7 +888,8 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuBar menu;
     private javax.swing.JMenuItem menuExport;
     private javax.swing.JMenu menuFile;
-    private javax.swing.JMenu menuSettings;
+    private javax.swing.JMenuItem menuImportMap;
+    private javax.swing.JMenu menuMap;
     private javax.swing.JPanel panelFilter;
     private javax.swing.JPanel panelFilterContainer;
     private javax.swing.JPanel panelFilterDifficulty;
@@ -1033,6 +915,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JRadioButton radioTerrainDifficult;
     private javax.swing.JRadioButton radioTerrainIgnore;
     private javax.swing.JRadioButton radioTerrainLight;
+    private javax.swing.JPopupMenu.Separator separator;
     private javax.swing.JSlider sliderZoom;
     private javax.swing.JTextField textContainer;
     private javax.swing.JTextField textCoordinates;
