@@ -5,7 +5,7 @@
  */
 package cz.cvut.fit.geotrip.view;
 
-import cz.cvut.fit.geotrip.controller.Controller;
+import cz.cvut.fit.geotrip.controller.MainController;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import org.mapsforge.map.layer.Layers;
@@ -19,7 +19,7 @@ public class MapViewMouseListener extends AbstractListener implements MouseListe
 
     private final MapView mapView;
     
-    public MapViewMouseListener(Controller controller, MapView mapView) {
+    public MapViewMouseListener(MainController controller, MapView mapView) {
         super(controller);
         this.mapView = mapView;
     }

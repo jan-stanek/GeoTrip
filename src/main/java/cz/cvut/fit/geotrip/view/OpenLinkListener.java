@@ -6,22 +6,25 @@
 package cz.cvut.fit.geotrip.view;
 
 import cz.cvut.fit.geotrip.controller.MainController;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  *
  * @author jan
  */
-public class MapViewMouseWheelListener extends AbstractListener implements MouseWheelListener {
+public class OpenLinkListener extends AbstractListener implements ActionListener {
 
-    public MapViewMouseWheelListener(MainController controller) {
+    String link;
+    
+    public OpenLinkListener(MainController controller, String link) {
         super(controller);
+        this.link = link;
     }
 
     @Override
-    public void mouseWheelMoved(MouseWheelEvent e) {
-        controller.changeZoom(e.getWheelRotation());
+    public void actionPerformed(ActionEvent e) {
+        controller.openUrl(link);
     }
-
+    
 }

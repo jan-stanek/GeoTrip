@@ -58,7 +58,7 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme;
  *
  * @author jan
  */
-public class Model {
+public class MainModel {
 
     private CacheDAO cacheDAO;
     private GpxDAO gpxDAO;
@@ -83,18 +83,18 @@ public class Model {
     private final GeoPoint refPoint;
 
     
-    public Model() {
-        loadSettings();
-
+    public MainModel() {
         refPoint = DAOFactory.getDAOFactory().getGpxDAO().getRef();
         cacheDAO = DAOFactory.getDAOFactory().getCacheDAO();
         
         layersCache = new HashMap<>();
         cacheLayers = new LinkedList<>();
+
+        loadSettings();
+        loadMarkersIcons();
     }
 
     public void load() {
-        loadMarkersIcons();
         loadMap();
         loadCaches();
         loadRef();
@@ -305,7 +305,7 @@ public class Model {
             resp = gh.route(req);
             pl.add(filteredList.get(i - 1).getLat(), filteredList.get(i - 1).getLon());
             pl.add(resp.getPoints());
-            boundingBox = boundingBox.extend(new BoundingBox(filteredList.get(i).getLat(), filteredList.get(i).getLon(), filteredList.get(i).getLat(), filteredList.get(i).getLon()));
+            boundingBox = boundingBox.extend(new BoundingBox(filteredList.get(i-1).getLat(), filteredList.get(i-1).getLon(), filteredList.get(i-1).getLat(), filteredList.get(i-1).getLon()));
         }
 
         req = new GHRequest(filteredList.get(i - 1).getLat(), filteredList.get(i - 1).getLon(), refPoint.getLat(), refPoint.getLon());

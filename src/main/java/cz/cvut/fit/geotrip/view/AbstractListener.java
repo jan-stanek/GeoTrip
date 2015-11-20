@@ -1,6 +1,6 @@
 package cz.cvut.fit.geotrip.view;
 
-import cz.cvut.fit.geotrip.controller.Controller;
+import cz.cvut.fit.geotrip.controller.MainController;
 
 /**
  *
@@ -8,9 +8,9 @@ import cz.cvut.fit.geotrip.controller.Controller;
  */
 public abstract class AbstractListener {
     
-    protected final Controller controller;
+    protected final MainController controller;
 
-    public AbstractListener(Controller controller) {
+    public AbstractListener(MainController controller) {
         this.controller = controller;
     }
     

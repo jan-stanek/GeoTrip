@@ -1,9 +1,8 @@
 package cz.cvut.fit.geotrip;
 
-import cz.cvut.fit.geotrip.controller.Controller;
-import cz.cvut.fit.geotrip.model.Model;
+import cz.cvut.fit.geotrip.controller.MainController;
+import cz.cvut.fit.geotrip.model.MainModel;
 import cz.cvut.fit.geotrip.view.MainFrame;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -21,16 +20,12 @@ public class GeoTrip {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) { }
        
-        Model model = new Model();
-        
-        MainFrame mainFrame = new MainFrame();
-        
-        Controller controller = new Controller(model, mainFrame);
+        MainModel model = new MainModel();
+        MainFrame mainFrame = new MainFrame(model);
+        MainController controller = new MainController(model, mainFrame);
         
         mainFrame.registerController(controller);
         mainFrame.load();
-        
-        model.load();
         
         mainFrame.setVisible(true);
     }

@@ -6,25 +6,16 @@
 package cz.cvut.fit.geotrip.view;
 
 import com.jidesoft.swing.RangeSlider;
-import cz.cvut.fit.geotrip.controller.Controller;
+import cz.cvut.fit.geotrip.controller.MainController;
 import cz.cvut.fit.geotrip.controller.MapSelectAction;
-import cz.cvut.fit.geotrip.data.CacheContainer;
 import cz.cvut.fit.geotrip.data.GeoCache;
-import java.awt.Desktop;
-import java.awt.event.ActionEvent;
+import cz.cvut.fit.geotrip.model.MainModel;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Hashtable;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.CompoundBorder;
@@ -45,7 +36,8 @@ import org.mapsforge.map.swing.view.MapView;
  */
 public class MainFrame extends javax.swing.JFrame {
 
-    private Controller controller;
+    private final MainModel model;
+    private MainController controller;
     
     private static final GraphicFactory GRAPHIC_FACTORY = AwtGraphicFactory.INSTANCE;
 
@@ -60,22 +52,23 @@ public class MainFrame extends javax.swing.JFrame {
     private RangeSlider sliderTerrain;
 
 
-    public MainFrame() {
-        initComponents();
- 
-        setIcon(getClass().getClassLoader().getResource("icon.png"));
+    public MainFrame(MainModel model) {
+        this.model = model;
     }
     
     public void load() {
-        addRangeSliders();
+        initComponents();
+        createRangeSliders();
         hideCacheInfo();
         createMapView();
-        controller.addMaps();
         
-        moveMapTo(controller.getRef().getCoordinates());
+        setIcon(getClass().getClassLoader().getResource("icon.png"));
+
+        controller.addMapsToMenu(); //TODO observer
+        setMapPosition(model.getRefPoint().getCoordinates());    //TODO observer
     }
     
-    public void registerController(Controller controller) {
+    public void registerController(MainController controller) {
         this.controller = controller;
     }
 
@@ -91,34 +84,35 @@ public class MainFrame extends javax.swing.JFrame {
         mapViewModel = mapView.getModel();
         mapView.getMapScaleBar().setVisible(true);
         
-        controller.setLayers(mapView.getLayerManager().getLayers());
+        model.setLayers(mapView.getLayerManager().getLayers());
        
-        mapView.addComponentListener(new MapViewComponentListener(mapView, mapViewModel.mapViewDimension));
-
         MouseEventListener mouseEventListener = new MouseEventListener(mapViewModel);
         MapViewMouseListener mapViewMouseListener = new MapViewMouseListener(controller, mapView);
         MapViewMouseWheelListener mapViewMouseWheelListener = new MapViewMouseWheelListener(controller);
+        mapView.addComponentListener(new MapViewComponentListener(mapView, mapViewModel.mapViewDimension));
         mapView.addMouseMotionListener(mouseEventListener);
         mapView.addMouseListener(mapViewMouseListener);
         mapView.addMouseListener(mouseEventListener);
         mapView.addMouseWheelListener(mapViewMouseWheelListener);
 
         mapView.setSize(panelMap.getWidth(), panelMap.getHeight());
-        panelMap.add(mapView);
 
         mapViewModel.mapViewPosition.setZoomLevelMin(ZOOM_MIN);
         mapViewModel.mapViewPosition.setZoomLevelMax(ZOOM_MAX);
 
+        panelMap.add(mapView);
+        
         sliderZoom.setMinimum(ZOOM_MIN);
         sliderZoom.setMaximum(ZOOM_MAX);
         sliderZoom.setValue(ZOOM_DEFAULT);
         
-        controller.setMapViewPosition(mapViewModel.mapViewPosition);
+        model.setMapViewPosition(mapViewModel.mapViewPosition);
+        model.load();
         
         setLookAndFeel();
     }
      
-    private void addRangeSliders() {
+    private void createRangeSliders() {
         Hashtable labelTable = new Hashtable();
         labelTable.put(1, new JLabel("1"));
         labelTable.put(3, new JLabel("2"));
@@ -149,25 +143,26 @@ public class MainFrame extends javax.swing.JFrame {
         panelFilterTerrain.add(sliderTerrain);
     }
  
-    public void moveMapTo(LatLong coordinates) {
+    public void zoomTo(BoundingBox boundingBox) {
+        setMapPosition(boundingBox.getCenterPoint());
+        setZoomLevel(LatLongUtils.zoomForBounds(mapViewModel.mapViewDimension.getDimension(), 
+                boundingBox, mapViewModel.displayModel.getTileSize()));
+    }
+
+    public void setMapPosition(LatLong coordinates) {
         mapViewModel.mapViewPosition.setCenter(coordinates);
     }
     
-    public void zoomMapTo(BoundingBox boundingBox) {
-        moveMapTo(boundingBox.getCenterPoint());
-        byte zoomLevel = LatLongUtils.zoomForBounds(mapViewModel.mapViewDimension.getDimension(), boundingBox, mapViewModel.displayModel.getTileSize());
-        sliderZoom.setValue(zoomLevel);
-    }
-
     public int getZoomLevel() {
-        return sliderZoom.getValue();
+        return mapViewModel.mapViewPosition.getZoomLevel();
     }
 
     public void setZoomLevel(int zoom) {
+        mapViewModel.mapViewPosition.setZoomLevel((byte)zoom);
         sliderZoom.setValue(zoom);
     }
 
-    public void showCacheInfo(final GeoCache cache) {
+    public void showCacheInfo(GeoCache cache) {
         textName.setText(cache.getName());
         textName.setCaretPosition(0);
         
@@ -179,32 +174,13 @@ public class MainFrame extends javax.swing.JFrame {
         buttonLink.setText("<html><a href=\"\">" + cache.getId() + "</a></html>");
         for (ActionListener al : buttonLink.getActionListeners())
             buttonLink.removeActionListener(al);
-        buttonLink.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openUrl(cache.getLink());
-            }
-        });
+        buttonLink.addActionListener(new OpenLinkListener(controller, cache.getLink()));
         
         panelInfo.setVisible(true);
     }
     
     public void hideCacheInfo() {
         panelInfo.setVisible(false);
-    }
-    
-    private void openUrl(String link) {
-        try {
-            URL url = new URL(link);
-            URI uri = url.toURI();
-            Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-            if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
-                desktop.browse(uri);
-            else
-                JOptionPane.showMessageDialog(this, "Odkaz se nepodařilo otevřít.", "Chyba prohlížeče", ERROR);
-        } catch (URISyntaxException | IOException ex) {
-            JOptionPane.showMessageDialog(this, "Odkaz se nepodařilo otevřít.", "Chyba", ERROR);
-        }
     }
     
     public void addMapItem(String name) {
@@ -820,47 +796,21 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_componentResized
 
     private void sliderZoomStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderZoomStateChanged
-        mapView.getModel().mapViewPosition.setZoomLevel((byte) sliderZoom.getValue());
+        controller.setZoom(sliderZoom.getValue());
     }//GEN-LAST:event_sliderZoomStateChanged
 
     private void buttonPlanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonPlanActionPerformed
-        int distance = Integer.parseInt(fieldDelka.getText());
-        
-        String vehicle = "";
-        switch(comboRouting.getSelectedItem().toString()) {
-            case "chůze":
-                vehicle = "foot";
-                break;
-            case "kolo":
-                vehicle = "bike";
-                break;
-            case "auto":
-                vehicle = "car";
-                break;
-        }
-                
-        int container = 0;
-
-        if (checkMicro.isSelected())
-            container |= CacheContainer.MICRO.getValue();
-        if (checkSmall.isSelected())
-            container |= CacheContainer.SMALL.getValue();
-        if (checkRegular.isSelected())
-            container |= CacheContainer.REGULAR.getValue();
-        if (checkLarge.isSelected())
-            container |= CacheContainer.LARGE.getValue();
-        if (checkOther.isSelected())
-            container |= CacheContainer.OTHER.getValue();
-
-        controller.planTrip(distance, vehicle, radioAll.isSelected(), container, sliderDifficulty.getLowValue(), sliderDifficulty.getHighValue(), sliderTerrain.getLowValue(), sliderTerrain.getHighValue());
+        controller.planTrip(fieldDelka.getText(), comboRouting.getSelectedItem().toString(), radioAll.isSelected(),
+                checkMicro.isSelected(), checkSmall.isSelected(), checkRegular.isSelected(), checkLarge.isSelected(), checkOther.isSelected(),
+                sliderDifficulty.getLowValue(), sliderDifficulty.getHighValue(), sliderTerrain.getLowValue(), sliderTerrain.getHighValue());
     }//GEN-LAST:event_buttonPlanActionPerformed
 
     private void buttonZoomPlusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonZoomPlusActionPerformed
-        sliderZoom.setValue(getZoomLevel() + 1);
+        controller.zoomIn();
     }//GEN-LAST:event_buttonZoomPlusActionPerformed
 
     private void buttonZoomMinusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonZoomMinusActionPerformed
-        sliderZoom.setValue(getZoomLevel() - 1);
+        controller.zoomOut();
     }//GEN-LAST:event_buttonZoomMinusActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
