@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cvut.fit.geotrip.model;
 
 import com.google.common.base.Predicate;
@@ -19,17 +14,24 @@ import cz.cvut.fit.geotrip.data.GeoPoint;
 import cz.cvut.fit.geotrip.data.dao.CacheDAO;
 import cz.cvut.fit.geotrip.data.dao.DAOFactory;
 import cz.cvut.fit.geotrip.data.dao.GpxDAO;
+import cz.cvut.fit.geotrip.view.CenterMapObserver;
 import cz.cvut.fit.geotrip.view.ErrorDialogObserver;
 import cz.cvut.fit.geotrip.view.InformationDialogObserver;
+import cz.cvut.fit.geotrip.view.InstalledMapsObserver;
+import cz.cvut.fit.geotrip.view.MapImportDialogObserver;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 import org.mapsforge.core.graphics.Bitmap;
@@ -60,7 +62,12 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme;
  */
 public class MainModel {
 
-    private CacheDAO cacheDAO;
+    private final String MAPS_DIRECTORY = "data/maps/";
+    private final String GH_DIRECTORY = "data/gh/";
+    private final String MAP_EXTENSION = ".map";
+    private final String OSM_EXTENSION = ".osm.pbf";
+    
+    private final CacheDAO cacheDAO;
     private GpxDAO gpxDAO;
     
     private static final GraphicFactory GRAPHIC_FACTORY = AwtGraphicFactory.INSTANCE;
@@ -74,6 +81,7 @@ public class MainModel {
     private Layer mapLayer = null;
     private Layer routeLayer = null;
     private final List<Layer> cacheLayers;
+    private final List<String> installedMaps;
     private final Map<Layer, GeoCache> layersCache;
     
     private Bitmap iconFound, iconNotFound, iconRef;
@@ -81,23 +89,51 @@ public class MainModel {
     private MapViewPosition mapViewPosition;
     
     private final GeoPoint refPoint;
+    
+    InformationDialogObserver informationDialogObserver;
+    ErrorDialogObserver errorDialogObserver;
+    InstalledMapsObserver installedMapsObserver;
+    CenterMapObserver centerMapObserver;
+    MapImportDialogObserver mapImportDialogObserver;
 
     
     public MainModel() {
         refPoint = DAOFactory.getDAOFactory().getGpxDAO().getRef();
         cacheDAO = DAOFactory.getDAOFactory().getCacheDAO();
-        
+
         layersCache = new HashMap<>();
         cacheLayers = new LinkedList<>();
+        installedMaps = new LinkedList<>();
 
         loadSettings();
         loadMarkersIcons();
     }
 
     public void load() {
+        findInstalledMaps();
         loadMap();
         loadCaches();
         loadRef();
+    }
+
+    public void registerInformationDialogObserver(InformationDialogObserver informationDialogObserver) {
+        this.informationDialogObserver = informationDialogObserver;
+    }
+    
+    public void registerErrorDialogObserver(ErrorDialogObserver errorDialogObserver) {
+        this.errorDialogObserver = errorDialogObserver;
+    }
+
+    public void registerInstalledMapsObserver(InstalledMapsObserver installedMapsObserver) {
+        this.installedMapsObserver = installedMapsObserver;
+    }
+
+    public void registerCenterMapObserver(CenterMapObserver centerMapObserver) {
+        this.centerMapObserver = centerMapObserver;
+    }    
+    
+    public void registerMapImportDialogObserver(MapImportDialogObserver mapImportDialogObserver) {
+        this.mapImportDialogObserver = mapImportDialogObserver;
     }
     
     private void loadSettings() {
@@ -112,7 +148,6 @@ public class MainModel {
             iconNotFound = GRAPHIC_FACTORY.createResourceBitmap(iconNotFoundIS, 0);
             iconRef = GRAPHIC_FACTORY.createResourceBitmap(iconRefIS, 0);
         } catch (IOException | IllegalArgumentException ex) {
-            ErrorDialogObserver errorDialogObserver = new ErrorDialogObserver();
             errorDialogObserver.update("Chybejici ikona", "");
         } 
     }
@@ -129,6 +164,10 @@ public class MainModel {
         this.mapViewPosition = mapViewPosition;
     }
     
+    public String getSelectedMap() {
+        return prefs.get("map", null);
+    }
+    
     public void changeMap(String mapName) {
         prefs.put("map", mapName);
         loadMap();
@@ -140,15 +179,13 @@ public class MainModel {
         mapName = prefs.get("map", null);
 
         if (mapName == null) {
-            InformationDialogObserver informationDialogObserver = new InformationDialogObserver();
             informationDialogObserver.update("Chybejici mapa", "Pridejte mapu do slozky data/maps a vyberte ji v nastaveni.");
             return;
         }
 
-        File mapFile = new File("data/maps/" + mapName + ".map");
-        File osmFile = new File("data/maps/" + mapName + ".osm.pbf");
+        File mapFile = new File(MAPS_DIRECTORY + mapName + MAP_EXTENSION);
+        File osmFile = new File(MAPS_DIRECTORY + mapName + OSM_EXTENSION);
         if (!mapFile.exists() || !osmFile.exists()) {
-            ErrorDialogObserver errorDialogObserver = new ErrorDialogObserver();
             errorDialogObserver.update("Chybejici mapa", "Soubor s mapou nenalezen.");
             return;
         }
@@ -180,6 +217,7 @@ public class MainModel {
     
     public void loadRef() {
         addRefMarker(refPoint.getCoordinates());
+        centerMapObserver.update(refPoint.getCoordinates());
     }
     
     public void addRefMarker(LatLong coordinates) {
@@ -241,6 +279,88 @@ public class MainModel {
         routeLayer = null;
     }
     
+    public void importMap(final File mapFile, final File osmFile) {
+        new Thread() {
+            @Override
+            public void run() {
+                String mapName = osmFile.getName().replaceFirst(OSM_EXTENSION, "");
+                
+                File mapFileDest = new File(MAPS_DIRECTORY + mapName + MAP_EXTENSION);
+                File osmFileDest = new File(MAPS_DIRECTORY + mapName + OSM_EXTENSION);
+                
+                try {
+                    Files.copy(mapFile.toPath(), mapFileDest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(osmFile.toPath(), osmFileDest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException ex) {
+                    Logger.getLogger(MainModel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                Thread car = initGraphHopperMap(mapName, "car");
+                Thread bike = initGraphHopperMap(mapName, "bike");
+                Thread foot = initGraphHopperMap(mapName, "foot");
+                car.start();
+                bike.start();
+                foot.start();
+                
+                try {
+                    car.join();
+                    bike.join();
+                    foot.join();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(MainModel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                mapImportDialogObserver.update();
+                findInstalledMaps();
+            }
+        }.start();
+        
+        
+    }
+    
+    private Thread initGraphHopperMap(final String mapName, final String vehicle) {
+        return new Thread() {
+            @Override
+            public void run() {
+                GraphHopper gh = new GraphHopper().setGraphHopperLocation(GH_DIRECTORY + mapName + "/" + vehicle).setEncodingManager(new EncodingManager(vehicle)).setOSMFile(new File(MAPS_DIRECTORY + mapName + OSM_EXTENSION).getAbsolutePath()).forDesktop();
+                gh.importOrLoad();
+            }
+        };
+    }
+    
+    public void findInstalledMaps() {
+        installedMaps.clear();
+        
+        File dir = new File(MAPS_DIRECTORY);
+        
+        List<String> tmp = new LinkedList<>();
+        
+        File[] mapArray = dir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith(MAP_EXTENSION);
+            }
+        }); 
+        
+        File[] osmArray = dir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith(OSM_EXTENSION);
+            }
+        });
+        
+        for (File f : mapArray) 
+            tmp.add(f.getName().split(Pattern.quote("."))[0]);
+        
+        for (File f : osmArray) {
+            String name = f.getName().split(Pattern.quote("."))[0];
+            if (tmp.contains(name)) 
+                installedMaps.add(name);
+        }
+        
+        installedMapsObserver.update(installedMaps);
+    }
+    
     public void filter(int distance, String vehicle, final boolean found, final int container,
             final int difficultyLow, final int difficultyHigh, final int terrainLow, final int terrainHigh) {
         removeCacheMarkers();
@@ -280,7 +400,7 @@ public class MainModel {
         loadCaches(filteredList);
 
         GraphHopper gh = new GraphHopper().setEncodingManager(new EncodingManager(vehicle)).forDesktop();
-        gh.load("data/gh/" + mapName + "/" + vehicle);
+        gh.load(GH_DIRECTORY + mapName + "/" + vehicle);
 
         PointList pl = new PointList();
         GHRequest req;
@@ -305,7 +425,7 @@ public class MainModel {
             resp = gh.route(req);
             pl.add(filteredList.get(i - 1).getLat(), filteredList.get(i - 1).getLon());
             pl.add(resp.getPoints());
-            boundingBox = boundingBox.extend(new BoundingBox(filteredList.get(i-1).getLat(), filteredList.get(i-1).getLon(), filteredList.get(i-1).getLat(), filteredList.get(i-1).getLon()));
+            boundingBox = boundingBox.extend(new BoundingBox(filteredList.get(i-1).getLat(), filteredList.get(i-1).getLon(), filteredList.get(i-1).getLat(), filteredList.get(i-1 ).getLon()));
         }
 
         req = new GHRequest(filteredList.get(i - 1).getLat(), filteredList.get(i - 1).getLon(), refPoint.getLat(), refPoint.getLon());
@@ -332,37 +452,5 @@ public class MainModel {
     
     public BoundingBox getBoundingBox() {
         return boundingBox;
-    }
-
-    public List<String> getMapList() {
-        File dir = new File("data/maps");
-        
-        List<String> res = new LinkedList<>();
-        List<String> tmp = new LinkedList<>();
-        
-        File[] mapArray = dir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.toLowerCase().endsWith(".map");
-            }
-        }); 
-        
-        File[] osmArray = dir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.toLowerCase().endsWith(".osm.pbf");
-            }
-        });
-        
-        for (File f : mapArray) 
-            tmp.add(f.getName().split(Pattern.quote("."))[0]);
-        
-        for (File f : osmArray) {
-            String name = f.getName().split(Pattern.quote("."))[0];
-            if (tmp.contains(name)) 
-                res.add(name);
-        }
-        
-        return res;
     }
 }

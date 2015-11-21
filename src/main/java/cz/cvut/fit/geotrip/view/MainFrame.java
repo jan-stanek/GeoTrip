@@ -7,15 +7,19 @@ package cz.cvut.fit.geotrip.view;
 
 import com.jidesoft.swing.RangeSlider;
 import cz.cvut.fit.geotrip.controller.MainController;
+import cz.cvut.fit.geotrip.controller.MapImportAction;
 import cz.cvut.fit.geotrip.controller.MapSelectAction;
 import cz.cvut.fit.geotrip.data.GeoCache;
 import cz.cvut.fit.geotrip.model.MainModel;
 import java.awt.event.ActionListener;
 import java.net.URL;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.CompoundBorder;
@@ -51,21 +55,31 @@ public class MainFrame extends javax.swing.JFrame {
     private RangeSlider sliderDifficulty;
     private RangeSlider sliderTerrain;
 
+    private final MapImportAction mapImportAction;
+    private final List<JRadioButtonMenuItem> mapMenuItems;
 
     public MainFrame(MainModel model) {
+        initComponents();
+        createRangeSliders();
+        
         this.model = model;
+        
+        mapImportAction = new MapImportAction("Importovat mapu", this, model);
+        menuImportMap.setAction(mapImportAction);
+        
+        mapMenuItems = new LinkedList<>();
+        
+        model.registerInstalledMapsObserver(new InstalledMapsObserver(this));
+        model.registerCenterMapObserver(new CenterMapObserver(this));
+        model.registerInformationDialogObserver(new InformationDialogObserver());
+        model.registerErrorDialogObserver(new ErrorDialogObserver());
     }
     
     public void load() {
-        initComponents();
-        createRangeSliders();
         hideCacheInfo();
         createMapView();
         
         setIcon(getClass().getClassLoader().getResource("icon.png"));
-
-        controller.addMapsToMenu(); //TODO observer
-        setMapPosition(model.getRefPoint().getCoordinates());    //TODO observer
     }
     
     public void registerController(MainController controller) {
@@ -108,8 +122,6 @@ public class MainFrame extends javax.swing.JFrame {
         
         model.setMapViewPosition(mapViewModel.mapViewPosition);
         model.load();
-        
-        setLookAndFeel();
     }
      
     private void createRangeSliders() {
@@ -183,12 +195,24 @@ public class MainFrame extends javax.swing.JFrame {
         panelInfo.setVisible(false);
     }
     
-    public void addMapItem(String name) {
-        MapSelectAction mapSelectAction = new MapSelectAction(controller, name);
-        menuMap.add(new JMenuItem(mapSelectAction));
+    public void refreshMapList(List<String> maps) {
+        for (JRadioButtonMenuItem item : mapMenuItems)
+            menuMap.remove(item);
+        mapMenuItems.clear();
+        
+        ButtonGroup buttonGroup = new ButtonGroup();
+        for (String map : maps) {
+            MapSelectAction mapSelectAction = new MapSelectAction(map, controller);
+            JRadioButtonMenuItem menuItem = new JRadioButtonMenuItem(mapSelectAction);
+            if (map.equals(model.getSelectedMap()))
+                menuItem.setSelected(true);
+            menuMap.add(menuItem);
+            buttonGroup.add(menuItem);
+            mapMenuItems.add(menuItem);
+        }
     }
     
-    private void setLookAndFeel() {
+    public void setLookAndFeel() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) { }

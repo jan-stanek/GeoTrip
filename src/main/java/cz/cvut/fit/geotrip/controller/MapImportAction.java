@@ -1,10 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cvut.fit.geotrip.controller;
 
+import cz.cvut.fit.geotrip.model.MainModel;
+import cz.cvut.fit.geotrip.view.MainFrame;
+import cz.cvut.fit.geotrip.view.MapImportDialog;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
@@ -14,9 +12,21 @@ import javax.swing.AbstractAction;
  */
 public class MapImportAction extends AbstractAction {
 
+    MainModel model;
+    MainFrame view;
+    
+    public MapImportAction(String name, MainFrame view, MainModel model) {
+        super(name);
+        this.view = view;
+        this.model = model; 
+    }
+    
     @Override
     public void actionPerformed(ActionEvent e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        MapImportDialog mapImportDialog = new MapImportDialog(view, true, model);
+        MapImportController mapImportController = new MapImportController(model, mapImportDialog);
+        mapImportDialog.registerController(mapImportController);
+        mapImportDialog.setVisible(true);  
     }
     
 }

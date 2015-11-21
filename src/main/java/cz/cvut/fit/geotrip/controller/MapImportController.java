@@ -1,12 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cvut.fit.geotrip.controller;
 
 import cz.cvut.fit.geotrip.model.MainModel;
-import cz.cvut.fit.geotrip.view.MainFrame;
 import cz.cvut.fit.geotrip.view.MapImportDialog;
 import java.io.File;
 
@@ -18,12 +12,41 @@ public class MapImportController {
     private final MainModel model;
     private final MapImportDialog view;
 
+
     public MapImportController(MainModel model, MapImportDialog view) {
         this.model = model;
         this.view = view;
     }
     
-    public void importMap(File map, File route) {
-        // disable buttons
+    public void importMap(File  mapFile, File osmFile) {
+        view.disableButtons();
+        view.showProgressBar();
+        model.importMap(mapFile, osmFile);
+    }
+    
+    public void selectMap() {
+        view.showMapFileChooser();
+    }
+    
+    public void selectOsm() {
+        view.showOsmFileChooser();
+    }
+    
+    public void setChosenMap(File mapFile) {
+        if (mapFile != null) {
+            view.setChosenMapName(mapFile.getName());
+            view.setCurrentDirectory(mapFile.getParentFile());
+        }
+    }
+    
+    public void setChosenOsm(File osmFile) {
+        if (osmFile != null) {
+            view.setChosenOsmName(osmFile.getName());
+            view.setCurrentDirectory(osmFile.getParentFile());
+        }
+    }
+    
+    public void closeDialog() {
+        view.dispose();
     }
 }

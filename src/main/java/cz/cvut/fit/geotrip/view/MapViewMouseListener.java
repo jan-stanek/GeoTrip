@@ -1,14 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cvut.fit.geotrip.view;
 
 import cz.cvut.fit.geotrip.controller.MainController;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import org.mapsforge.map.layer.Layers;
 import org.mapsforge.map.swing.view.MapView;
 
 /**
@@ -26,7 +20,7 @@ public class MapViewMouseListener extends AbstractListener implements MouseListe
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        controller.getSelectedLayer(mapView, controller.getLayers(), e.getX(), e.getY());
+        controller.getSelectedLayer(mapView, controller.getModel().getLayers(), e.getX(), e.getY());
     }
 
     @Override

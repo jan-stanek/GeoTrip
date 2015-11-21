@@ -1,7 +1,5 @@
 package cz.cvut.fit.geotrip.controller;
 
-import cz.cvut.fit.geotrip.model.MainModel;
-import cz.cvut.fit.geotrip.view.MainFrame;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
@@ -11,10 +9,10 @@ import javax.swing.AbstractAction;
  */
 public class MapSelectAction extends AbstractAction {
     
-    private MainController controller;
-    private String mapName;
+    private final MainController controller;
+    private final String mapName;
     
-    public MapSelectAction(MainController controller, String mapName) {
+    public MapSelectAction(String mapName, MainController controller) {
         super(mapName);
         this.controller = controller;
         this.mapName = mapName;

@@ -5,75 +5,94 @@
  */
 package cz.cvut.fit.geotrip.view;
 
-import com.graphhopper.GraphHopper;
-import com.graphhopper.routing.util.EncodingManager;
 import cz.cvut.fit.geotrip.controller.MapImportController;
 import cz.cvut.fit.geotrip.model.MainModel;
+import java.awt.Frame;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
  * @author jan
  */
-public class MapImportDialog extends javax.swing.JDialog {
+public final class MapImportDialog extends javax.swing.JDialog {
 
     MainModel model;
     MapImportController controller;
     
     /**
      * Creates new form MapImportDialog
+     * @param parent
+     * @param modal
+     * @param model
      */
-    public MapImportDialog(java.awt.Frame parent, boolean modal, MainModel model) {
+    public MapImportDialog(Frame parent, boolean modal, MainModel model) {
         super(parent, modal);
         
         this.model = model;
+        model.registerMapImportDialogObserver(new MapImportDialogObserver(this));
         
         initComponents();
         
         this.setLocation(parent.getLocation().x + parent.getSize().width / 2 - this.getSize().width / 2, 
                 parent.getLocation().y + parent.getSize().height / 2 - this.getSize().height / 2);
+        
+        hideProgressBar();
+        
+        fileChooserMap.addChoosableFileFilter(new FileNameExtensionFilter("Map soubor", "map"));
+        fileChooserOsm.addChoosableFileFilter(new FileNameExtensionFilter("Osm soubor", "pbf"));
     }
 
     public void registerController(MapImportController controller) {
         this.controller = controller;
     }
- /*   
-    private void initGraphHoppers(final String mapName) {
-        final Thread t1 = initGraphHopper(mapName, "car");
-        final Thread t2 = initGraphHopper(mapName, "bike");
-        final Thread t3 = initGraphHopper(mapName, "foot");
+    
+    public void showProgressBar() {
+        progressBar.setVisible(true);
+    }
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                t1.start();
-                t2.start();
-                t3.start();
-
-                try {
-                    t1.join();
-                    t2.join();
-                    t3.join();
-                } catch (InterruptedException ex) { }
-
-                dispose();
-            }
-        });
+    public void hideProgressBar() {
+        progressBar.setVisible(false);
     }
     
-    private Thread initGraphHopper(final String mapName, final String vehicle) {
-        return new Thread() {
-            @Override
-            public void run() {
-                GraphHopper gh = new GraphHopper().setGraphHopperLocation("data/gh/" + mapName + "/" + vehicle).setEncodingManager(new EncodingManager(vehicle)).setOSMFile(new File("data/maps/" + mapName + ".osm.pbf").getAbsolutePath()).forDesktop();
-                gh.importOrLoad();
-            }
-        };
+    public void showMapFileChooser() {
+        fileChooserMap.showDialog(this, null);
     }
-    */
+    
+    public void showOsmFileChooser() {
+        fileChooserOsm.showDialog(this, null);
+    }
+    
+    public void setCurrentDirectory(File dir) {
+        fileChooserMap.setCurrentDirectory(dir);
+        fileChooserOsm.setCurrentDirectory(dir);
+    }
+    
+    public void enableButtons() {
+        buttonCancel.setEnabled(true);
+        buttonImport.setEnabled(true);
+        buttonSelectMap.setEnabled(true);
+        buttonSelectOsm.setEnabled(true);
+        this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    }
+    
+    public void disableButtons() {
+        buttonCancel.setEnabled(false);
+        buttonImport.setEnabled(false);
+        buttonSelectMap.setEnabled(false);
+        buttonSelectOsm.setEnabled(false);
+        this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+    }
+    
+    public void setChosenMapName(String name) {
+        textMapFile.setText(name);
+    }
+    
+    public void setChosenOsmName(String name) {
+        textOsmFile.setText(name);
+    }
+   
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -84,30 +103,57 @@ public class MapImportDialog extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        fileChooser = new javax.swing.JFileChooser();
+        fileChooserOsm = new javax.swing.JFileChooser();
+        fileChooserMap = new javax.swing.JFileChooser();
         labelMapFile = new javax.swing.JLabel();
-        labelRouteFile = new javax.swing.JLabel();
+        labelOsmFile = new javax.swing.JLabel();
         textMapFile = new javax.swing.JTextField();
-        textRouteFile = new javax.swing.JTextField();
+        textOsmFile = new javax.swing.JTextField();
         buttonSelectMap = new javax.swing.JButton();
-        buttonSelectRoute = new javax.swing.JButton();
+        buttonSelectOsm = new javax.swing.JButton();
         buttonImport = new javax.swing.JButton();
         buttonCancel = new javax.swing.JButton();
         progressBar = new javax.swing.JProgressBar();
 
+        fileChooserOsm.setAcceptAllFileFilterUsed(false);
+        fileChooserOsm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fileChooserOsmActionPerformed(evt);
+            }
+        });
+
+        fileChooserMap.setAcceptAllFileFilterUsed(false);
+        fileChooserMap.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fileChooserMapActionPerformed(evt);
+            }
+        });
+
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Import mapy");
+        setResizable(false);
 
-        labelMapFile.setText("Mapový soubor:");
+        labelMapFile.setText("map soubor:");
 
-        labelRouteFile.setText("Routovací soubor:");
+        labelOsmFile.setText("osm soubor:");
 
-        textMapFile.setText("jTextField1");
+        textMapFile.setEnabled(false);
 
-        textRouteFile.setText("jTextField1");
+        textOsmFile.setEnabled(false);
 
         buttonSelectMap.setText("Vybrat");
+        buttonSelectMap.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonSelectMapActionPerformed(evt);
+            }
+        });
 
-        buttonSelectRoute.setText("Vybrat");
+        buttonSelectOsm.setText("Vybrat");
+        buttonSelectOsm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonSelectOsmActionPerformed(evt);
+            }
+        });
 
         buttonImport.setText("Importovat");
         buttonImport.addActionListener(new java.awt.event.ActionListener() {
@@ -116,7 +162,14 @@ public class MapImportDialog extends javax.swing.JDialog {
             }
         });
 
-        buttonCancel.setText("Zrušit");
+        buttonCancel.setText("Zavřít");
+        buttonCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonCancelActionPerformed(evt);
+            }
+        });
+
+        progressBar.setIndeterminate(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -124,29 +177,26 @@ public class MapImportDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progressBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(buttonCancel)
+                        .addComponent(progressBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(buttonImport))
-                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(buttonImport)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(buttonCancel))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(labelMapFile)
-                                .addGap(14, 14, 14)
-                                .addComponent(textMapFile, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(buttonSelectMap))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(labelRouteFile)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(textRouteFile, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(buttonSelectRoute)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                            .addComponent(labelMapFile)
+                            .addComponent(labelOsmFile))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(textOsmFile, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(textMapFile, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(buttonSelectOsm)
+                            .addComponent(buttonSelectMap))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -158,15 +208,15 @@ public class MapImportDialog extends javax.swing.JDialog {
                     .addComponent(buttonSelectMap))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(labelRouteFile)
-                    .addComponent(textRouteFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(buttonSelectRoute))
+                    .addComponent(labelOsmFile)
+                    .addComponent(textOsmFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(buttonSelectOsm))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(buttonCancel)
-                    .addComponent(buttonImport))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(buttonImport)
+                        .addComponent(buttonCancel))
+                    .addComponent(progressBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -174,19 +224,40 @@ public class MapImportDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void buttonImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonImportActionPerformed
-        controller.importMap(null, null);
+        controller.importMap(fileChooserMap.getSelectedFile(), fileChooserOsm.getSelectedFile());
     }//GEN-LAST:event_buttonImportActionPerformed
+
+    private void buttonSelectMapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSelectMapActionPerformed
+        controller.selectMap();
+    }//GEN-LAST:event_buttonSelectMapActionPerformed
+
+    private void buttonSelectOsmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSelectOsmActionPerformed
+        controller.selectOsm();
+    }//GEN-LAST:event_buttonSelectOsmActionPerformed
+
+    private void buttonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelActionPerformed
+        controller.closeDialog();
+    }//GEN-LAST:event_buttonCancelActionPerformed
+
+    private void fileChooserOsmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileChooserOsmActionPerformed
+        controller.setChosenOsm(fileChooserOsm.getSelectedFile());
+    }//GEN-LAST:event_fileChooserOsmActionPerformed
+
+    private void fileChooserMapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileChooserMapActionPerformed
+        controller.setChosenMap(fileChooserMap.getSelectedFile());
+    }//GEN-LAST:event_fileChooserMapActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonCancel;
     private javax.swing.JButton buttonImport;
     private javax.swing.JButton buttonSelectMap;
-    private javax.swing.JButton buttonSelectRoute;
-    private javax.swing.JFileChooser fileChooser;
+    private javax.swing.JButton buttonSelectOsm;
+    private javax.swing.JFileChooser fileChooserMap;
+    private javax.swing.JFileChooser fileChooserOsm;
     private javax.swing.JLabel labelMapFile;
-    private javax.swing.JLabel labelRouteFile;
+    private javax.swing.JLabel labelOsmFile;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JTextField textMapFile;
-    private javax.swing.JTextField textRouteFile;
+    private javax.swing.JTextField textOsmFile;
     // End of variables declaration//GEN-END:variables
 }
