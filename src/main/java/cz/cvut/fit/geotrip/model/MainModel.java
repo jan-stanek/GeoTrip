@@ -361,10 +361,17 @@ public class MainModel {
         installedMapsObserver.update(installedMaps);
     }
     
-    public void filter(int distance, String vehicle, final boolean found, final int container,
+    public void filter(final int distance, String vehicle, final boolean found, final int container,
             final int difficultyLow, final int difficultyHigh, final int terrainLow, final int terrainHigh) {
         removeCacheMarkers();
 
+        Predicate<GeoCache> predicateDistance = new Predicate<GeoCache>() {
+            @Override
+            public boolean apply(GeoCache gc) {
+                return gc.countDistance(refPoint) < ((distance * 1000) / 2);
+            }
+        };
+        
         Predicate<GeoCache> predicateFound = new Predicate<GeoCache>() {
             @Override
             public boolean apply(GeoCache gc) {
@@ -393,7 +400,7 @@ public class MainModel {
             }
         };
         
-        Predicate predicateAnd = Predicates.and(predicateFound, predicateContainer, predicateDifficulty, predicateTerrain);
+        Predicate predicateAnd = Predicates.and(predicateDistance, predicateFound, predicateContainer, predicateDifficulty, predicateTerrain);
         
         List<GeoCache> filteredList = new LinkedList<>(cacheDAO.getFiltered(predicateAnd));
         
