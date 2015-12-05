@@ -1,6 +1,6 @@
-package cz.cvut.fit.geotrip.view;
+package cz.cvut.fit.geotrip.presentation.view;
 
-import org.mapsforge.core.model.LatLong;
+import cz.cvut.fit.geotrip.data.entities.GeoPoint;
 
 /**
  *
@@ -14,7 +14,7 @@ public class CenterMapObserver {
         this.view = view;
     }
     
-    public void update(LatLong coordinates) {
+    public void update(GeoPoint coordinates) {
         view.setMapPosition(coordinates);
     }
     

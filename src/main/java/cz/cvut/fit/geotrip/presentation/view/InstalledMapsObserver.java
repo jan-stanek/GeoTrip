@@ -1,4 +1,4 @@
-package cz.cvut.fit.geotrip.view;
+package cz.cvut.fit.geotrip.presentation.view;
 
 import java.util.List;
 

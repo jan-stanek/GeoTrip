@@ -1,13 +1,12 @@
-package cz.cvut.fit.geotrip.data;
+package cz.cvut.fit.geotrip.data.entities;
 
 import java.text.DecimalFormat;
-import org.mapsforge.core.model.LatLong;
 
 /**
  *
  * @author jan
  */
-public class GeoCache extends GeoPoint {
+public class GeoCache extends GeoPlace {
     
     private final CacheContainer container;
     private final int difficulty;
@@ -18,7 +17,7 @@ public class GeoCache extends GeoPoint {
     private final String link;
 
     
-    public GeoCache(LatLong coordinates, String name, CacheContainer container, int difficulty,
+    public GeoCache(GeoPoint coordinates, String name, CacheContainer container, int difficulty,
             int terrain, int favorites, boolean found, String id, String link) {
         super(coordinates, name);
         
@@ -31,8 +30,8 @@ public class GeoCache extends GeoPoint {
         this.link = link;
     }
 
-    public double getDistance(GeoPoint geoPoint) {
-        return countDistance(geoPoint);
+    public double getDistance(GeoPlace geoPoint) {
+        return getCircleDistance(geoPoint);
     }
 
     public CacheContainer getContainer() {

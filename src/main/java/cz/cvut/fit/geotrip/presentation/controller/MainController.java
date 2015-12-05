@@ -1,8 +1,8 @@
-package cz.cvut.fit.geotrip.controller;
+package cz.cvut.fit.geotrip.presentation.controller;
 
-import cz.cvut.fit.geotrip.data.CacheContainer;
-import cz.cvut.fit.geotrip.model.MainModel;
-import cz.cvut.fit.geotrip.view.MainFrame;
+import cz.cvut.fit.geotrip.data.entities.CacheContainer;
+import cz.cvut.fit.geotrip.business.MainModel;
+import cz.cvut.fit.geotrip.presentation.view.MainFrame;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
@@ -73,7 +73,9 @@ public class MainController {
     }
     
     public void planTrip(String distanceStr, String vehicleStr, boolean found, boolean containerMicro, boolean containerSmall, boolean containerRegular,
-            boolean containerLarge, boolean containerOther, int difficultyLow, int difficultyHigh, int terrainLow, int terrainHigh) {
+            boolean containerLarge, boolean containerOther, int difficultyLow, int difficultyHigh, int terrainLow, int terrainHigh,
+            boolean containerPriorityI, boolean containerPriorityL, boolean containerPriorityH, boolean difficultyPriorityI, boolean difficultyPriorityL,
+            boolean difficultyPriorityH, boolean terrainPriorityI, boolean terrainPriorityL, boolean terrainPriorityH) {
         
         int distance = Integer.parseInt(distanceStr);
         
@@ -103,8 +105,17 @@ public class MainController {
         if (containerOther)
             container |= CacheContainer.OTHER.getValue();
         
+        int containerPriority = containerPriorityI ? 0 : (containerPriorityL ? -1 : 1);
+        int difficultyPriority = difficultyPriorityI ? 0 : (difficultyPriorityL ? -1 : 1);
+        int terrainPriority = terrainPriorityI ? 0 : (terrainPriorityL ? -1 : 1);
+        
         view.hideCacheInfo();
-        model.filter(distance, vehicle, found, container, difficultyLow, difficultyHigh, terrainLow, terrainHigh);
+        view.hideTripInfo();
+        
+        model.planTrip(distance * 1000, vehicle, found, container, difficultyLow, difficultyHigh,
+                terrainLow, terrainHigh, containerPriority, difficultyPriority, terrainPriority);
+        
+        view.showTripInfo(model.getTripLength(), model.getTripTime());
         view.zoomTo(model.getBoundingBox());
     }
     

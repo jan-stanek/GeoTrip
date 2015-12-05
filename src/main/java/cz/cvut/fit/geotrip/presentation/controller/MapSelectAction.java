@@ -1,4 +1,4 @@
-package cz.cvut.fit.geotrip.controller;
+package cz.cvut.fit.geotrip.presentation.controller;
 
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;

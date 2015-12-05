@@ -1,7 +1,7 @@
 package cz.cvut.fit.geotrip.data.dao;
 
 import com.google.common.base.Predicate;
-import cz.cvut.fit.geotrip.data.GeoCache;
+import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import java.util.Collection;
 
 /**

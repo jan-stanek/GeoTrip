@@ -1,7 +1,7 @@
-package cz.cvut.fit.geotrip.controller;
+package cz.cvut.fit.geotrip.presentation.controller;
 
-import cz.cvut.fit.geotrip.model.MainModel;
-import cz.cvut.fit.geotrip.view.MapImportDialog;
+import cz.cvut.fit.geotrip.business.MainModel;
+import cz.cvut.fit.geotrip.presentation.view.MapImportDialog;
 import java.io.File;
 
 /**

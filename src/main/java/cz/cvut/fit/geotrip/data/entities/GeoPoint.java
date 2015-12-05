@@ -1,9 +1,8 @@
-package cz.cvut.fit.geotrip.data;
+package cz.cvut.fit.geotrip.data.entities;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-import org.mapsforge.core.model.LatLong;
 
 /**
  *
@@ -11,42 +10,27 @@ import org.mapsforge.core.model.LatLong;
  */
 public class GeoPoint {
 
-    private final LatLong coordinates;
-    private final String name;
+    private final double lat;
+    private final double lon;
     
-    public GeoPoint(LatLong coordinates, String name) {
-        this.coordinates = coordinates;
-        this.name = name;
-    }
-    
-    public LatLong getCoordinates() {
-        return coordinates;
+    public GeoPoint(double lat, double lon) {
+        this.lat = lat;
+        this.lon = lon;
     }
     
     public double getLat() {
-        return coordinates.latitude;
+        return lat;
     }
     
     public double getLon() {
-        return coordinates.longitude;
+        return lon;
     }
     
-    public String getName() {
-        return name;
+    public double getCircleDistance(GeoPlace point) {
+        return getCircleDistance(point.getLat(), point.getLon());
     }
     
-    public double countDistance(GeoPoint point) {
-        return countDistance(point.coordinates.latitude, point.coordinates.longitude);
-    }
-    
-    public double countDistance(LatLong point) {
-        return countDistance(point.latitude, point.longitude);
-    }
-
-    public double countDistance(double refLat, double refLon) {
-        double lat = coordinates.latitude;
-        double lon = coordinates.longitude;
-        
+    public double getCircleDistance(double refLat, double refLon) {
         double dLat = Math.toRadians(refLat-lat);
         double dLon = Math.toRadians(refLon-lon);
         
@@ -56,9 +40,6 @@ public class GeoPoint {
     }
     
     public String getCoordinatesString() {
-        double lat = coordinates.latitude;
-        double lon = coordinates.longitude;
-        
         int latDegrees = (int)Math.round(Math.floor(lat));
         int latMinutes = (int)Math.round(Math.floor(60 * (lat - latDegrees)));
         double latSeconds = 3600 * ((lat - latDegrees) - latMinutes / 60.0);

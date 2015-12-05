@@ -3,14 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.cvut.fit.geotrip.view;
+package cz.cvut.fit.geotrip.presentation.view;
 
 import com.jidesoft.swing.RangeSlider;
-import cz.cvut.fit.geotrip.controller.MainController;
-import cz.cvut.fit.geotrip.controller.MapImportAction;
-import cz.cvut.fit.geotrip.controller.MapSelectAction;
-import cz.cvut.fit.geotrip.data.GeoCache;
-import cz.cvut.fit.geotrip.model.MainModel;
+import cz.cvut.fit.geotrip.presentation.controller.MainController;
+import cz.cvut.fit.geotrip.presentation.controller.MapImportAction;
+import cz.cvut.fit.geotrip.presentation.controller.MapSelectAction;
+import cz.cvut.fit.geotrip.data.entities.GeoCache;
+import cz.cvut.fit.geotrip.business.MainModel;
+import cz.cvut.fit.geotrip.data.entities.GeoPoint;
 import java.awt.event.ActionListener;
 import java.net.URL;
 import java.util.Hashtable;
@@ -75,8 +76,9 @@ public class MainFrame extends javax.swing.JFrame {
         model.registerErrorDialogObserver(new ErrorDialogObserver());
     }
     
-    public void load() {
+    public void init() {
         hideCacheInfo();
+        hideTripInfo();
         createMapView();
         
         setIcon(getClass().getClassLoader().getResource("icon.png"));
@@ -121,7 +123,7 @@ public class MainFrame extends javax.swing.JFrame {
         sliderZoom.setValue(ZOOM_DEFAULT);
         
         model.setMapViewPosition(mapViewModel.mapViewPosition);
-        model.load();
+        model.init();
     }
      
     private void createRangeSliders() {
@@ -161,6 +163,10 @@ public class MainFrame extends javax.swing.JFrame {
                 boundingBox, mapViewModel.displayModel.getTileSize()));
     }
 
+    public void setMapPosition(GeoPoint coordinates) {
+        setMapPosition(new LatLong(coordinates.getLat(), coordinates.getLon()));
+    }
+    
     public void setMapPosition(LatLong coordinates) {
         mapViewModel.mapViewPosition.setCenter(coordinates);
     }
@@ -188,11 +194,21 @@ public class MainFrame extends javax.swing.JFrame {
             buttonLink.removeActionListener(al);
         buttonLink.addActionListener(new OpenLinkListener(controller, cache.getLink()));
         
-        panelInfo.setVisible(true);
+        panelCacheInfo.setVisible(true);
     }
     
     public void hideCacheInfo() {
-        panelInfo.setVisible(false);
+        panelCacheInfo.setVisible(false);
+    }
+    
+    public void showTripInfo(String length, String time) {
+        textTripLength.setText(length);
+        textTripTime.setText(time);
+        panelTripInfo.setVisible(true);
+    }
+    
+    public void hideTripInfo() {
+        panelTripInfo.setVisible(false);
     }
     
     public void refreshMapList(List<String> maps) {
@@ -269,7 +285,7 @@ public class MainFrame extends javax.swing.JFrame {
         sliderZoom = new javax.swing.JSlider();
         buttonZoomPlus = new javax.swing.JButton();
         buttonZoomMinus = new javax.swing.JButton();
-        panelInfo = new javax.swing.JPanel();
+        panelCacheInfo = new javax.swing.JPanel();
         textName = new javax.swing.JTextField();
         textCoordinates = new javax.swing.JTextField();
         labelContainer = new javax.swing.JLabel();
@@ -279,6 +295,12 @@ public class MainFrame extends javax.swing.JFrame {
         labelTerrain = new javax.swing.JLabel();
         textTerrain = new javax.swing.JTextField();
         buttonLink = new javax.swing.JButton();
+        panelTripInfo = new javax.swing.JPanel();
+        labelTripLength = new javax.swing.JLabel();
+        textTripLength = new javax.swing.JTextField();
+        labelTripTime = new javax.swing.JLabel();
+        textTripTime = new javax.swing.JTextField();
+        labelTripKm = new javax.swing.JLabel();
         menu = new javax.swing.JMenuBar();
         menuFile = new javax.swing.JMenu();
         menuExport = new javax.swing.JMenuItem();
@@ -644,7 +666,7 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
-        panelInfo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        panelCacheInfo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
 
         textName.setEditable(false);
         textName.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
@@ -679,14 +701,14 @@ public class MainFrame extends javax.swing.JFrame {
         buttonLink.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
         buttonLink.setLabel("odkaz");
 
-        javax.swing.GroupLayout panelInfoLayout = new javax.swing.GroupLayout(panelInfo);
-        panelInfo.setLayout(panelInfoLayout);
-        panelInfoLayout.setHorizontalGroup(
-            panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelInfoLayout.createSequentialGroup()
+        javax.swing.GroupLayout panelCacheInfoLayout = new javax.swing.GroupLayout(panelCacheInfo);
+        panelCacheInfo.setLayout(panelCacheInfoLayout);
+        panelCacheInfoLayout.setHorizontalGroup(
+            panelCacheInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelCacheInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelInfoLayout.createSequentialGroup()
+                .addGroup(panelCacheInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelCacheInfoLayout.createSequentialGroup()
                         .addComponent(labelContainer)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(textContainer, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -699,32 +721,84 @@ public class MainFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(textTerrain, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(panelInfoLayout.createSequentialGroup()
-                        .addGroup(panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(panelCacheInfoLayout.createSequentialGroup()
+                        .addGroup(panelCacheInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(textName, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelInfoLayout.createSequentialGroup()
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelCacheInfoLayout.createSequentialGroup()
                                 .addComponent(textCoordinates, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(buttonLink)))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
-        panelInfoLayout.setVerticalGroup(
-            panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelInfoLayout.createSequentialGroup()
+        panelCacheInfoLayout.setVerticalGroup(
+            panelCacheInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelCacheInfoLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(textName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(panelCacheInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(textCoordinates, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(buttonLink))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(panelCacheInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(labelContainer)
                     .addComponent(textContainer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(labelDifficulty)
                     .addComponent(textDifficulty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(labelTerrain)
                     .addComponent(textTerrain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        panelTripInfo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+
+        labelTripLength.setText("Délka výletu:  ");
+
+        textTripLength.setEditable(false);
+        textTripLength.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        textTripLength.setText("0");
+        textTripLength.setBorder(null);
+
+        labelTripTime.setText("Předpokládaný čas: ");
+
+        textTripTime.setEditable(false);
+        textTripTime.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        textTripTime.setText("0:00");
+        textTripTime.setBorder(null);
+
+        labelTripKm.setText("km");
+
+        javax.swing.GroupLayout panelTripInfoLayout = new javax.swing.GroupLayout(panelTripInfo);
+        panelTripInfo.setLayout(panelTripInfoLayout);
+        panelTripInfoLayout.setHorizontalGroup(
+            panelTripInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelTripInfoLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(panelTripInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(panelTripInfoLayout.createSequentialGroup()
+                        .addComponent(labelTripTime)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(textTripTime))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelTripInfoLayout.createSequentialGroup()
+                        .addComponent(labelTripLength)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(textTripLength, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(labelTripKm)))
+                .addContainerGap())
+        );
+        panelTripInfoLayout.setVerticalGroup(
+            panelTripInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelTripInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(panelTripInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(labelTripLength)
+                    .addComponent(textTripLength, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(labelTripKm))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelTripInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(labelTripTime)
+                    .addComponent(textTripTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -736,27 +810,31 @@ public class MainFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(panelMapLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelMapLayout.createSequentialGroup()
+                        .addGap(0, 201, Short.MAX_VALUE)
+                        .addComponent(panelCacheInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(panelMapLayout.createSequentialGroup()
                         .addGroup(panelMapLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(buttonZoomPlus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(buttonZoomMinus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(buttonZoomPlus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(sliderZoom, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 462, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelMapLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(panelInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(panelTripInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         panelMapLayout.setVerticalGroup(
             panelMapLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelMapLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(buttonZoomPlus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sliderZoom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(panelMapLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelMapLayout.createSequentialGroup()
+                        .addComponent(buttonZoomPlus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sliderZoom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(panelTripInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(buttonZoomMinus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(panelInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(panelCacheInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -826,7 +904,10 @@ public class MainFrame extends javax.swing.JFrame {
     private void buttonPlanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonPlanActionPerformed
         controller.planTrip(fieldDelka.getText(), comboRouting.getSelectedItem().toString(), radioAll.isSelected(),
                 checkMicro.isSelected(), checkSmall.isSelected(), checkRegular.isSelected(), checkLarge.isSelected(), checkOther.isSelected(),
-                sliderDifficulty.getLowValue(), sliderDifficulty.getHighValue(), sliderTerrain.getLowValue(), sliderTerrain.getHighValue());
+                sliderDifficulty.getLowValue(), sliderDifficulty.getHighValue(), sliderTerrain.getLowValue(), sliderTerrain.getHighValue(),
+                radioContainerIgnore.isSelected(), radioContainerSmall.isSelected(), radioContainerLarge.isSelected(),
+                radioDifficultyIgnore.isSelected(), radioDifficultySmall.isSelected(), radioDifficultyGreat.isSelected(),
+                radioTerrainIgnore.isSelected(), radioTerrainLight.isSelected(), radioTerrainDifficult.isSelected());
     }//GEN-LAST:event_buttonPlanActionPerformed
 
     private void buttonZoomPlusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonZoomPlusActionPerformed
@@ -859,17 +940,20 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel labelLength;
     private javax.swing.JLabel labelRouting;
     private javax.swing.JLabel labelTerrain;
+    private javax.swing.JLabel labelTripKm;
+    private javax.swing.JLabel labelTripLength;
+    private javax.swing.JLabel labelTripTime;
     private javax.swing.JMenuBar menu;
     private javax.swing.JMenuItem menuExport;
     private javax.swing.JMenu menuFile;
     private javax.swing.JMenuItem menuImportMap;
     private javax.swing.JMenu menuMap;
+    private javax.swing.JPanel panelCacheInfo;
     private javax.swing.JPanel panelFilter;
     private javax.swing.JPanel panelFilterContainer;
     private javax.swing.JPanel panelFilterDifficulty;
     private javax.swing.JPanel panelFilterState;
     private javax.swing.JPanel panelFilterTerrain;
-    private javax.swing.JPanel panelInfo;
     private javax.swing.JPanel panelLeft;
     private javax.swing.JPanel panelMap;
     private javax.swing.JPanel panelPreferences;
@@ -878,6 +962,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel panelPreferencesTerrain;
     private javax.swing.JPanel panelRight;
     private javax.swing.JPanel panelTrip;
+    private javax.swing.JPanel panelTripInfo;
     private javax.swing.JRadioButton radioAll;
     private javax.swing.JRadioButton radioContainerIgnore;
     private javax.swing.JRadioButton radioContainerLarge;
@@ -896,5 +981,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JTextField textDifficulty;
     private javax.swing.JTextField textName;
     private javax.swing.JTextField textTerrain;
+    private javax.swing.JTextField textTripLength;
+    private javax.swing.JTextField textTripTime;
     // End of variables declaration//GEN-END:variables
 }

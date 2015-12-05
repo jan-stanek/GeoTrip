@@ -1,8 +1,8 @@
-package cz.cvut.fit.geotrip.controller;
+package cz.cvut.fit.geotrip.presentation.controller;
 
-import cz.cvut.fit.geotrip.model.MainModel;
-import cz.cvut.fit.geotrip.view.MainFrame;
-import cz.cvut.fit.geotrip.view.MapImportDialog;
+import cz.cvut.fit.geotrip.business.MainModel;
+import cz.cvut.fit.geotrip.presentation.view.MainFrame;
+import cz.cvut.fit.geotrip.presentation.view.MapImportDialog;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 

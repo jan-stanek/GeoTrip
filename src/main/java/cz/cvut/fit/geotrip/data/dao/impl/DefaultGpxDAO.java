@@ -1,9 +1,10 @@
 package cz.cvut.fit.geotrip.data.dao.impl;
 
 import cz.cvut.fit.geotrip.data.dao.GpxDAO;
-import cz.cvut.fit.geotrip.data.GeoCache;
-import cz.cvut.fit.geotrip.data.CacheContainer;
-import cz.cvut.fit.geotrip.data.GeoPoint;
+import cz.cvut.fit.geotrip.data.entities.GeoCache;
+import cz.cvut.fit.geotrip.data.entities.CacheContainer;
+import cz.cvut.fit.geotrip.data.entities.GeoPlace;
+import cz.cvut.fit.geotrip.data.entities.GeoPoint;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,7 +17,6 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
-import org.mapsforge.core.model.LatLong;
 
 /**
  *
@@ -24,7 +24,7 @@ import org.mapsforge.core.model.LatLong;
  */
 public class DefaultGpxDAO implements GpxDAO {
 
-    public static DefaultGpxDAO instance = new DefaultGpxDAO();
+    public static GpxDAO instance = new DefaultGpxDAO();
 
     private Document document;
 
@@ -39,7 +39,7 @@ public class DefaultGpxDAO implements GpxDAO {
     }
 
     @Override
-    public GeoPoint getRef() {
+    public GeoPlace getRef() {
         Namespace ns = document.getRootElement().getNamespace();
         Element ref = document.getRootElement().getChild("extensions", ns).getChild("ref", ns);
 
@@ -48,7 +48,7 @@ public class DefaultGpxDAO implements GpxDAO {
 
         String name = ref.getChildText("name", ns);
 
-        return new GeoPoint(new LatLong(lat, lon), name);
+        return new GeoPlace(new GeoPoint(lat, lon), name);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class DefaultGpxDAO implements GpxDAO {
     }
 
     private GeoCache parseCache(Namespace rootNs, Element waypoint) {
-        LatLong coordinates = parseCacheCoordinates(waypoint);
+        GeoPoint coordinates = parseCacheCoordinates(waypoint);
 
         String id = parseCacheId(rootNs, waypoint);
 
@@ -97,10 +97,10 @@ public class DefaultGpxDAO implements GpxDAO {
         return new GeoCache(coordinates, name, container, difficulty, terrain, favorites, found, id, link);
     }
 
-    private LatLong parseCacheCoordinates(Element e) {
+    private GeoPoint parseCacheCoordinates(Element e) {
         double lat = parseCacheLat(e);
         double lon = parseCacheLon(e);
-        return new LatLong(lat, lon);
+        return new GeoPoint(lat, lon);
     }
 
     private double parseCacheLat(Element e) {

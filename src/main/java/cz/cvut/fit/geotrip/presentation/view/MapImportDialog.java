@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.cvut.fit.geotrip.view;
+package cz.cvut.fit.geotrip.presentation.view;
 
-import cz.cvut.fit.geotrip.controller.MapImportController;
-import cz.cvut.fit.geotrip.model.MainModel;
+import cz.cvut.fit.geotrip.presentation.controller.MapImportController;
+import cz.cvut.fit.geotrip.business.MainModel;
 import java.awt.Frame;
 import java.io.File;
 import javax.swing.WindowConstants;

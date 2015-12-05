@@ -1,6 +1,6 @@
-package cz.cvut.fit.geotrip.view;
+package cz.cvut.fit.geotrip.presentation.view;
 
-import cz.cvut.fit.geotrip.controller.MainController;
+import cz.cvut.fit.geotrip.presentation.controller.MainController;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 

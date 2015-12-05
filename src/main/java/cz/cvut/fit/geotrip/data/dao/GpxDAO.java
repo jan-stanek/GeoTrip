@@ -1,7 +1,7 @@
 package cz.cvut.fit.geotrip.data.dao;
 
-import cz.cvut.fit.geotrip.data.GeoCache;
-import cz.cvut.fit.geotrip.data.GeoPoint;
+import cz.cvut.fit.geotrip.data.entities.GeoCache;
+import cz.cvut.fit.geotrip.data.entities.GeoPlace;
 import java.util.Collection;
 
 /**
@@ -10,6 +10,6 @@ import java.util.Collection;
  */
 public interface GpxDAO {
     
-    GeoPoint getRef();
+    GeoPlace getRef();
     Collection<GeoCache> getAllCaches();
 }

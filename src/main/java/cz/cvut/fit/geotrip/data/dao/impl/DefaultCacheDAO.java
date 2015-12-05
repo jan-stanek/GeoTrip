@@ -5,7 +5,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import cz.cvut.fit.geotrip.data.dao.CacheDAO;
 import cz.cvut.fit.geotrip.data.dao.DAOFactory;
-import cz.cvut.fit.geotrip.data.GeoCache;
+import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class DefaultCacheDAO implements CacheDAO {
 
-    public static DefaultCacheDAO instance = new DefaultCacheDAO();
+    public static CacheDAO instance = new DefaultCacheDAO();
 
     private final List<GeoCache> data;
 
