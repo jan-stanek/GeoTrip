@@ -1,4 +1,4 @@
-package cz.cvut.fit.geotrip.business.routing.impl;
+package cz.cvut.fit.geotrip.business.router.impl;
 
 import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
@@ -7,7 +7,7 @@ import com.graphhopper.routing.AlgorithmOptions;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.util.PointList;
 import cz.cvut.fit.geotrip.business.MainModel;
-import cz.cvut.fit.geotrip.business.routing.Router;
+import cz.cvut.fit.geotrip.business.router.Router;
 import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import cz.cvut.fit.geotrip.data.entities.GeoPlace;
 import cz.cvut.fit.geotrip.data.entities.GeoPoint;
