@@ -13,8 +13,11 @@ public class ExactPlanner implements Planner {
     private List<Integer> route;
     private double length;
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void plan(int nodes, double[][] distanceMatrix) {
+    public void plan(int nodes, final double[][] distanceMatrix) {
         route = new LinkedList<>();
         double res[][] = new double[1 << nodes][nodes];
         
@@ -72,12 +75,18 @@ public class ExactPlanner implements Planner {
         }
         route.add(0);
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double getLength() {
         return length;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Integer> getRoute() {
         return route;

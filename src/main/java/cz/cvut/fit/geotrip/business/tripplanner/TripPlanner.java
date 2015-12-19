@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class TripPlanner {
     
-    final static int EXACT_MAX = 20;
+    final static int EXACT_MAX = 17;
    
     private final String mapName;
     private final String vehicle;
