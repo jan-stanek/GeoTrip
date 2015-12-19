@@ -63,7 +63,7 @@ public class MainModel {
 
     private static final GraphicFactory GRAPHIC_FACTORY = AwtGraphicFactory.INSTANCE;
 
-    private final String MAPS_DIRECTORY = "data/maps/";
+    private final String MAPS_DIRECTORY = "maps/";
     private final String MAP_EXTENSION = ".map";
     private final String OSM_EXTENSION = ".osm.pbf";
     
@@ -153,8 +153,8 @@ public class MainModel {
             public void run() {
                 String mapName = osmFile.getName().replaceFirst(OSM_EXTENSION, "");
                 
-                File mapFileDest = new File(MAPS_DIRECTORY + mapName + MAP_EXTENSION);
-                File osmFileDest = new File(MAPS_DIRECTORY + mapName + OSM_EXTENSION);
+                File mapFileDest = new File(GeoTrip.DATA_DIRECTORY + MAPS_DIRECTORY + mapName + MAP_EXTENSION);
+                File osmFileDest = new File(GeoTrip.DATA_DIRECTORY + MAPS_DIRECTORY + mapName + OSM_EXTENSION);
                 
                 try {
                     Files.copy(mapFile.toPath(), mapFileDest.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -224,7 +224,7 @@ public class MainModel {
     private void findInstalledMaps() {
         installedMaps.clear();
         
-        File dir = new File(MAPS_DIRECTORY);
+        File dir = new File(GeoTrip.DATA_DIRECTORY + MAPS_DIRECTORY);
         
         List<String> tmp = new LinkedList<>();
         
@@ -268,8 +268,8 @@ public class MainModel {
             return;
         }
 
-        File mapFile = new File(MAPS_DIRECTORY + mapName + MAP_EXTENSION);
-        File osmFile = new File(MAPS_DIRECTORY + mapName + OSM_EXTENSION);
+        File mapFile = new File(GeoTrip.DATA_DIRECTORY + MAPS_DIRECTORY + mapName + MAP_EXTENSION);
+        File osmFile = new File(GeoTrip.DATA_DIRECTORY + MAPS_DIRECTORY + mapName + OSM_EXTENSION);
         if (!mapFile.exists() || !osmFile.exists()) {
             errorDialogObserver.update("Chybejici mapa", "Soubor s mapou nenalezen.");
             return;

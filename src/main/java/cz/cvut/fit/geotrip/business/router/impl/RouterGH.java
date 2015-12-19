@@ -6,6 +6,7 @@ import com.graphhopper.GraphHopper;
 import com.graphhopper.routing.AlgorithmOptions;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.util.PointList;
+import cz.cvut.fit.geotrip.GeoTrip;
 import cz.cvut.fit.geotrip.business.MainModel;
 import cz.cvut.fit.geotrip.business.router.Router;
 import cz.cvut.fit.geotrip.data.entities.GeoCache;
@@ -24,8 +25,8 @@ import java.util.logging.Logger;
  */
 public class RouterGH implements Router {
 
-    private final String MAPS_DIRECTORY = "data/maps/";
-    private final String GH_DIRECTORY = "data/gh/";
+    private final String MAPS_DIRECTORY = "maps/";
+    private final String GH_DIRECTORY = "gh/";
     private final String OSM_EXTENSION = ".osm.pbf";
     
     private GraphHopper gh;
@@ -38,7 +39,7 @@ public class RouterGH implements Router {
     @Override
     public void init(String mapName, String vehicle, GeoPlace ref, List<GeoCache> caches) {
         gh = new GraphHopper().setEncodingManager(new EncodingManager(vehicle)).forDesktop();
-        gh.load(GH_DIRECTORY + mapName + "/" + vehicle);
+        gh.load(GeoTrip.DATA_DIRECTORY + GH_DIRECTORY + mapName + "/" + vehicle);
         this.vehicle = vehicle;
         countMatrix(ref, caches);
     }
@@ -140,7 +141,7 @@ public class RouterGH implements Router {
         return new Thread() {
             @Override
             public void run() {
-                gh = new GraphHopper().setGraphHopperLocation(GH_DIRECTORY + mapName + "/" + vehicle).setEncodingManager(new EncodingManager(vehicle)).setOSMFile(new File(MAPS_DIRECTORY + mapName + OSM_EXTENSION).getAbsolutePath()).forDesktop();
+                gh = new GraphHopper().setGraphHopperLocation(GeoTrip.DATA_DIRECTORY + GH_DIRECTORY + mapName + "/" + vehicle).setEncodingManager(new EncodingManager(vehicle)).setOSMFile(new File(GeoTrip.DATA_DIRECTORY + MAPS_DIRECTORY + mapName + OSM_EXTENSION).getAbsolutePath()).forDesktop();
                 gh.importOrLoad();
             }
         };

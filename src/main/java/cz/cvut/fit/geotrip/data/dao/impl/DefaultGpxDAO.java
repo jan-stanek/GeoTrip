@@ -1,5 +1,6 @@
 package cz.cvut.fit.geotrip.data.dao.impl;
 
+import cz.cvut.fit.geotrip.GeoTrip;
 import cz.cvut.fit.geotrip.data.dao.GpxDAO;
 import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import cz.cvut.fit.geotrip.data.entities.CacheContainer;
@@ -29,7 +30,7 @@ public class DefaultGpxDAO implements GpxDAO {
     private Document document;
 
     private DefaultGpxDAO() {
-        File inputFile = new File("data\\caches.gpx");
+        File inputFile = new File(GeoTrip.DATA_DIRECTORY + "caches.gpx");
         SAXBuilder saxBuilder = new SAXBuilder();
         try {
             document = saxBuilder.build(inputFile);
