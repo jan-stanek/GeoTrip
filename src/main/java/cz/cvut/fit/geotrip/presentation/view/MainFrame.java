@@ -12,8 +12,10 @@ import cz.cvut.fit.geotrip.presentation.controller.MapSelectAction;
 import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import cz.cvut.fit.geotrip.business.MainModel;
 import cz.cvut.fit.geotrip.data.entities.GeoPoint;
+import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -80,8 +82,7 @@ public class MainFrame extends javax.swing.JFrame {
         hideCacheInfo();
         hideTripInfo();
         createMapView();
-        
-        setIcon(getClass().getClassLoader().getResource("icon.png"));
+        setIcon();
     }
     
     public void registerController(MainController controller) {
@@ -233,6 +234,14 @@ public class MainFrame extends javax.swing.JFrame {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) { }
+    }
+    
+    private void setIcon() {
+        List<Image> icons = new ArrayList<>();
+        icons.add(new ImageIcon(getClass().getClassLoader().getResource("icon-small.png")).getImage());
+        icons.add(new ImageIcon(getClass().getClassLoader().getResource("icon-medium.png")).getImage());
+        icons.add(new ImageIcon(getClass().getClassLoader().getResource("icon.png")).getImage());
+        setIconImages(icons);
     }
     
     /**
