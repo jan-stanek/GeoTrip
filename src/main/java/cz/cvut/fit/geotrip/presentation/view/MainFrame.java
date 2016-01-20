@@ -201,9 +201,10 @@ public class MainFrame extends javax.swing.JFrame {
         panelCacheInfo.setVisible(false);
     }
     
-    public void showTripInfo(String length, String time) {
+    public void showTripInfo(String length, String time, String caches) {
         textTripLength.setText(length);
         textTripTime.setText(time);
+        textTripCaches.setText(caches);
         panelTripInfo.setVisible(true);
     }
     
@@ -301,6 +302,8 @@ public class MainFrame extends javax.swing.JFrame {
         labelTripTime = new javax.swing.JLabel();
         textTripTime = new javax.swing.JTextField();
         labelTripKm = new javax.swing.JLabel();
+        labelTripCaches = new javax.swing.JLabel();
+        textTripCaches = new javax.swing.JTextField();
         menu = new javax.swing.JMenuBar();
         menuFile = new javax.swing.JMenu();
         menuExport = new javax.swing.JMenuItem();
@@ -768,23 +771,37 @@ public class MainFrame extends javax.swing.JFrame {
 
         labelTripKm.setText("km");
 
+        labelTripCaches.setText("Počet schránek:");
+
+        textTripCaches.setEditable(false);
+        textTripCaches.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        textTripCaches.setText("0");
+        textTripCaches.setBorder(null);
+
         javax.swing.GroupLayout panelTripInfoLayout = new javax.swing.GroupLayout(panelTripInfo);
         panelTripInfo.setLayout(panelTripInfoLayout);
         panelTripInfoLayout.setHorizontalGroup(
             panelTripInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelTripInfoLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(panelTripInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addContainerGap()
+                .addGroup(panelTripInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelTripInfoLayout.createSequentialGroup()
-                        .addComponent(labelTripTime)
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(panelTripInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(panelTripInfoLayout.createSequentialGroup()
+                                .addComponent(labelTripTime)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(textTripTime))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelTripInfoLayout.createSequentialGroup()
+                                .addComponent(labelTripLength)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(textTripLength, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(labelTripKm))))
+                    .addGroup(panelTripInfoLayout.createSequentialGroup()
+                        .addComponent(labelTripCaches)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(textTripTime))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelTripInfoLayout.createSequentialGroup()
-                        .addComponent(labelTripLength)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(textTripLength, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(labelTripKm)))
+                        .addComponent(textTripCaches)))
                 .addContainerGap())
         );
         panelTripInfoLayout.setVerticalGroup(
@@ -799,6 +816,10 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGroup(panelTripInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(labelTripTime)
                     .addComponent(textTripTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelTripInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(labelTripCaches)
+                    .addComponent(textTripCaches, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -940,6 +961,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel labelLength;
     private javax.swing.JLabel labelRouting;
     private javax.swing.JLabel labelTerrain;
+    private javax.swing.JLabel labelTripCaches;
     private javax.swing.JLabel labelTripKm;
     private javax.swing.JLabel labelTripLength;
     private javax.swing.JLabel labelTripTime;
@@ -981,6 +1003,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JTextField textDifficulty;
     private javax.swing.JTextField textName;
     private javax.swing.JTextField textTerrain;
+    private javax.swing.JTextField textTripCaches;
     private javax.swing.JTextField textTripLength;
     private javax.swing.JTextField textTripTime;
     // End of variables declaration//GEN-END:variables

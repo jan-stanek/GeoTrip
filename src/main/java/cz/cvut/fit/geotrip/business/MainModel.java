@@ -222,6 +222,9 @@ public class MainModel {
         return String.format("%d:%02d", hours, minutes);
     }
     
+    public String getTripCaches() {
+        return String.format("%d", tripPlanner.getTripCaches());
+    }
     
     private void findInstalledMaps() {
         installedMaps.clear();

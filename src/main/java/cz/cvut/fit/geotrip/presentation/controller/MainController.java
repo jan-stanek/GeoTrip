@@ -115,7 +115,7 @@ public class MainController {
         model.planTrip(distance * 1000, vehicle, found, container, difficultyLow, difficultyHigh,
                 terrainLow, terrainHigh, containerPriority, difficultyPriority, terrainPriority);
         
-        view.showTripInfo(model.getTripLength(), model.getTripTime());
+        view.showTripInfo(model.getTripLength(), model.getTripTime(), model.getTripCaches());
         view.zoomTo(model.getBoundingBox());
     }
     

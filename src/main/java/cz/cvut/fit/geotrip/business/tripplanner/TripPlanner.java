@@ -18,6 +18,7 @@ import java.util.List;
 public class TripPlanner {
     
     final static int EXACT_MAX = 17;
+    final static int MATRIX_MAX = 40;
    
     private final String mapName;
     private final String vehicle;
@@ -54,16 +55,43 @@ public class TripPlanner {
         this.containerPriority = containerPriority;
         this.difficultyPriority = difficultyPriority;
         this.terrainPriority = terrainPriority;
-                
-        router.init(mapName, vehicle, ref, caches);
+        
+        nodes = caches.size()+1;
+        Planner planner;
+        
+        if (nodes > MATRIX_MAX) {
+            distanceMatrix = new double[nodes][nodes];
+            timeMatrix = new long[nodes][nodes];
+            routeMatrix = new LinkedList[nodes][nodes];
+            
+            for (int i = 0; i < nodes-1; i++) {
+                GeoCache tmp = caches.get(i);
+                for (int j = 0; j < i; j++) 
+                    distanceMatrix[i][j] = distanceMatrix[j][i] = tmp.getCircleDistance(caches.get(j));
+            }
+            
+            removeTooDistantCaches();
+            rankCaches();
+
+            while (nodes > MATRIX_MAX) {
+                planner = new FastPlanner();
+                planner.plan(nodes, distanceMatrix);
+                length = planner.getLength();
+
+                if (length > maxLength)
+                    removeCache(rankedCaches.getLast().getGeoCache());
+                else
+                    break;
+            }
+        }
+        
+        router.init(mapName, vehicle, ref, this.caches);
         distanceMatrix = router.getDistanceMatrix();
         timeMatrix = router.getTimeMatrix();
         routeMatrix = router.getRouteMatrix();
-        nodes = caches.size()+1;
         removeTooDistantCaches();
         rankCaches();
         
-        Planner planner;
         while (true) {
             if (nodes > EXACT_MAX)
                 planner = new FastPlanner();
@@ -86,9 +114,17 @@ public class TripPlanner {
     
     public long getTripTime() {
         long time = 0;
-        for (int i = 0; i < route.size()-1; i++)
+        int i;
+        for (i = 0; i < route.size()-2; i++) {
             time += getRouteTime(route.get(i), route.get(i+1));
+            time += getCacheTime(route.get(i+1));
+        }
+        time += getRouteTime(route.get(i), route.get(i+1));
         return time;
+    }
+    
+    public int getTripCaches() {
+        return caches.size();
     }
 
     public List<GeoPoint> getTripPoints() {
@@ -110,7 +146,7 @@ public class TripPlanner {
     }
     
     private void removeCache(GeoCache cache) {
-        int index = caches.indexOf(cache);
+        int index = caches.indexOf(cache) + 1;
         
         double[][] tmpDistanceMatrix = new double[nodes-1][nodes-1];
         long[][] tmpTimeMatrix = new long[nodes-1][nodes-1];
@@ -118,11 +154,11 @@ public class TripPlanner {
         
         int i2 = 0, j2;
         for (int i = 0; i < nodes; i++) {
-            if (i == index+1)
+            if (i == index)
                 continue;
             j2 = 0;
             for (int j = 0; j < nodes; j++) {
-                if (j == index+1)
+                if (j == index)
                     continue;
                 tmpDistanceMatrix[i2][j2] = distanceMatrix[i][j];
                 tmpTimeMatrix[i2][j2] = timeMatrix[i][j];
@@ -135,7 +171,7 @@ public class TripPlanner {
         distanceMatrix = tmpDistanceMatrix;
         timeMatrix = tmpTimeMatrix;
         routeMatrix = tmpRouteMatrix;
-        caches.remove(index);
+        caches.remove(index - 1);
         nodes--;
         rankCaches();
     }
@@ -169,8 +205,9 @@ public class TripPlanner {
     
     private double rankOthDistance(GeoCache from) {
         double res = 0;
+        int index = caches.indexOf(from)+1;
         for (int i = 1; i < nodes; i++)
-            res += distanceMatrix[caches.indexOf(from)+1][i];
+            res += distanceMatrix[index][i];
         return res;
     }
     
@@ -211,4 +248,7 @@ public class TripPlanner {
         return timeMatrix[from][to];
     }
     
+    private long getCacheTime(int cache) {
+        return caches.get(cache-1).getDifficulty() * 5 * 60 * 1000;
+    }
 }
