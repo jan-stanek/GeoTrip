@@ -33,8 +33,10 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 import org.mapsforge.core.graphics.Bitmap;
+import org.mapsforge.core.graphics.Cap;
 import org.mapsforge.core.graphics.Color;
 import org.mapsforge.core.graphics.GraphicFactory;
+import org.mapsforge.core.graphics.Join;
 import org.mapsforge.core.graphics.Paint;
 import org.mapsforge.core.graphics.Style;
 import org.mapsforge.core.model.BoundingBox;
@@ -358,7 +360,10 @@ public class MainModel {
     private void addRoute(List<GeoPoint> route) {
         Paint paint = GRAPHIC_FACTORY.createPaint();
         paint.setColor(Color.BLACK);
-        paint.setStrokeWidth(6);
+        paint.setStrokeWidth(5);
+        float[] dash = {10, 15};
+        paint.setDashPathEffect(dash);
+        paint.setStrokeCap(Cap.SQUARE);
         paint.setStyle(Style.STROKE);
         
         Polyline polyline = new Polyline(paint, GRAPHIC_FACTORY);
