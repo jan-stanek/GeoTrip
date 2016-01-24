@@ -112,11 +112,11 @@ public class MainController {
         view.hideCacheInfo();
         view.hideTripInfo();
         
-        model.planTrip(distance * 1000, vehicle, found, container, difficultyLow, difficultyHigh,
-                terrainLow, terrainHigh, containerPriority, difficultyPriority, terrainPriority);
-        
-        view.showTripInfo(model.getTripLength(), model.getTripTime(), model.getTripCaches());
-        view.zoomTo(model.getBoundingBox());
+        if (model.planTrip(distance * 1000, vehicle, found, container, difficultyLow, difficultyHigh,
+                terrainLow, terrainHigh, containerPriority, difficultyPriority, terrainPriority)) {
+            view.showTripInfo(model.getTripLength(), model.getTripTime(), model.getTripCaches());
+            view.zoomTo(model.getBoundingBox());
+        }
     }
     
     public void openUrl(String link) {

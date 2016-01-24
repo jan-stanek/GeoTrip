@@ -200,7 +200,7 @@ public class MainModel {
         return boundingBox;
     }
 
-    public void planTrip(int distance, String vehicle, boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow,
+    public boolean planTrip(int distance, String vehicle, boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow,
             int terrainHigh, int containerPriority, int difficultyPriority, int terrainPriority) {
         removeCacheMarkers();
         removeRoute();
@@ -214,11 +214,17 @@ public class MainModel {
         planningDialogObserver.show();
         
         List<GeoPoint> route = tripPlanner.getTripPoints();
-        addRoute(route);
         
+        if (route == null) {
+            errorDialogObserver.show("No trip found", "No trip was found.");
+            return false;
+        }
+        
+        addRoute(route);
         countBoundingBox(route);
-                
         printCaches(filteredCaches);
+        
+        return true;
     }
 
     public String getTripLength() {
@@ -279,14 +285,14 @@ public class MainModel {
         mapName = prefs.get("map", null);
 
         if (mapName == null) {
-            informationDialogObserver.update("Chybejici mapa", "Pridejte mapu do slozky data/maps a vyberte ji v nastaveni.");
+            informationDialogObserver.show("Chybejici mapa", "Pridejte mapu do slozky data/maps a vyberte ji v nastaveni.");
             return;
         }
 
         File mapFile = new File(GeoTrip.DATA_DIRECTORY + MAPS_DIRECTORY + mapName + MAP_EXTENSION);
         File osmFile = new File(GeoTrip.DATA_DIRECTORY + MAPS_DIRECTORY + mapName + OSM_EXTENSION);
         if (!mapFile.exists() || !osmFile.exists()) {
-            errorDialogObserver.update("Chybejici mapa", "Soubor s mapou nenalezen.");
+            errorDialogObserver.show("Chybejici mapa", "Soubor s mapou nenalezen.");
             return;
         }
         
@@ -301,7 +307,7 @@ public class MainModel {
             iconNotFound = GRAPHIC_FACTORY.createResourceBitmap(iconNotFoundIS, 0);
             iconRef = GRAPHIC_FACTORY.createResourceBitmap(iconRefIS, 0);
         } catch (IOException | IllegalArgumentException ex) {
-            errorDialogObserver.update("Chybejici ikona", "");
+            errorDialogObserver.show("Chybejici ikona", "");
         } 
     }
     

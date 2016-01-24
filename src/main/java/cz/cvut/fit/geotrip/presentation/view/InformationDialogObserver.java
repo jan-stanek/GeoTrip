@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
  */
 public class InformationDialogObserver {
 
-    public void update(String title, String text) {
+    public void show(String title, String text) {
         JOptionPane.showMessageDialog(null, text, title, JOptionPane.INFORMATION_MESSAGE);
     }
     

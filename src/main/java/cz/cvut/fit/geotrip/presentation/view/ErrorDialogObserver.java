@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
  */
 public class ErrorDialogObserver {
 
-    public void update(String title, String text) {
+    public void show(String title, String text) {
         JOptionPane.showMessageDialog(null, text, title, JOptionPane.ERROR_MESSAGE);
     }
     

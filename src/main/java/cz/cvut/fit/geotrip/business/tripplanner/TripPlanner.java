@@ -139,11 +139,14 @@ private PlanningDialogObserver planningDialogObserver;
     }
 
     public List<GeoPoint> getTripPoints() {
-        LinkedList<GeoPoint> points = new LinkedList<>();
-        for (int i = 0; i < route.size() - 1; i++) {
-            points.addAll(getRoutePoints(route.get(i), route.get(i + 1)));
+        if (caches.size() > 0) {
+            LinkedList<GeoPoint> points = new LinkedList<>();
+            for (int i = 0; i < route.size() - 1; i++) {
+                points.addAll(getRoutePoints(route.get(i), route.get(i + 1)));
+            }
+            return points;
         }
-        return points;
+        return null;
     }
 
     private void removeTooDistantCaches() {
