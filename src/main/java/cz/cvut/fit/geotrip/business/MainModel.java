@@ -6,6 +6,7 @@ import cz.cvut.fit.geotrip.GeoTrip;
 import cz.cvut.fit.geotrip.business.router.Router;
 import cz.cvut.fit.geotrip.business.router.impl.RouterGH;
 import cz.cvut.fit.geotrip.business.tripplanner.TripPlanner;
+import cz.cvut.fit.geotrip.data.GpxExport;
 import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import cz.cvut.fit.geotrip.data.entities.GeoPlace;
 import cz.cvut.fit.geotrip.data.dao.CacheDAO;
@@ -91,6 +92,8 @@ public class MainModel {
     private final GeoPlace refPoint;
     
     private TripPlanner tripPlanner;
+    
+    List<GeoPlace> trip;
     
     private InformationDialogObserver informationDialogObserver;
     private ErrorDialogObserver errorDialogObserver;
@@ -213,7 +216,8 @@ public class MainModel {
         
         planningDialogObserver.show();
         
-        List<GeoPoint> route = tripPlanner.getTripPoints();
+        List<GeoPoint> route = tripPlanner.getTripRoutePoints();
+        trip = tripPlanner.getTripPoints();
         
         if (route == null) {
             errorDialogObserver.show("No trip found", "No trip was found.");
@@ -240,6 +244,11 @@ public class MainModel {
     
     public String getTripCaches() {
         return String.format("%d", tripPlanner.getTripCaches());
+    }
+    
+    public void exportToGpx(File file) {
+        GpxExport gpxExport = new GpxExport(file);
+        gpxExport.export(trip);
     }
     
     private void findInstalledMaps() {

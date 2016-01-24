@@ -138,17 +138,30 @@ private PlanningDialogObserver planningDialogObserver;
         return caches.size();
     }
 
-    public List<GeoPoint> getTripPoints() {
+    public List<GeoPoint> getTripRoutePoints() {
         if (caches.size() > 0) {
             LinkedList<GeoPoint> points = new LinkedList<>();
             for (int i = 0; i < route.size() - 1; i++) {
-                points.addAll(getRoutePoints(route.get(i), route.get(i + 1)));
+                points.addAll(TripPlanner.this.getRoutePoints(route.get(i), route.get(i + 1)));
             }
             return points;
         }
         return null;
     }
 
+    public List<GeoPlace> getTripPoints() {
+        if (caches.size() > 0) {
+            LinkedList<GeoPlace> places = new LinkedList<>();
+            places.add(ref);
+            for (int i = 1; i < route.size() - 1; i++) {
+                places.add(getCache(route.get(i)));
+            }
+            places.add(ref);
+            return places;
+        }
+        return null;
+    }
+    
     private void removeTooDistantCaches() {
         for (int i = 0; i < caches.size(); i++) {
             GeoCache c = caches.get(i);
@@ -268,6 +281,10 @@ private PlanningDialogObserver planningDialogObserver;
         return timeMatrix[from][to];
     }
 
+    private GeoCache getCache(int cache) {
+        return caches.get(cache - 1);
+    }
+    
     private long getCacheTime(int cache) {
         return caches.get(cache - 1).getDifficulty() * 5 * 60 * 1000;
     }

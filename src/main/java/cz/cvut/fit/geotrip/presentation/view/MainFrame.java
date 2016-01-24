@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cvut.fit.geotrip.presentation.view;
 
 import com.jidesoft.swing.RangeSlider;
@@ -12,6 +7,7 @@ import cz.cvut.fit.geotrip.presentation.controller.MapSelectAction;
 import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import cz.cvut.fit.geotrip.business.MainModel;
 import cz.cvut.fit.geotrip.data.entities.GeoPoint;
+import cz.cvut.fit.geotrip.presentation.controller.GpxExportAction;
 import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.net.URL;
@@ -58,6 +54,7 @@ public class MainFrame extends javax.swing.JFrame {
     private RangeSlider sliderDifficulty;
     private RangeSlider sliderTerrain;
 
+    private final GpxExportAction gpxExportAction;
     private final MapImportAction mapImportAction;
     private final List<JRadioButtonMenuItem> mapMenuItems;
 
@@ -66,6 +63,10 @@ public class MainFrame extends javax.swing.JFrame {
         createRangeSliders();
         
         this.model = model;
+        
+        gpxExportAction = new GpxExportAction("Exportovat do GPX", this, model);
+        menuExport.setAction(gpxExportAction);
+        menuExport.setEnabled(false);
         
         mapImportAction = new MapImportAction("Importovat mapu", this, model);
         menuImportMap.setAction(mapImportAction);
@@ -128,6 +129,10 @@ public class MainFrame extends javax.swing.JFrame {
         model.init();
     }
      
+    public void setExportEnabled(boolean enabled) {
+        menuExport.setEnabled(enabled);
+    }
+    
     private void createRangeSliders() {
         Hashtable labelTable = new Hashtable();
         labelTable.put(1, new JLabel("1"));
