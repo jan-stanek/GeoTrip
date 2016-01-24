@@ -8,27 +8,31 @@ import cz.cvut.fit.geotrip.business.router.impl.RouterGH;
 import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import cz.cvut.fit.geotrip.data.entities.GeoPlace;
 import cz.cvut.fit.geotrip.data.entities.GeoPoint;
+import cz.cvut.fit.geotrip.presentation.view.PlanningDialogObserver;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author jan
  */
-public class TripPlanner {
-    
+public class TripPlanner implements Runnable {
+
     final static int EXACT_MAX = 17;
     final static int MATRIX_MAX = 40;
-   
+
     private final String mapName;
     private final String vehicle;
-    private GeoPlace ref;
-    private double maxLength;
+    private final GeoPlace ref;
+    private final double maxLength;
     private double length;
-    private int containerPriority;
-    private int difficultyPriority;
-    private int terrainPriority;
-
+    private final int containerPriority;
+    private final int difficultyPriority;
+    private final int terrainPriority;
+private PlanningDialogObserver planningDialogObserver;
+    
     private int nodes;
     private List<Integer> route;
     private List<GeoCache> caches;
@@ -38,38 +42,40 @@ public class TripPlanner {
     private List[][] routeMatrix;
 
     private final Router router;
-    
-    
-    public TripPlanner(String mapName, String vehicle) {
+
+    public TripPlanner(String mapName, String vehicle, GeoPlace ref, List<GeoCache> caches,
+            double maxLength, int containerPriority, int difficultyPriority, int terrainPriority,
+            PlanningDialogObserver planningDialogObserver) {
         this.mapName = mapName;
         this.vehicle = vehicle;
-        
         route = new LinkedList<>();
         router = new RouterGH();
-    }
-    
-    public void plan(GeoPlace ref, List<GeoCache> caches, double maxLength, int containerPriority, int difficultyPriority, int terrainPriority) {
         this.ref = ref;
         this.caches = new LinkedList<>(caches);
         this.maxLength = maxLength;
         this.containerPriority = containerPriority;
         this.difficultyPriority = difficultyPriority;
         this.terrainPriority = terrainPriority;
-        
-        nodes = caches.size()+1;
+        this.planningDialogObserver = planningDialogObserver;
+    }
+
+    @Override
+    public void run() {
+        nodes = caches.size() + 1;
         Planner planner;
-        
+
         if (nodes > MATRIX_MAX) {
             distanceMatrix = new double[nodes][nodes];
             timeMatrix = new long[nodes][nodes];
             routeMatrix = new LinkedList[nodes][nodes];
-            
-            for (int i = 0; i < nodes-1; i++) {
+
+            for (int i = 0; i < nodes - 1; i++) {
                 GeoCache tmp = caches.get(i);
-                for (int j = 0; j < i; j++) 
+                for (int j = 0; j < i; j++) {
                     distanceMatrix[i][j] = distanceMatrix[j][i] = tmp.getCircleDistance(caches.get(j));
+                }
             }
-            
+
             removeTooDistantCaches();
             rankCaches();
 
@@ -78,63 +84,68 @@ public class TripPlanner {
                 planner.plan(nodes, distanceMatrix);
                 length = planner.getLength();
 
-                if (length > maxLength)
+                if (length > maxLength) {
                     removeCache(rankedCaches.getLast().getGeoCache());
-                else
+                } else {
                     break;
+                }
             }
         }
-        
-        router.init(mapName, vehicle, ref, this.caches);
+
+        router.init(mapName, vehicle, ref, caches);
         distanceMatrix = router.getDistanceMatrix();
         timeMatrix = router.getTimeMatrix();
         routeMatrix = router.getRouteMatrix();
         removeTooDistantCaches();
         rankCaches();
-        
+
         while (true) {
-            if (nodes > EXACT_MAX)
+            if (nodes > EXACT_MAX) {
                 planner = new FastPlanner();
-            else
+            } else {
                 planner = new ExactPlanner();
+            }
             planner.plan(nodes, distanceMatrix);
             length = planner.getLength();
-            
-            if (length > maxLength)
+
+            if (length > maxLength) {
                 removeCache(rankedCaches.getLast().getGeoCache());
-            else
+            } else {
                 break;
+            }
         }
         route = planner.getRoute();
+        
+        planningDialogObserver.hide();
     }
 
     public double getTripLength() {
         return length;
     }
-    
+
     public long getTripTime() {
         long time = 0;
         int i;
-        for (i = 0; i < route.size()-2; i++) {
-            time += getRouteTime(route.get(i), route.get(i+1));
-            time += getCacheTime(route.get(i+1));
+        for (i = 0; i < route.size() - 2; i++) {
+            time += getRouteTime(route.get(i), route.get(i + 1));
+            time += getCacheTime(route.get(i + 1));
         }
-        time += getRouteTime(route.get(i), route.get(i+1));
+        time += getRouteTime(route.get(i), route.get(i + 1));
         return time;
     }
-    
+
     public int getTripCaches() {
         return caches.size();
     }
 
     public List<GeoPoint> getTripPoints() {
         LinkedList<GeoPoint> points = new LinkedList<>();
-        for (int i = 0; i < route.size()-1; i++)
-            points.addAll(getRoutePoints(route.get(i), route.get(i+1)));
+        for (int i = 0; i < route.size() - 1; i++) {
+            points.addAll(getRoutePoints(route.get(i), route.get(i + 1)));
+        }
         return points;
-    }    
-    
-    
+    }
+
     private void removeTooDistantCaches() {
         for (int i = 0; i < caches.size(); i++) {
             GeoCache c = caches.get(i);
@@ -144,22 +155,24 @@ public class TripPlanner {
             }
         }
     }
-    
+
     private void removeCache(GeoCache cache) {
         int index = caches.indexOf(cache) + 1;
-        
-        double[][] tmpDistanceMatrix = new double[nodes-1][nodes-1];
-        long[][] tmpTimeMatrix = new long[nodes-1][nodes-1];
-        List[][] tmpRouteMatrix = new LinkedList[nodes-1][nodes-1];
-        
+
+        double[][] tmpDistanceMatrix = new double[nodes - 1][nodes - 1];
+        long[][] tmpTimeMatrix = new long[nodes - 1][nodes - 1];
+        List[][] tmpRouteMatrix = new LinkedList[nodes - 1][nodes - 1];
+
         int i2 = 0, j2;
         for (int i = 0; i < nodes; i++) {
-            if (i == index)
+            if (i == index) {
                 continue;
+            }
             j2 = 0;
             for (int j = 0; j < nodes; j++) {
-                if (j == index)
+                if (j == index) {
                     continue;
+                }
                 tmpDistanceMatrix[i2][j2] = distanceMatrix[i][j];
                 tmpTimeMatrix[i2][j2] = timeMatrix[i][j];
                 tmpRouteMatrix[i2][j2] = routeMatrix[i][j];
@@ -167,7 +180,7 @@ public class TripPlanner {
             }
             i2++;
         }
-        
+
         distanceMatrix = tmpDistanceMatrix;
         timeMatrix = tmpTimeMatrix;
         routeMatrix = tmpRouteMatrix;
@@ -175,7 +188,7 @@ public class TripPlanner {
         nodes--;
         rankCaches();
     }
-    
+
     private void rankCaches() {
         rankedCaches = new RankedCacheList();
         for (GeoCache c : caches) {
@@ -189,66 +202,70 @@ public class TripPlanner {
             rankedCaches.add(rc);
         }
         rankedCaches.normalize();
-    }    
-    
+    }
+
     private double countDistanceFromRef(GeoCache to) {
-        return distanceMatrix[0][caches.indexOf(to)+1];
+        return distanceMatrix[0][caches.indexOf(to) + 1];
     }
-    
+
     private double countDistanceToRef(GeoCache from) {
-        return distanceMatrix[caches.indexOf(from)+1][0];
+        return distanceMatrix[caches.indexOf(from) + 1][0];
     }
-    
+
     private double rankRefDistance(GeoCache to) {
         return countDistanceFromRef(to);
     }
-    
+
     private double rankOthDistance(GeoCache from) {
         double res = 0;
-        int index = caches.indexOf(from)+1;
-        for (int i = 1; i < nodes; i++)
+        int index = caches.indexOf(from) + 1;
+        for (int i = 1; i < nodes; i++) {
             res += distanceMatrix[index][i];
+        }
         return res;
     }
-    
+
     private double rankContainer(GeoCache c) {
-        if (containerPriority == 0)
+        if (containerPriority == 0) {
             return 0;
-        else if (c.getContainer().getRank() == 0)
+        } else if (c.getContainer().getRank() == 0) {
             return 2.5;
-        else if (containerPriority == 1)
+        } else if (containerPriority == 1) {
             return c.getContainer().getRank();
-        else
+        } else {
             return 5 - c.getContainer().getRank();
+        }
     }
-    
+
     private double rankDifficulty(GeoCache c) {
-        if (difficultyPriority == 0)
+        if (difficultyPriority == 0) {
             return 0;
-        else if (difficultyPriority == 1)
+        } else if (difficultyPriority == 1) {
             return c.getDifficulty();
-        else 
+        } else {
             return 10 - c.getDifficulty();
+        }
     }
-    
+
     private double rankTerrain(GeoCache c) {
-        if (terrainPriority == 0)
+        if (terrainPriority == 0) {
             return 0;
-        else if (terrainPriority == 1)
+        } else if (terrainPriority == 1) {
             return c.getTerrain();
-        else 
+        } else {
             return 10 - c.getTerrain();
+        }
     }
-    
+
     private List<GeoPoint> getRoutePoints(int from, int to) {
         return routeMatrix[from][to];
     }
-    
+
     private long getRouteTime(int from, int to) {
         return timeMatrix[from][to];
     }
-    
+
     private long getCacheTime(int cache) {
-        return caches.get(cache-1).getDifficulty() * 5 * 60 * 1000;
+        return caches.get(cache - 1).getDifficulty() * 5 * 60 * 1000;
     }
 }

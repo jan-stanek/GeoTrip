@@ -17,10 +17,12 @@ import cz.cvut.fit.geotrip.presentation.view.ErrorDialogObserver;
 import cz.cvut.fit.geotrip.presentation.view.InformationDialogObserver;
 import cz.cvut.fit.geotrip.presentation.view.InstalledMapsObserver;
 import cz.cvut.fit.geotrip.presentation.view.MapImportDialogObserver;
+import cz.cvut.fit.geotrip.presentation.view.PlanningDialogObserver;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import static java.lang.Thread.sleep;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
@@ -95,6 +97,7 @@ public class MainModel {
     private InstalledMapsObserver installedMapsObserver;
     private CenterMapObserver centerMapObserver;
     private MapImportDialogObserver mapImportDialogObserver;
+    private PlanningDialogObserver planningDialogObserver;
 
     
     public MainModel() {
@@ -136,6 +139,10 @@ public class MainModel {
         this.mapImportDialogObserver = mapImportDialogObserver;
     }
 
+    public void registerPlanningDialogObserver(PlanningDialogObserver planningDialogObserver) {
+        this.planningDialogObserver = planningDialogObserver;
+    }
+    
     public void setMapViewPosition(MapViewPosition mapViewPosition) {
         this.mapViewPosition = mapViewPosition;
     }
@@ -199,9 +206,12 @@ public class MainModel {
         removeRoute();
 
         List<GeoCache> filteredCaches = getFilteredCaches(distance, vehicle, found, container, difficultyLow, difficultyHigh, terrainLow, terrainHigh);
+
+        tripPlanner = new TripPlanner(mapName, vehicle, refPoint, filteredCaches, distance, containerPriority, difficultyPriority, terrainPriority, planningDialogObserver);
         
-        tripPlanner = new TripPlanner(mapName, vehicle);
-        tripPlanner.plan(refPoint, filteredCaches, distance, containerPriority, difficultyPriority, terrainPriority);
+        new Thread(tripPlanner).start();
+        
+        planningDialogObserver.show();
         
         List<GeoPoint> route = tripPlanner.getTripPoints();
         addRoute(route);

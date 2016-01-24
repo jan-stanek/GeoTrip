@@ -76,6 +76,7 @@ public class MainFrame extends javax.swing.JFrame {
         model.registerCenterMapObserver(new CenterMapObserver(this));
         model.registerInformationDialogObserver(new InformationDialogObserver());
         model.registerErrorDialogObserver(new ErrorDialogObserver());
+        model.registerPlanningDialogObserver(new PlanningDialogObserver(this));
     }
     
     public void init() {
