@@ -64,11 +64,11 @@ public class MainFrame extends javax.swing.JFrame {
         
         this.model = model;
         
-        gpxExportAction = new GpxExportAction("Exportovat do GPX", this, model);
+        gpxExportAction = new GpxExportAction("Export trasy", this, model);
         menuExport.setAction(gpxExportAction);
         menuExport.setEnabled(false);
         
-        mapImportAction = new MapImportAction("Importovat mapu", this, model);
+        mapImportAction = new MapImportAction("Import map", this, model);
         menuImportMap.setAction(mapImportAction);
         
         mapMenuItems = new LinkedList<>();
