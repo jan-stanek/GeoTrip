@@ -1,5 +1,6 @@
 package cz.cvut.fit.geotrip.business.tripplanner;
 
+import cz.cvut.fit.geotrip.business.RoutingTypes;
 import cz.cvut.fit.geotrip.business.planner.Planner;
 import cz.cvut.fit.geotrip.business.planner.impl.ExactPlanner;
 import cz.cvut.fit.geotrip.business.planner.impl.FastPlanner;
@@ -24,14 +25,14 @@ public class TripPlanner implements Runnable {
     final static int MATRIX_MAX = 40;
 
     private final String mapName;
-    private final String vehicle;
+    private final RoutingTypes vehicle;
     private final GeoPlace ref;
     private final double maxLength;
     private double length;
     private final int containerPriority;
     private final int difficultyPriority;
     private final int terrainPriority;
-private PlanningDialogObserver planningDialogObserver;
+    private PlanningDialogObserver planningDialogObserver;
     
     private int nodes;
     private List<Integer> route;
@@ -43,7 +44,7 @@ private PlanningDialogObserver planningDialogObserver;
 
     private final Router router;
 
-    public TripPlanner(String mapName, String vehicle, GeoPlace ref, List<GeoCache> caches,
+    public TripPlanner(String mapName, RoutingTypes vehicle, GeoPlace ref, List<GeoCache> caches,
             double maxLength, int containerPriority, int difficultyPriority, int terrainPriority,
             PlanningDialogObserver planningDialogObserver) {
         this.mapName = mapName;

@@ -2,6 +2,7 @@ package cz.cvut.fit.geotrip.presentation.controller;
 
 import cz.cvut.fit.geotrip.data.entities.CacheContainer;
 import cz.cvut.fit.geotrip.business.MainModel;
+import cz.cvut.fit.geotrip.business.RoutingTypes;
 import cz.cvut.fit.geotrip.presentation.view.MainFrame;
 import java.awt.Desktop;
 import java.io.IOException;
@@ -72,26 +73,13 @@ public class MainController {
         setZoom(view.getZoomLevel() - 1);
     }
     
-    public void planTrip(String distanceStr, String vehicleStr, boolean found, boolean containerMicro, boolean containerSmall, boolean containerRegular,
+    public void planTrip(String distanceStr, RoutingTypes vehicle, boolean found, boolean containerMicro, boolean containerSmall, boolean containerRegular,
             boolean containerLarge, boolean containerOther, int difficultyLow, int difficultyHigh, int terrainLow, int terrainHigh,
             boolean containerPriorityI, boolean containerPriorityL, boolean containerPriorityH, boolean difficultyPriorityI, boolean difficultyPriorityL,
             boolean difficultyPriorityH, boolean terrainPriorityI, boolean terrainPriorityL, boolean terrainPriorityH) {
         
         int distance = Integer.parseInt(distanceStr);
         
-        String vehicle = "";
-        switch(vehicleStr) {
-            case "chůze":
-                vehicle = "foot";
-                break;
-            case "kolo":
-                vehicle = "bike";
-                break;
-            case "auto":
-                vehicle = "car";
-                break;
-        }
-                
         int container = 0;
 
         if (containerMicro)

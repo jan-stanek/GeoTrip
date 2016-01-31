@@ -203,12 +203,12 @@ public class MainModel {
         return boundingBox;
     }
 
-    public boolean planTrip(int distance, String vehicle, boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow,
+    public boolean planTrip(int distance, RoutingTypes vehicle, boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow,
             int terrainHigh, int containerPriority, int difficultyPriority, int terrainPriority) {
         removeCacheMarkers();
         removeRoute();
 
-        List<GeoCache> filteredCaches = getFilteredCaches(distance, vehicle, found, container, difficultyLow, difficultyHigh, terrainLow, terrainHigh);
+        List<GeoCache> filteredCaches = getFilteredCaches(distance, found, container, difficultyLow, difficultyHigh, terrainLow, terrainHigh);
 
         tripPlanner = new TripPlanner(mapName, vehicle, refPoint, filteredCaches, distance, containerPriority, difficultyPriority, terrainPriority, planningDialogObserver);
         
@@ -415,7 +415,7 @@ public class MainModel {
             boundingBox = boundingBox.extend(new BoundingBox(p.getLat(), p.getLon(), p.getLat(), p.getLon()));
     }
     
-    private List<GeoCache> getFilteredCaches(final int distance, String vehicle, final boolean found, final int container,
+    private List<GeoCache> getFilteredCaches(final int distance, final boolean found, final int container,
             final int difficultyLow, final int difficultyHigh, final int terrainLow, final int terrainHigh) {
                 Predicate<GeoCache> predicateDistance = new Predicate<GeoCache>() {
             @Override

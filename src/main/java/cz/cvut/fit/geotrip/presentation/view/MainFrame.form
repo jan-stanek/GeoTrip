@@ -51,7 +51,7 @@
     <Property name="defaultCloseOperation" type="int" value="3"/>
     <Property name="title" type="java.lang.String" value="GeoTrip"/>
     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-      <Dimension value="[800, 560]"/>
+      <Dimension value="[880, 630]"/>
     </Property>
   </Properties>
   <SyntheticProperties>
@@ -121,7 +121,7 @@
                   <Component id="panelPreferences" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="buttonPlan" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace pref="20" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -143,6 +143,7 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="labelLength" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="labelRouting" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="labelRouting1" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="4" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
@@ -151,7 +152,8 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="labelKm" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <Component id="comboRouting" max="32767" attributes="0"/>
+                          <Component id="comboRouting" pref="197" max="32767" attributes="0"/>
+                          <Component id="comboRouting1" alignment="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -168,6 +170,11 @@
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="comboRouting" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="labelRouting" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="comboRouting1" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="labelRouting1" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -192,18 +199,27 @@
             </Component>
             <Component class="javax.swing.JComboBox" name="comboRouting">
               <Properties>
-                <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                  <StringArray count="3">
-                    <StringItem index="0" value="ch&#x16f;ze"/>
-                    <StringItem index="1" value="kolo"/>
-                    <StringItem index="2" value="auto"/>
-                  </StringArray>
+                <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="new DefaultComboBoxModel(RoutingTypes.values())" type="code"/>
                 </Property>
+                <Property name="toolTipText" type="java.lang.String" value=""/>
               </Properties>
             </Component>
             <Component class="javax.swing.JLabel" name="labelKm">
               <Properties>
                 <Property name="text" type="java.lang.String" value="km"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JComboBox" name="comboRouting1">
+              <Properties>
+                <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="new DefaultComboBoxModel(TripTypes.values())&#xd;&#xa;" type="code"/>
+                </Property>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="labelRouting1">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Typ v&#xfd;letu:"/>
               </Properties>
             </Component>
           </SubComponents>

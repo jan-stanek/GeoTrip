@@ -6,6 +6,8 @@ import cz.cvut.fit.geotrip.presentation.controller.MapImportAction;
 import cz.cvut.fit.geotrip.presentation.controller.MapSelectAction;
 import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import cz.cvut.fit.geotrip.business.MainModel;
+import cz.cvut.fit.geotrip.business.RoutingTypes;
+import cz.cvut.fit.geotrip.business.TripTypes;
 import cz.cvut.fit.geotrip.data.entities.GeoPoint;
 import cz.cvut.fit.geotrip.presentation.controller.GpxExportAction;
 import java.awt.Image;
@@ -16,6 +18,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JRadioButtonMenuItem;
@@ -270,6 +273,8 @@ public class MainFrame extends javax.swing.JFrame {
         labelRouting = new javax.swing.JLabel();
         comboRouting = new javax.swing.JComboBox();
         labelKm = new javax.swing.JLabel();
+        comboRouting1 = new javax.swing.JComboBox();
+        labelRouting1 = new javax.swing.JLabel();
         panelFilter = new javax.swing.JPanel();
         panelFilterState = new javax.swing.JPanel();
         radioAll = new javax.swing.JRadioButton();
@@ -328,7 +333,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("GeoTrip");
-        setMinimumSize(new java.awt.Dimension(800, 560));
+        setMinimumSize(new java.awt.Dimension(880, 630));
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
                 MainFrame.this.componentResized(evt);
@@ -344,9 +349,15 @@ public class MainFrame extends javax.swing.JFrame {
 
         labelRouting.setText("Trasa pro:");
 
-        comboRouting.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "chůze", "kolo", "auto" }));
+        comboRouting.setModel(new DefaultComboBoxModel(RoutingTypes.values()));
+        comboRouting.setToolTipText("");
 
         labelKm.setText("km");
+
+        comboRouting1.setModel(new DefaultComboBoxModel(TripTypes.values())
+        );
+
+        labelRouting1.setText("Typ výletu:");
 
         javax.swing.GroupLayout panelTripLayout = new javax.swing.GroupLayout(panelTrip);
         panelTrip.setLayout(panelTripLayout);
@@ -355,14 +366,16 @@ public class MainFrame extends javax.swing.JFrame {
             .addGroup(panelTripLayout.createSequentialGroup()
                 .addGroup(panelTripLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(labelLength)
-                    .addComponent(labelRouting))
+                    .addComponent(labelRouting)
+                    .addComponent(labelRouting1))
                 .addGap(4, 4, 4)
                 .addGroup(panelTripLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelTripLayout.createSequentialGroup()
                         .addComponent(fieldDelka)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(labelKm))
-                    .addComponent(comboRouting, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(comboRouting, 0, 197, Short.MAX_VALUE)
+                    .addComponent(comboRouting1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         panelTripLayout.setVerticalGroup(
             panelTripLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -374,7 +387,11 @@ public class MainFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelTripLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(comboRouting, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(labelRouting)))
+                    .addComponent(labelRouting))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelTripLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(comboRouting1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(labelRouting1)))
         );
 
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("texts"); // NOI18N
@@ -640,7 +657,7 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(panelPreferences, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(buttonPlan)
-                .addContainerGap())
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         panelRight.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -938,7 +955,7 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_sliderZoomStateChanged
 
     private void buttonPlanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonPlanActionPerformed
-        controller.planTrip(fieldDelka.getText(), comboRouting.getSelectedItem().toString(), radioAll.isSelected(),
+        controller.planTrip(fieldDelka.getText(), (RoutingTypes)comboRouting.getSelectedItem(), radioAll.isSelected(),
                 checkMicro.isSelected(), checkSmall.isSelected(), checkRegular.isSelected(), checkLarge.isSelected(), checkOther.isSelected(),
                 sliderDifficulty.getLowValue(), sliderDifficulty.getHighValue(), sliderTerrain.getLowValue(), sliderTerrain.getHighValue(),
                 radioContainerIgnore.isSelected(), radioContainerSmall.isSelected(), radioContainerLarge.isSelected(),
@@ -965,6 +982,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JCheckBox checkRegular;
     private javax.swing.JCheckBox checkSmall;
     private javax.swing.JComboBox comboRouting;
+    private javax.swing.JComboBox comboRouting1;
     private javax.swing.JTextField fieldDelka;
     private javax.swing.ButtonGroup groupContainer;
     private javax.swing.ButtonGroup groupDifficulty;
@@ -975,6 +993,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel labelKm;
     private javax.swing.JLabel labelLength;
     private javax.swing.JLabel labelRouting;
+    private javax.swing.JLabel labelRouting1;
     private javax.swing.JLabel labelTerrain;
     private javax.swing.JLabel labelTripCaches;
     private javax.swing.JLabel labelTripKm;

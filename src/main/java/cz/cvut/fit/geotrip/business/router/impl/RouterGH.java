@@ -8,6 +8,7 @@ import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.util.PointList;
 import cz.cvut.fit.geotrip.GeoTrip;
 import cz.cvut.fit.geotrip.business.MainModel;
+import cz.cvut.fit.geotrip.business.RoutingTypes;
 import cz.cvut.fit.geotrip.business.router.Router;
 import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import cz.cvut.fit.geotrip.data.entities.GeoPlace;
@@ -37,10 +38,10 @@ public class RouterGH implements Router {
    
     
     @Override
-    public void init(String mapName, String vehicle, GeoPlace ref, List<GeoCache> caches) {
-        gh = new GraphHopper().setEncodingManager(new EncodingManager(vehicle)).forDesktop();
-        gh.load(GeoTrip.DATA_DIRECTORY + GH_DIRECTORY + mapName + "/" + vehicle);
-        this.vehicle = vehicle;
+    public void init(String mapName, RoutingTypes vehicle, GeoPlace ref, List<GeoCache> caches) {
+        this.vehicle = vehicleToString(vehicle);
+        gh = new GraphHopper().setEncodingManager(new EncodingManager(this.vehicle)).forDesktop();
+        gh.load(GeoTrip.DATA_DIRECTORY + GH_DIRECTORY + mapName + "/" + this.vehicle);
         countMatrix(ref, caches);
     }
     
@@ -145,5 +146,17 @@ public class RouterGH implements Router {
                 gh.importOrLoad();
             }
         };
+    }
+    
+    private String vehicleToString(RoutingTypes vehicle) {
+        switch(vehicle) {
+            case FOOT:
+                return "foot";
+            case BIKE:
+                return "bike";
+            case CAR:
+                return "car";
+        }
+        return null;
     }
 }
