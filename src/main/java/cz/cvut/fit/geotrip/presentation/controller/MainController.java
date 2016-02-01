@@ -3,6 +3,8 @@ package cz.cvut.fit.geotrip.presentation.controller;
 import cz.cvut.fit.geotrip.data.entities.CacheContainer;
 import cz.cvut.fit.geotrip.business.MainModel;
 import cz.cvut.fit.geotrip.business.RoutingTypes;
+import cz.cvut.fit.geotrip.business.TripType;
+import cz.cvut.fit.geotrip.business.tripplanner.TripPlanner;
 import cz.cvut.fit.geotrip.presentation.view.MainFrame;
 import java.awt.Desktop;
 import java.io.IOException;
@@ -73,7 +75,7 @@ public class MainController {
         setZoom(view.getZoomLevel() - 1);
     }
     
-    public void planTrip(String distanceStr, RoutingTypes vehicle, boolean found, boolean containerMicro, boolean containerSmall, boolean containerRegular,
+    public void planTrip(String distanceStr, RoutingTypes vehicle, TripType tripType, boolean found, boolean containerMicro, boolean containerSmall, boolean containerRegular,
             boolean containerLarge, boolean containerOther, int difficultyLow, int difficultyHigh, int terrainLow, int terrainHigh,
             boolean containerPriorityI, boolean containerPriorityL, boolean containerPriorityH, boolean difficultyPriorityI, boolean difficultyPriorityL,
             boolean difficultyPriorityH, boolean terrainPriorityI, boolean terrainPriorityL, boolean terrainPriorityH) {
@@ -100,7 +102,7 @@ public class MainController {
         view.hideCacheInfo();
         view.hideTripInfo();
         
-        if (model.planTrip(distance * 1000, vehicle, found, container, difficultyLow, difficultyHigh,
+        if (model.planTrip(distance * 1000, vehicle, tripType, found, container, difficultyLow, difficultyHigh,
                 terrainLow, terrainHigh, containerPriority, difficultyPriority, terrainPriority)) {
             view.setExportEnabled(true);
             view.showTripInfo(model.getTripLength(), model.getTripTime(), model.getTripCaches());

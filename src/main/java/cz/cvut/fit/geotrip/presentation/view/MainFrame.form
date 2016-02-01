@@ -143,7 +143,7 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="labelLength" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="labelRouting" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="labelRouting1" min="-2" max="-2" attributes="0"/>
+                          <Component id="labelTripType" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="4" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
@@ -153,7 +153,7 @@
                               <Component id="labelKm" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <Component id="comboRouting" pref="197" max="32767" attributes="0"/>
-                          <Component id="comboRouting1" alignment="0" max="32767" attributes="0"/>
+                          <Component id="comboTripType" alignment="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -173,8 +173,8 @@
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="comboRouting1" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="labelRouting1" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="comboTripType" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="labelTripType" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -210,14 +210,14 @@
                 <Property name="text" type="java.lang.String" value="km"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JComboBox" name="comboRouting1">
+            <Component class="javax.swing.JComboBox" name="comboTripType">
               <Properties>
                 <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                   <Connection code="new DefaultComboBoxModel(TripTypes.values())&#xd;&#xa;" type="code"/>
                 </Property>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="labelRouting1">
+            <Component class="javax.swing.JLabel" name="labelTripType">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Typ v&#xfd;letu:"/>
               </Properties>

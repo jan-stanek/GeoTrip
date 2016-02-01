@@ -1,6 +1,7 @@
 package cz.cvut.fit.geotrip.business.tripplanner;
 
 import cz.cvut.fit.geotrip.business.RoutingTypes;
+import cz.cvut.fit.geotrip.business.TripType;
 import cz.cvut.fit.geotrip.business.planner.Planner;
 import cz.cvut.fit.geotrip.business.planner.impl.ExactPlanner;
 import cz.cvut.fit.geotrip.business.planner.impl.FastPlanner;
@@ -12,28 +13,24 @@ import cz.cvut.fit.geotrip.data.entities.GeoPoint;
 import cz.cvut.fit.geotrip.presentation.view.PlanningDialogObserver;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-/**
- *
- * @author jan
- */
 public class TripPlanner implements Runnable {
 
     final static int EXACT_MAX = 17;
-    final static int MATRIX_MAX = 40;
+    final static int MATRIX_MAX = 50;
 
     private final String mapName;
     private final RoutingTypes vehicle;
+    private final TripType tripType;
     private final GeoPlace ref;
     private final double maxLength;
     private double length;
     private final int containerPriority;
     private final int difficultyPriority;
     private final int terrainPriority;
-    private PlanningDialogObserver planningDialogObserver;
     
+    private PlanningDialogObserver planningDialogObserver;
+
     private int nodes;
     private List<Integer> route;
     private List<GeoCache> caches;
@@ -44,11 +41,12 @@ public class TripPlanner implements Runnable {
 
     private final Router router;
 
-    public TripPlanner(String mapName, RoutingTypes vehicle, GeoPlace ref, List<GeoCache> caches,
-            double maxLength, int containerPriority, int difficultyPriority, int terrainPriority,
-            PlanningDialogObserver planningDialogObserver) {
+    public TripPlanner(String mapName, RoutingTypes vehicle, TripType tripType, GeoPlace ref,
+            List<GeoCache> caches, double maxLength, int containerPriority, int difficultyPriority,
+            int terrainPriority, PlanningDialogObserver planningDialogObserver) {
         this.mapName = mapName;
         this.vehicle = vehicle;
+        this.tripType = tripType;
         route = new LinkedList<>();
         router = new RouterGH();
         this.ref = ref;
@@ -78,7 +76,6 @@ public class TripPlanner implements Runnable {
             }
 
             removeTooDistantCaches();
-            rankCaches();
 
             while (nodes > MATRIX_MAX) {
                 planner = new FastPlanner();
@@ -98,7 +95,6 @@ public class TripPlanner implements Runnable {
         timeMatrix = router.getTimeMatrix();
         routeMatrix = router.getRouteMatrix();
         removeTooDistantCaches();
-        rankCaches();
 
         while (true) {
             if (nodes > EXACT_MAX) {
@@ -116,7 +112,7 @@ public class TripPlanner implements Runnable {
             }
         }
         route = planner.getRoute();
-        
+
         planningDialogObserver.hide();
     }
 
@@ -162,7 +158,7 @@ public class TripPlanner implements Runnable {
         }
         return null;
     }
-    
+
     private void removeTooDistantCaches() {
         for (int i = 0; i < caches.size(); i++) {
             GeoCache c = caches.get(i);
@@ -171,6 +167,7 @@ public class TripPlanner implements Runnable {
                 i--;
             }
         }
+        rankCaches();
     }
 
     private void removeCache(GeoCache cache) {
@@ -205,7 +202,7 @@ public class TripPlanner implements Runnable {
         nodes--;
         rankCaches();
     }
-
+    
     private void rankCaches() {
         rankedCaches = new RankedCacheList();
         for (GeoCache c : caches) {
@@ -218,7 +215,7 @@ public class TripPlanner implements Runnable {
             rc.setFavoritesRank(c.getFavorites());
             rankedCaches.add(rc);
         }
-        rankedCaches.normalize();
+        rankedCaches.sort(tripType, maxLength, length);
     }
 
     private double countDistanceFromRef(GeoCache to) {
@@ -285,7 +282,7 @@ public class TripPlanner implements Runnable {
     private GeoCache getCache(int cache) {
         return caches.get(cache - 1);
     }
-    
+
     private long getCacheTime(int cache) {
         return caches.get(cache - 1).getDifficulty() * 5 * 60 * 1000;
     }

@@ -203,14 +203,14 @@ public class MainModel {
         return boundingBox;
     }
 
-    public boolean planTrip(int distance, RoutingTypes vehicle, boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow,
+    public boolean planTrip(int distance, RoutingTypes vehicle, TripType tripType, boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow,
             int terrainHigh, int containerPriority, int difficultyPriority, int terrainPriority) {
         removeCacheMarkers();
         removeRoute();
 
         List<GeoCache> filteredCaches = getFilteredCaches(distance, found, container, difficultyLow, difficultyHigh, terrainLow, terrainHigh);
 
-        tripPlanner = new TripPlanner(mapName, vehicle, refPoint, filteredCaches, distance, containerPriority, difficultyPriority, terrainPriority, planningDialogObserver);
+        tripPlanner = new TripPlanner(mapName, vehicle, tripType, refPoint, filteredCaches, distance, containerPriority, difficultyPriority, terrainPriority, planningDialogObserver);
         
         new Thread(tripPlanner).start();
         
