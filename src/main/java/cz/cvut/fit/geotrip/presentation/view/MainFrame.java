@@ -7,10 +7,10 @@ import cz.cvut.fit.geotrip.presentation.controller.MapSelectAction;
 import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import cz.cvut.fit.geotrip.business.MainModel;
 import cz.cvut.fit.geotrip.business.RoutingTypes;
-import cz.cvut.fit.geotrip.business.TripType;
 import cz.cvut.fit.geotrip.business.TripTypes;
 import cz.cvut.fit.geotrip.data.entities.GeoPoint;
 import cz.cvut.fit.geotrip.presentation.controller.GpxExportAction;
+import cz.cvut.fit.geotrip.utils.Texts;
 import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.net.URL;
@@ -37,20 +37,16 @@ import org.mapsforge.map.swing.controller.MapViewComponentListener;
 import org.mapsforge.map.swing.controller.MouseEventListener;
 import org.mapsforge.map.swing.view.MapView;
 
-/**
- *
- * @author jan
- */
 public class MainFrame extends javax.swing.JFrame {
 
     private final MainModel model;
     private MainController controller;
-    
+
     private static final GraphicFactory GRAPHIC_FACTORY = AwtGraphicFactory.INSTANCE;
 
     private MapView mapView;
     private Model mapViewModel;
-    
+
     private final byte ZOOM_MIN = 6;
     private final byte ZOOM_MAX = 20;
     private final byte ZOOM_DEFAULT = 13;
@@ -65,34 +61,35 @@ public class MainFrame extends javax.swing.JFrame {
     public MainFrame(MainModel model) {
         initComponents();
         createRangeSliders();
-        
+
         this.model = model;
-        
-        gpxExportAction = new GpxExportAction("Export trasy", this, model);
+
+        gpxExportAction = new GpxExportAction(Texts.getInstance().getLocalizedText("menuFileExport"), this, model);
         menuExport.setAction(gpxExportAction);
         menuExport.setEnabled(false);
-        
-        mapImportAction = new MapImportAction("Import map", this, model);
+
+        mapImportAction = new MapImportAction(Texts.getInstance().getLocalizedText("menuMapImport"), this, model);
         menuImportMap.setAction(mapImportAction);
-        
+
         mapMenuItems = new LinkedList<>();
-        
+
         model.registerInstalledMapsObserver(new InstalledMapsObserver(this));
         model.registerCenterMapObserver(new CenterMapObserver(this));
-        model.registerInformationDialogObserver(new InformationDialogObserver());
-        model.registerErrorDialogObserver(new ErrorDialogObserver());
+        model.registerInformationDialog(new InformationDialog());
+        model.registerErrorDialog(new ErrorDialog());
         model.registerPlanningDialogObserver(new PlanningDialogObserver(this));
     }
-    
+
     public void init() {
         hideCacheInfo();
         hideTripInfo();
         createMapView();
         setIcon();
     }
-    
+
     public void registerController(MainController controller) {
         this.controller = controller;
+        controller.registerErrorDialog(new ErrorDialog());
     }
 
     private void setIcon(URL img) {
@@ -106,9 +103,9 @@ public class MainFrame extends javax.swing.JFrame {
         mapView = new MapView();
         mapViewModel = mapView.getModel();
         mapView.getMapScaleBar().setVisible(true);
-        
+
         model.setLayers(mapView.getLayerManager().getLayers());
-       
+
         MouseEventListener mouseEventListener = new MouseEventListener(mapViewModel);
         MapViewMouseListener mapViewMouseListener = new MapViewMouseListener(controller, mapView);
         MapViewMouseWheelListener mapViewMouseWheelListener = new MapViewMouseWheelListener(controller);
@@ -124,19 +121,19 @@ public class MainFrame extends javax.swing.JFrame {
         mapViewModel.mapViewPosition.setZoomLevelMax(ZOOM_MAX);
 
         panelMap.add(mapView);
-        
+
         sliderZoom.setMinimum(ZOOM_MIN);
         sliderZoom.setMaximum(ZOOM_MAX);
         sliderZoom.setValue(ZOOM_DEFAULT);
-        
+
         model.setMapViewPosition(mapViewModel.mapViewPosition);
         model.init();
     }
-     
+
     public void setExportEnabled(boolean enabled) {
         menuExport.setEnabled(enabled);
     }
-    
+
     private void createRangeSliders() {
         Hashtable labelTable = new Hashtable();
         labelTable.put(1, new JLabel("1"));
@@ -167,85 +164,89 @@ public class MainFrame extends javax.swing.JFrame {
         sliderTerrain.setFocusable(false);
         panelFilterTerrain.add(sliderTerrain);
     }
- 
+
     public void zoomTo(BoundingBox boundingBox) {
         setMapPosition(boundingBox.getCenterPoint());
-        setZoomLevel(LatLongUtils.zoomForBounds(mapViewModel.mapViewDimension.getDimension(), 
+        setZoomLevel(LatLongUtils.zoomForBounds(mapViewModel.mapViewDimension.getDimension(),
                 boundingBox, mapViewModel.displayModel.getTileSize()));
     }
 
     public void setMapPosition(GeoPoint coordinates) {
         setMapPosition(new LatLong(coordinates.getLat(), coordinates.getLon()));
     }
-    
+
     public void setMapPosition(LatLong coordinates) {
         mapViewModel.mapViewPosition.setCenter(coordinates);
     }
-    
+
     public int getZoomLevel() {
         return mapViewModel.mapViewPosition.getZoomLevel();
     }
 
     public void setZoomLevel(int zoom) {
-        mapViewModel.mapViewPosition.setZoomLevel((byte)zoom);
+        mapViewModel.mapViewPosition.setZoomLevel((byte) zoom);
         sliderZoom.setValue(zoom);
     }
 
     public void showCacheInfo(GeoCache cache) {
         textName.setText(cache.getName());
         textName.setCaretPosition(0);
-        
+
         textCoordinates.setText(cache.getCoordinatesString());
         textContainer.setText(cache.getContainer().getName());
         textDifficulty.setText(cache.getDifficultyString());
         textTerrain.setText(cache.getTerrainString());
-        
+
         buttonLink.setText("<html><a href=\"\">" + cache.getId() + "</a></html>");
-        for (ActionListener al : buttonLink.getActionListeners())
+        for (ActionListener al : buttonLink.getActionListeners()) {
             buttonLink.removeActionListener(al);
+        }
         buttonLink.addActionListener(new OpenLinkListener(controller, cache.getLink()));
-        
+
         panelCacheInfo.setVisible(true);
     }
-    
+
     public void hideCacheInfo() {
         panelCacheInfo.setVisible(false);
     }
-    
+
     public void showTripInfo(String length, String time, String caches) {
         textTripLength.setText(length);
         textTripTime.setText(time);
         textTripCaches.setText(caches);
         panelTripInfo.setVisible(true);
     }
-    
+
     public void hideTripInfo() {
         panelTripInfo.setVisible(false);
     }
-    
+
     public void refreshMapList(List<String> maps) {
-        for (JRadioButtonMenuItem item : mapMenuItems)
+        for (JRadioButtonMenuItem item : mapMenuItems) {
             menuMap.remove(item);
+        }
         mapMenuItems.clear();
-        
+
         ButtonGroup buttonGroup = new ButtonGroup();
         for (String map : maps) {
             MapSelectAction mapSelectAction = new MapSelectAction(map, controller);
             JRadioButtonMenuItem menuItem = new JRadioButtonMenuItem(mapSelectAction);
-            if (map.equals(model.getSelectedMap()))
+            if (map.equals(model.getSelectedMap())) {
                 menuItem.setSelected(true);
+            }
             menuMap.add(menuItem);
             buttonGroup.add(menuItem);
             mapMenuItems.add(menuItem);
         }
     }
-    
+
     public void setLookAndFeel() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) { }
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+        }
     }
-    
+
     private void setIcon() {
         List<Image> icons = new ArrayList<>();
         icons.add(new ImageIcon(getClass().getClassLoader().getResource("icon-small.png")).getImage());
@@ -253,7 +254,7 @@ public class MainFrame extends javax.swing.JFrame {
         icons.add(new ImageIcon(getClass().getClassLoader().getResource("icon.png")).getImage());
         setIconImages(icons);
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -343,12 +344,13 @@ public class MainFrame extends javax.swing.JFrame {
 
         panelTrip.setBorder(javax.swing.BorderFactory.createTitledBorder("Výlet"));
 
-        labelLength.setText("Maximální délka:");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("texts"); // NOI18N
+        labelLength.setText(bundle.getString("labelLength")); // NOI18N
 
         fieldDelka.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         fieldDelka.setText("0");
 
-        labelRouting.setText("Trasa pro:");
+        labelRouting.setText(bundle.getString("labelVehicle")); // NOI18N
 
         comboRouting.setModel(new DefaultComboBoxModel(RoutingTypes.values()));
         comboRouting.setToolTipText("");
@@ -358,7 +360,7 @@ public class MainFrame extends javax.swing.JFrame {
         comboTripType.setModel(new DefaultComboBoxModel(TripTypes.values())
         );
 
-        labelTripType.setText("Typ výletu:");
+        labelTripType.setText(bundle.getString("labelTripType")); // NOI18N
 
         javax.swing.GroupLayout panelTripLayout = new javax.swing.GroupLayout(panelTrip);
         panelTrip.setLayout(panelTripLayout);
@@ -375,7 +377,7 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(fieldDelka)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(labelKm))
-                    .addComponent(comboRouting, 0, 197, Short.MAX_VALUE)
+                    .addComponent(comboRouting, 0, 223, Short.MAX_VALUE)
                     .addComponent(comboTripType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         panelTripLayout.setVerticalGroup(
@@ -395,7 +397,6 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(labelTripType)))
         );
 
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("texts"); // NOI18N
         panelFilter.setBorder(javax.swing.BorderFactory.createTitledBorder(bundle.getString("panelFilter"))); // NOI18N
 
         panelFilterState.setBorder(javax.swing.BorderFactory.createTitledBorder(bundle.getString("panelFilterState"))); // NOI18N
@@ -498,7 +499,7 @@ public class MainFrame extends javax.swing.JFrame {
         panelFilter.setLayout(panelFilterLayout);
         panelFilterLayout.setHorizontalGroup(
             panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(panelFilterTerrain, javax.swing.GroupLayout.DEFAULT_SIZE, 279, Short.MAX_VALUE)
+            .addComponent(panelFilterTerrain, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
             .addComponent(panelFilterDifficulty, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(panelFilterState, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(panelFilterContainer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -521,14 +522,14 @@ public class MainFrame extends javax.swing.JFrame {
         panelPreferencesContainer.setBorder(javax.swing.BorderFactory.createTitledBorder(bundle.getString("panelContainer"))); // NOI18N
 
         groupContainer.add(radioContainerSmall);
-        radioContainerSmall.setText("malá");
+        radioContainerSmall.setText(bundle.getString("radioPreferencesSmall")); // NOI18N
 
         groupContainer.add(radioContainerLarge);
-        radioContainerLarge.setText("velká");
+        radioContainerLarge.setText(bundle.getString("radioPreferencesLarge")); // NOI18N
 
         groupContainer.add(radioContainerIgnore);
         radioContainerIgnore.setSelected(true);
-        radioContainerIgnore.setText("nezáleží");
+        radioContainerIgnore.setText(bundle.getString("radioPreferencesIgnore")); // NOI18N
 
         javax.swing.GroupLayout panelPreferencesContainerLayout = new javax.swing.GroupLayout(panelPreferencesContainer);
         panelPreferencesContainer.setLayout(panelPreferencesContainerLayout);
@@ -553,14 +554,14 @@ public class MainFrame extends javax.swing.JFrame {
         panelPreferencesDifficulty.setBorder(javax.swing.BorderFactory.createTitledBorder(bundle.getString("panelDifficulty"))); // NOI18N
 
         groupDifficulty.add(radioDifficultySmall);
-        radioDifficultySmall.setText("malá");
+        radioDifficultySmall.setText(bundle.getString("radioPreferencesSmall")); // NOI18N
 
         groupDifficulty.add(radioDifficultyGreat);
-        radioDifficultyGreat.setText("velká");
+        radioDifficultyGreat.setText(bundle.getString("radioPreferencesHigh")); // NOI18N
 
         groupDifficulty.add(radioDifficultyIgnore);
         radioDifficultyIgnore.setSelected(true);
-        radioDifficultyIgnore.setText("nezáleží");
+        radioDifficultyIgnore.setText(bundle.getString("radioPreferencesIgnore")); // NOI18N
 
         javax.swing.GroupLayout panelPreferencesDifficultyLayout = new javax.swing.GroupLayout(panelPreferencesDifficulty);
         panelPreferencesDifficulty.setLayout(panelPreferencesDifficultyLayout);
@@ -585,14 +586,15 @@ public class MainFrame extends javax.swing.JFrame {
         panelPreferencesTerrain.setBorder(javax.swing.BorderFactory.createTitledBorder(bundle.getString("panelTerrain"))); // NOI18N
 
         groupTerrain.add(radioTerrainLight);
-        radioTerrainLight.setText("lehký");
+        radioTerrainLight.setText(bundle.getString("radioPreferencesLight")); // NOI18N
 
         groupTerrain.add(radioTerrainDifficult);
-        radioTerrainDifficult.setText("náročný");
+        radioTerrainDifficult.setText(bundle.getString("radioPreferencesDifficult")); // NOI18N
 
         groupTerrain.add(radioTerrainIgnore);
         radioTerrainIgnore.setSelected(true);
-        radioTerrainIgnore.setText("nezáleží");
+        radioTerrainIgnore.setText(bundle.getString("radioPreferencesIgnore")); // NOI18N
+        radioTerrainIgnore.setActionCommand(bundle.getString("radioPreferencesIgnore")); // NOI18N
 
         javax.swing.GroupLayout panelPreferencesTerrainLayout = new javax.swing.GroupLayout(panelPreferencesTerrain);
         panelPreferencesTerrain.setLayout(panelPreferencesTerrainLayout);
@@ -706,7 +708,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         textName.setEditable(false);
         textName.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        textName.setText("název");
+        textName.setText("name");
         textName.setBorder(null);
 
         textCoordinates.setEditable(false);
@@ -716,7 +718,7 @@ public class MainFrame extends javax.swing.JFrame {
         labelContainer.setText(bundle.getString("infoContainer")); // NOI18N
 
         textContainer.setEditable(false);
-        textContainer.setText("ostatní");
+        textContainer.setText("other");
         textContainer.setBorder(null);
 
         labelDifficulty.setText(bundle.getString("infoDifficulty")); // NOI18N
@@ -731,11 +733,11 @@ public class MainFrame extends javax.swing.JFrame {
         textTerrain.setText("0");
         textTerrain.setBorder(null);
 
+        buttonLink.setText("link");
         buttonLink.setBorder(null);
         buttonLink.setContentAreaFilled(false);
         buttonLink.setFocusable(false);
         buttonLink.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
-        buttonLink.setLabel("odkaz");
 
         javax.swing.GroupLayout panelCacheInfoLayout = new javax.swing.GroupLayout(panelCacheInfo);
         panelCacheInfo.setLayout(panelCacheInfoLayout);
@@ -788,14 +790,14 @@ public class MainFrame extends javax.swing.JFrame {
 
         panelTripInfo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
 
-        labelTripLength.setText("Délka výletu:  ");
+        labelTripLength.setText(bundle.getString("tripLength")); // NOI18N
 
         textTripLength.setEditable(false);
         textTripLength.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         textTripLength.setText("0");
         textTripLength.setBorder(null);
 
-        labelTripTime.setText("Předpokládaný čas: ");
+        labelTripTime.setText(bundle.getString("tripTime")); // NOI18N
 
         textTripTime.setEditable(false);
         textTripTime.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
@@ -804,7 +806,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         labelTripKm.setText("km");
 
-        labelTripCaches.setText("Počet schránek:");
+        labelTripCaches.setText(bundle.getString("tripCaches")); // NOI18N
 
         textTripCaches.setEditable(false);
         textTripCaches.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
@@ -864,7 +866,7 @@ public class MainFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(panelMapLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelMapLayout.createSequentialGroup()
-                        .addGap(0, 201, Short.MAX_VALUE)
+                        .addGap(0, 221, Short.MAX_VALUE)
                         .addComponent(panelCacheInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(panelMapLayout.createSequentialGroup()
                         .addGroup(panelMapLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -906,15 +908,15 @@ public class MainFrame extends javax.swing.JFrame {
         menuFile.setText(bundle.getString("menuFile")); // NOI18N
         menuFile.setLabel(bundle.getString("menuFile")); // NOI18N
 
-        menuExport.setLabel("export trasy");
+        menuExport.setText(bundle.getString("menuFileExport")); // NOI18N
         menuFile.add(menuExport);
 
         menu.add(menuFile);
 
-        menuMap.setText("Mapa");
+        menuMap.setText(bundle.getString("menuMap")); // NOI18N
         menuMap.setActionCommand("Settings");
 
-        menuImportMap.setText("Importovat mapu");
+        menuImportMap.setText(bundle.getString("menuMapImport")); // NOI18N
         menuMap.add(menuImportMap);
         menuMap.add(separator);
 
@@ -947,8 +949,9 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void componentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_componentResized
-        if (mapView != null) 
+        if (mapView != null) {
             mapView.setSize(panelMap.getWidth(), panelMap.getHeight());
+        }
     }//GEN-LAST:event_componentResized
 
     private void sliderZoomStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderZoomStateChanged
@@ -956,7 +959,7 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_sliderZoomStateChanged
 
     private void buttonPlanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonPlanActionPerformed
-        controller.planTrip(fieldDelka.getText(), (RoutingTypes)comboRouting.getSelectedItem(), (TripTypes)comboTripType.getSelectedItem(), radioAll.isSelected(),
+        controller.planTrip(fieldDelka.getText(), (RoutingTypes) comboRouting.getSelectedItem(), (TripTypes) comboTripType.getSelectedItem(), radioAll.isSelected(),
                 checkMicro.isSelected(), checkSmall.isSelected(), checkRegular.isSelected(), checkLarge.isSelected(), checkOther.isSelected(),
                 sliderDifficulty.getLowValue(), sliderDifficulty.getHighValue(), sliderTerrain.getLowValue(), sliderTerrain.getHighValue(),
                 radioContainerIgnore.isSelected(), radioContainerSmall.isSelected(), radioContainerLarge.isSelected(),

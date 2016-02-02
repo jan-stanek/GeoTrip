@@ -4,8 +4,9 @@ import cz.cvut.fit.geotrip.data.entities.CacheContainer;
 import cz.cvut.fit.geotrip.business.MainModel;
 import cz.cvut.fit.geotrip.business.RoutingTypes;
 import cz.cvut.fit.geotrip.business.TripType;
-import cz.cvut.fit.geotrip.business.tripplanner.TripPlanner;
+import cz.cvut.fit.geotrip.presentation.view.ErrorDialog;
 import cz.cvut.fit.geotrip.presentation.view.MainFrame;
+import cz.cvut.fit.geotrip.utils.Texts;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
@@ -19,15 +20,13 @@ import org.mapsforge.map.layer.Layers;
 import org.mapsforge.map.swing.view.MapView;
 import org.mapsforge.map.util.MapViewProjection;
 
-/**
- *
- * @author jan
- */
 public class MainController {
 
     private final MainModel model;
     private final MainFrame view;
     
+    ErrorDialog errorDialog;
+
     public MainController(MainModel model, MainFrame view) {
         this.model = model;
         this.view = view;
@@ -36,94 +35,104 @@ public class MainController {
     public MainModel getModel() {
         return model;
     }
-    
+
     public MainFrame getView() {
         return view;
     }
     
+    public void registerErrorDialog(ErrorDialog errorDialog) {
+        this.errorDialog = errorDialog;
+    }
+
     public void getSelectedLayer(MapView mapView, Layers layers, int x, int y) {
         view.hideCacheInfo();
-        
+
         MapViewProjection mapViewProjection = new MapViewProjection(mapView);
-                
+
         for (int i = layers.size() - 1; i >= 0; --i) {
             Layer layer = layers.get(i);
             Point layerPosition = mapViewProjection.toPixels(layer.getPosition());
             Point clickPosition = new Point(x, y);
- 
+
             if (layer.onTap(layer.getPosition(), layerPosition, clickPosition)) {
                 view.showCacheInfo(model.getCacheByLayer(layer));
                 break;
             }
         }
     }
-    
+
     public void setZoom(int zoom) {
-        if (view.getZoomLevel() != zoom)
+        if (view.getZoomLevel() != zoom) {
             view.setZoomLevel(zoom);
-    } 
-    
+        }
+    }
+
     public void changeZoom(int rotation) {
         setZoom(view.getZoomLevel() - rotation);
     }
-    
+
     public void zoomIn() {
         setZoom(view.getZoomLevel() + 1);
     }
-    
+
     public void zoomOut() {
         setZoom(view.getZoomLevel() - 1);
     }
-    
+
     public void planTrip(String distanceStr, RoutingTypes vehicle, TripType tripType, boolean found, boolean containerMicro, boolean containerSmall, boolean containerRegular,
             boolean containerLarge, boolean containerOther, int difficultyLow, int difficultyHigh, int terrainLow, int terrainHigh,
             boolean containerPriorityI, boolean containerPriorityL, boolean containerPriorityH, boolean difficultyPriorityI, boolean difficultyPriorityL,
             boolean difficultyPriorityH, boolean terrainPriorityI, boolean terrainPriorityL, boolean terrainPriorityH) {
-        
+
         int distance = Integer.parseInt(distanceStr);
-        
+
         int container = 0;
 
-        if (containerMicro)
+        if (containerMicro) {
             container |= CacheContainer.MICRO.getValue();
-        if (containerSmall)
+        }
+        if (containerSmall) {
             container |= CacheContainer.SMALL.getValue();
-        if (containerRegular)
+        }
+        if (containerRegular) {
             container |= CacheContainer.REGULAR.getValue();
-        if (containerLarge)
+        }
+        if (containerLarge) {
             container |= CacheContainer.LARGE.getValue();
-        if (containerOther)
+        }
+        if (containerOther) {
             container |= CacheContainer.OTHER.getValue();
-        
+        }
+
         int containerPriority = containerPriorityI ? 0 : (containerPriorityL ? -1 : 1);
         int difficultyPriority = difficultyPriorityI ? 0 : (difficultyPriorityL ? -1 : 1);
         int terrainPriority = terrainPriorityI ? 0 : (terrainPriorityL ? -1 : 1);
-        
+
         view.hideCacheInfo();
         view.hideTripInfo();
-        
+
         if (model.planTrip(distance * 1000, vehicle, tripType, found, container, difficultyLow, difficultyHigh,
                 terrainLow, terrainHigh, containerPriority, difficultyPriority, terrainPriority)) {
             view.setExportEnabled(true);
             view.showTripInfo(model.getTripLength(), model.getTripTime(), model.getTripCaches());
             view.zoomTo(model.getBoundingBox());
-        }
-        else {
+        } else {
             view.setExportEnabled(false);
         }
     }
-    
+
     public void openUrl(String link) {
         try {
             URL url = new URL(link);
             URI uri = url.toURI();
             Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-            if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
+            if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
                 desktop.browse(uri);
-            else
-                JOptionPane.showMessageDialog(null, "Odkaz se nepodařilo otevřít.", "Chyba prohlížeče", ERROR_MESSAGE);
+            } else {
+                errorDialog.show(Texts.getInstance().getLocalizedText("openLinkErrorTitle"), Texts.getInstance().getLocalizedText("openLinkErrorMessage"));
+            }
         } catch (URISyntaxException | IOException ex) {
-            JOptionPane.showMessageDialog(null, "Odkaz se nepodařilo otevřít.", "Chyba", ERROR_MESSAGE);
+            errorDialog.show(Texts.getInstance().getLocalizedText("openLinkErrorTitle"), Texts.getInstance().getLocalizedText("openLinkErrorMessage"));
         }
     }
 }

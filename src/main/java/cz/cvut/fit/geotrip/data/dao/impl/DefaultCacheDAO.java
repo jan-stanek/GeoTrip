@@ -10,10 +10,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- *
- * @author jan
- */
 public class DefaultCacheDAO implements CacheDAO {
 
     public static CacheDAO instance = new DefaultCacheDAO();
@@ -29,9 +25,9 @@ public class DefaultCacheDAO implements CacheDAO {
     public Collection<GeoCache> getAll() {
         return new LinkedList<>(data);
     }
-    
+
     @Override
     public Collection<GeoCache> getFiltered(Predicate<GeoCache> predicate) {
         return Lists.newLinkedList(Iterables.filter(data, predicate));
-    }    
+    }
 }

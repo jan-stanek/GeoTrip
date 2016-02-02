@@ -7,42 +7,39 @@ import java.io.File;
 import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-/**
- *
- * @author jan
- */
 public final class MapImportDialog extends javax.swing.JDialog {
 
     MainModel model;
     MapImportController controller;
-    
+
     /**
      * Creates new form MapImportDialog
+     *
      * @param parent
      * @param modal
      * @param model
      */
     public MapImportDialog(Frame parent, boolean modal, MainModel model) {
         super(parent, modal);
-        
+
         this.model = model;
         model.registerMapImportDialogObserver(new MapImportDialogObserver(this));
-        
+
         initComponents();
-        
-        this.setLocation(parent.getLocation().x + parent.getSize().width / 2 - this.getSize().width / 2, 
+
+        this.setLocation(parent.getLocation().x + parent.getSize().width / 2 - this.getSize().width / 2,
                 parent.getLocation().y + parent.getSize().height / 2 - this.getSize().height / 2);
-        
+
         hideProgressBar();
-        
-        fileChooserMap.addChoosableFileFilter(new FileNameExtensionFilter("Map soubor", "map"));
-        fileChooserOsm.addChoosableFileFilter(new FileNameExtensionFilter("Osm soubor", "pbf"));
+
+        fileChooserMap.addChoosableFileFilter(new FileNameExtensionFilter("Mapsforge map (*.map)", "map"));
+        fileChooserOsm.addChoosableFileFilter(new FileNameExtensionFilter("OpenStreetMap (*.osm.pbf)", "pbf"));
     }
 
     public void registerController(MapImportController controller) {
         this.controller = controller;
     }
-    
+
     public void showProgressBar() {
         progressBar.setVisible(true);
     }
@@ -50,20 +47,20 @@ public final class MapImportDialog extends javax.swing.JDialog {
     public void hideProgressBar() {
         progressBar.setVisible(false);
     }
-    
+
     public void showMapFileChooser() {
         fileChooserMap.showDialog(this, null);
     }
-    
+
     public void showOsmFileChooser() {
         fileChooserOsm.showDialog(this, null);
     }
-    
+
     public void setCurrentDirectory(File dir) {
         fileChooserMap.setCurrentDirectory(dir);
         fileChooserOsm.setCurrentDirectory(dir);
     }
-    
+
     public void enableButtons() {
         buttonCancel.setEnabled(true);
         buttonImport.setEnabled(true);
@@ -71,7 +68,7 @@ public final class MapImportDialog extends javax.swing.JDialog {
         buttonSelectOsm.setEnabled(true);
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     }
-    
+
     public void disableButtons() {
         buttonCancel.setEnabled(false);
         buttonImport.setEnabled(false);
@@ -79,16 +76,15 @@ public final class MapImportDialog extends javax.swing.JDialog {
         buttonSelectOsm.setEnabled(false);
         this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     }
-    
+
     public void setChosenMapName(String name) {
         textMapFile.setText(name);
     }
-    
+
     public void setChosenOsmName(String name) {
         textOsmFile.setText(name);
     }
-   
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -125,39 +121,40 @@ public final class MapImportDialog extends javax.swing.JDialog {
         });
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Import mapy");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("texts"); // NOI18N
+        setTitle(bundle.getString("menuMapImport")); // NOI18N
         setResizable(false);
 
-        labelMapFile.setText("map soubor:");
+        labelMapFile.setText(bundle.getString("importMapFile")); // NOI18N
 
-        labelOsmFile.setText("osm soubor:");
+        labelOsmFile.setText(bundle.getString("importOsmFile")); // NOI18N
 
         textMapFile.setEnabled(false);
 
         textOsmFile.setEnabled(false);
 
-        buttonSelectMap.setText("Vybrat");
+        buttonSelectMap.setText(bundle.getString("importSelect")); // NOI18N
         buttonSelectMap.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonSelectMapActionPerformed(evt);
             }
         });
 
-        buttonSelectOsm.setText("Vybrat");
+        buttonSelectOsm.setText(bundle.getString("importSelect")); // NOI18N
         buttonSelectOsm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonSelectOsmActionPerformed(evt);
             }
         });
 
-        buttonImport.setText("Importovat");
+        buttonImport.setText(bundle.getString("importImport")); // NOI18N
         buttonImport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonImportActionPerformed(evt);
             }
         });
 
-        buttonCancel.setText("Zavřít");
+        buttonCancel.setText(bundle.getString("importClose")); // NOI18N
         buttonCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonCancelActionPerformed(evt);

@@ -5,14 +5,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import org.mapsforge.map.swing.view.MapView;
 
-/**
- *
- * @author jan
- */
 public class MapViewMouseListener extends AbstractListener implements MouseListener {
 
     private final MapView mapView;
-    
+
     public MapViewMouseListener(MainController controller, MapView mapView) {
         super(controller);
         this.mapView = mapView;
@@ -24,15 +20,19 @@ public class MapViewMouseListener extends AbstractListener implements MouseListe
     }
 
     @Override
-    public void mousePressed(MouseEvent e) { }
+    public void mousePressed(MouseEvent e) {
+    }
 
     @Override
-    public void mouseReleased(MouseEvent e) { }
+    public void mouseReleased(MouseEvent e) {
+    }
 
     @Override
-    public void mouseEntered(MouseEvent e) { }
+    public void mouseEntered(MouseEvent e) {
+    }
 
     @Override
-    public void mouseExited(MouseEvent e) { }
-    
+    public void mouseExited(MouseEvent e) {
+    }
+
 }

@@ -1,26 +1,19 @@
 package cz.cvut.fit.geotrip.data;
 
 import cz.cvut.fit.geotrip.data.entities.GeoPlace;
-import cz.cvut.fit.geotrip.data.entities.GeoPoint;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
-
 
 public class GpxExport {
 
@@ -32,17 +25,17 @@ public class GpxExport {
 
     public boolean export(List<GeoPlace> route) {
         Document doc = new Document();
-        
+
         Namespace ns = Namespace.getNamespace("http://www.topografix.com/GPX/1/0");
         Element gpx = new Element("gpx", ns);
         gpx.setAttribute("version", "1.0");
         gpx.setAttribute("creator", "GeoTrip");
         doc.setRootElement(gpx);
-        
+
         Element time = new Element("time", ns);
         time.addContent(getCurrentTimestamp());
         gpx.addContent(time);
-        
+
         Element rte = new Element("rte", ns);
         gpx.addContent(rte);
 
@@ -60,7 +53,7 @@ public class GpxExport {
 
         XMLOutputter xmlOutput = new XMLOutputter();
         xmlOutput.setFormat(Format.getPrettyFormat());
-        
+
         try (FileOutputStream fos = new FileOutputStream(file)) {
             xmlOutput.output(doc, fos);
         } catch (IOException ex) {
@@ -69,7 +62,7 @@ public class GpxExport {
 
         return true;
     }
-    
+
     private String getCurrentTimestamp() {
         TimeZone tz = TimeZone.getTimeZone("UTC");
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

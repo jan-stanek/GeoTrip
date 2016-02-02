@@ -24,20 +24,26 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="menuExport">
               <Properties>
-                <Property name="label" type="java.lang.String" value="export trasy"/>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="texts.properties" key="menuFileExport" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                </Property>
               </Properties>
             </MenuItem>
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="menuMap">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Mapa"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="texts.properties" key="menuMap" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+            </Property>
             <Property name="actionCommand" type="java.lang.String" value="Settings"/>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="menuImportMap">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Importovat mapu"/>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="texts.properties" key="menuMapImport" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                </Property>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="separator">
@@ -152,7 +158,7 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="labelKm" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <Component id="comboRouting" pref="197" max="32767" attributes="0"/>
+                          <Component id="comboRouting" pref="223" max="32767" attributes="0"/>
                           <Component id="comboTripType" alignment="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
@@ -183,7 +189,9 @@
           <SubComponents>
             <Component class="javax.swing.JLabel" name="labelLength">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Maxim&#xe1;ln&#xed; d&#xe9;lka:"/>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="texts.properties" key="labelLength" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                </Property>
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="fieldDelka">
@@ -194,7 +202,9 @@
             </Component>
             <Component class="javax.swing.JLabel" name="labelRouting">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Trasa pro:"/>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="texts.properties" key="labelVehicle" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                </Property>
               </Properties>
             </Component>
             <Component class="javax.swing.JComboBox" name="comboRouting">
@@ -219,7 +229,9 @@
             </Component>
             <Component class="javax.swing.JLabel" name="labelTripType">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Typ v&#xfd;letu:"/>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="texts.properties" key="labelTripType" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                </Property>
               </Properties>
             </Component>
           </SubComponents>
@@ -238,7 +250,7 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="panelFilterTerrain" alignment="0" pref="279" max="32767" attributes="0"/>
+                  <Component id="panelFilterTerrain" alignment="0" pref="302" max="32767" attributes="0"/>
                   <Component id="panelFilterDifficulty" alignment="0" max="32767" attributes="0"/>
                   <Component id="panelFilterState" alignment="0" max="32767" attributes="0"/>
                   <Component id="panelFilterContainer" alignment="0" max="32767" attributes="0"/>
@@ -525,7 +537,9 @@
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                       <ComponentRef name="groupContainer"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="mal&#xe1;"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="texts.properties" key="radioPreferencesSmall" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="radioContainerLarge">
@@ -533,7 +547,9 @@
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                       <ComponentRef name="groupContainer"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="velk&#xe1;"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="texts.properties" key="radioPreferencesLarge" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="radioContainerIgnore">
@@ -542,7 +558,9 @@
                       <ComponentRef name="groupContainer"/>
                     </Property>
                     <Property name="selected" type="boolean" value="true"/>
-                    <Property name="text" type="java.lang.String" value="nez&#xe1;le&#x17e;&#xed;"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="texts.properties" key="radioPreferencesIgnore" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
               </SubComponents>
@@ -587,7 +605,9 @@
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                       <ComponentRef name="groupDifficulty"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="mal&#xe1;"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="texts.properties" key="radioPreferencesSmall" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="radioDifficultyGreat">
@@ -595,7 +615,9 @@
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                       <ComponentRef name="groupDifficulty"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="velk&#xe1;"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="texts.properties" key="radioPreferencesHigh" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="radioDifficultyIgnore">
@@ -604,7 +626,9 @@
                       <ComponentRef name="groupDifficulty"/>
                     </Property>
                     <Property name="selected" type="boolean" value="true"/>
-                    <Property name="text" type="java.lang.String" value="nez&#xe1;le&#x17e;&#xed;"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="texts.properties" key="radioPreferencesIgnore" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
               </SubComponents>
@@ -649,7 +673,9 @@
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                       <ComponentRef name="groupTerrain"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="lehk&#xfd;"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="texts.properties" key="radioPreferencesLight" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="radioTerrainDifficult">
@@ -657,7 +683,9 @@
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                       <ComponentRef name="groupTerrain"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="n&#xe1;ro&#x10d;n&#xfd;"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="texts.properties" key="radioPreferencesDifficult" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="radioTerrainIgnore">
@@ -666,7 +694,12 @@
                       <ComponentRef name="groupTerrain"/>
                     </Property>
                     <Property name="selected" type="boolean" value="true"/>
-                    <Property name="text" type="java.lang.String" value="nez&#xe1;le&#x17e;&#xed;"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="texts.properties" key="radioPreferencesIgnore" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="actionCommand" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="texts.properties" key="radioPreferencesIgnore" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
               </SubComponents>
@@ -716,7 +749,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
-                              <EmptySpace min="0" pref="201" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="221" max="32767" attributes="0"/>
                               <Component id="panelCacheInfo" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" attributes="0">
@@ -896,7 +929,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Tahoma" size="11" style="1"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="n&#xe1;zev"/>
+                    <Property name="text" type="java.lang.String" value="name"/>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                       <Border info="null"/>
                     </Property>
@@ -921,7 +954,7 @@
                 <Component class="javax.swing.JTextField" name="textContainer">
                   <Properties>
                     <Property name="editable" type="boolean" value="false"/>
-                    <Property name="text" type="java.lang.String" value="ostatn&#xed;"/>
+                    <Property name="text" type="java.lang.String" value="other"/>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                       <Border info="null"/>
                     </Property>
@@ -961,13 +994,13 @@
                 </Component>
                 <Component class="javax.swing.JButton" name="buttonLink">
                   <Properties>
+                    <Property name="text" type="java.lang.String" value="link"/>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                       <Border info="null"/>
                     </Property>
                     <Property name="contentAreaFilled" type="boolean" value="false"/>
                     <Property name="focusable" type="boolean" value="false"/>
                     <Property name="horizontalAlignment" type="int" value="10"/>
-                    <Property name="label" type="java.lang.String" value="odkaz"/>
                   </Properties>
                 </Component>
               </SubComponents>
@@ -1041,7 +1074,9 @@
               <SubComponents>
                 <Component class="javax.swing.JLabel" name="labelTripLength">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="D&#xe9;lka v&#xfd;letu:  "/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="texts.properties" key="tripLength" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JTextField" name="textTripLength">
@@ -1056,7 +1091,9 @@
                 </Component>
                 <Component class="javax.swing.JLabel" name="labelTripTime">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="P&#x159;edpokl&#xe1;dan&#xfd; &#x10d;as: "/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="texts.properties" key="tripTime" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JTextField" name="textTripTime">
@@ -1076,7 +1113,9 @@
                 </Component>
                 <Component class="javax.swing.JLabel" name="labelTripCaches">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Po&#x10d;et schr&#xe1;nek:"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="texts.properties" key="tripCaches" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JTextField" name="textTripCaches">

@@ -4,10 +4,6 @@ import cz.cvut.fit.geotrip.presentation.controller.MainController;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
-/**
- *
- * @author jan
- */
 public class MapViewMouseWheelListener extends AbstractListener implements MouseWheelListener {
 
     public MapViewMouseWheelListener(MainController controller) {

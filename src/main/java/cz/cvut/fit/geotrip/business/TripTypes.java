@@ -1,13 +1,13 @@
 package cz.cvut.fit.geotrip.business;
 
-import java.util.ResourceBundle;
+import cz.cvut.fit.geotrip.utils.Texts;
 
 public enum TripTypes implements TripType {
 
     NORMAL {
                 @Override
                 public String toString() {
-                    return ResourceBundle.getBundle("texts").getString("tripNormal");
+                    return Texts.getInstance().getLocalizedText("tripNormal");
                 }
 
                 @Override
@@ -43,7 +43,7 @@ public enum TripTypes implements TripType {
     COUNT {
                 @Override
                 public String toString() {
-                    return ResourceBundle.getBundle("texts").getString("tripCount");
+                    return Texts.getInstance().getLocalizedText("tripCount");
                 }
 
                 @Override
@@ -79,7 +79,7 @@ public enum TripTypes implements TripType {
     PREFERENCES {
                 @Override
                 public String toString() {
-                    return ResourceBundle.getBundle("texts").getString("tripPreferences");
+                    return Texts.getInstance().getLocalizedText("tripPreferences");
                 }
 
                 @Override
@@ -115,7 +115,7 @@ public enum TripTypes implements TripType {
     FAVORITES {
                 @Override
                 public String toString() {
-                    return ResourceBundle.getBundle("texts").getString("tripFavorites");
+                    return Texts.getInstance().getLocalizedText("tripFavorites");
                 }
 
                 @Override

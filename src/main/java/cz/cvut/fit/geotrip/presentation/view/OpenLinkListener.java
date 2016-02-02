@@ -4,14 +4,10 @@ import cz.cvut.fit.geotrip.presentation.controller.MainController;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-/**
- *
- * @author jan
- */
 public class OpenLinkListener extends AbstractListener implements ActionListener {
 
     String link;
-    
+
     public OpenLinkListener(MainController controller, String link) {
         super(controller);
         this.link = link;
@@ -21,5 +17,5 @@ public class OpenLinkListener extends AbstractListener implements ActionListener
     public void actionPerformed(ActionEvent e) {
         controller.openUrl(link);
     }
-    
+
 }

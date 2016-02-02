@@ -24,12 +24,13 @@ public class PlanningDialog extends javax.swing.JDialog {
         labelPlanning = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("Planning trip...");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("texts"); // NOI18N
+        setTitle(bundle.getString("tripPlanning")); // NOI18N
         setResizable(false);
 
         progressBar.setIndeterminate(true);
 
-        labelPlanning.setText("Planning trip...");
+        labelPlanning.setText(bundle.getString("tripPlanning")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

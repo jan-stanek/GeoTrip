@@ -19,10 +19,6 @@ import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 
-/**
- *
- * @author jan
- */
 public class DefaultGpxDAO implements GpxDAO {
 
     public static GpxDAO instance = new DefaultGpxDAO();
@@ -61,8 +57,9 @@ public class DefaultGpxDAO implements GpxDAO {
 
         for (Element waypoint : waypoints) {
             GeoCache gc = parseCache(rootNs, waypoint);
-            if (gc == null)
+            if (gc == null) {
                 continue;
+            }
             data.add(gc);
         }
 
@@ -84,8 +81,9 @@ public class DefaultGpxDAO implements GpxDAO {
         String name = parseCacheName(ns, e);
 
         CacheContainer container = parseCacheContainer(ns, e);
-        if (container == null)
+        if (container == null) {
             return null;
+        }
 
         int difficulty = parseCacheDifficulty(ns, e);
         int terrain = parseCacheTerrain(ns, e);
