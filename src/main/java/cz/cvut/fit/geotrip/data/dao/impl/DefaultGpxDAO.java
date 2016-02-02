@@ -6,6 +6,8 @@ import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import cz.cvut.fit.geotrip.data.entities.CacheContainer;
 import cz.cvut.fit.geotrip.data.entities.GeoPlace;
 import cz.cvut.fit.geotrip.data.entities.GeoPoint;
+import cz.cvut.fit.geotrip.presentation.view.ErrorDialog;
+import cz.cvut.fit.geotrip.utils.Texts;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ public class DefaultGpxDAO implements GpxDAO {
         try {
             document = saxBuilder.build(inputFile);
         } catch (JDOMException | IOException ex) {
-            Logger.getLogger(DefaultGpxDAO.class.getName()).log(Level.SEVERE, null, ex);
+            ErrorDialog.getInstance().show(Texts.getInstance().getLocalizedText("gpxOpenErrorTitle"), Texts.getInstance().getLocalizedText("gpxOpenErrorMessage"));
         }
     }
 

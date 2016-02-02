@@ -90,8 +90,6 @@ public class MainModel {
 
     List<GeoPlace> trip;
 
-    private InformationDialog informationDialog;
-    private ErrorDialog errorDialog;
     private InstalledMapsObserver installedMapsObserver;
     private CenterMapObserver centerMapObserver;
     private MapImportDialogObserver mapImportDialogObserver;
@@ -114,14 +112,6 @@ public class MainModel {
         loadMap();
         MainModel.this.printCaches();
         loadRef();
-    }
-
-    public void registerInformationDialog(InformationDialog informationDialog) {
-        this.informationDialog = informationDialog;
-    }
-
-    public void registerErrorDialog(ErrorDialog errorDialog) {
-        this.errorDialog = errorDialog;
     }
 
     public void registerInstalledMapsObserver(InstalledMapsObserver installedMapsObserver) {
@@ -166,7 +156,7 @@ public class MainModel {
                     Files.copy(mapFile.toPath(), mapFileDest.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     Files.copy(osmFile.toPath(), osmFileDest.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException ex) {
-                    Logger.getLogger(MainModel.class.getName()).log(Level.SEVERE, null, ex);
+                    ErrorDialog.getInstance().show(Texts.getInstance().getLocalizedText("mapCopyErrorTitle"), Texts.getInstance().getLocalizedText("mapCopyErrorMessage"));
                 }
 
                 Router router = new RouterGH();
@@ -214,7 +204,7 @@ public class MainModel {
         trip = tripPlanner.getTripPoints();
 
         if (route == null) {
-            errorDialog.show(Texts.getInstance().getLocalizedText("noTripFoundTitle"), Texts.getInstance().getLocalizedText("noTripFoundMessage"));
+            InformationDialog.getInstance().show(Texts.getInstance().getLocalizedText("noTripFoundTitle"), Texts.getInstance().getLocalizedText("noTripFoundMessage"));
             return false;
         }
 
@@ -290,14 +280,14 @@ public class MainModel {
         mapName = prefs.get("map", null);
 
         if (mapName == null) {
-            informationDialog.show(Texts.getInstance().getLocalizedText("noMapTitle"), Texts.getInstance().getLocalizedText("noMapMessage"));
+            InformationDialog.getInstance().show(Texts.getInstance().getLocalizedText("noMapTitle"), Texts.getInstance().getLocalizedText("noMapMessage"));
             return;
         }
 
         File mapFile = new File(GeoTrip.DATA_DIRECTORY + MAPS_DIRECTORY + mapName + MAP_EXTENSION);
         File osmFile = new File(GeoTrip.DATA_DIRECTORY + MAPS_DIRECTORY + mapName + OSM_EXTENSION);
         if (!mapFile.exists() || !osmFile.exists()) {
-            errorDialog.show(Texts.getInstance().getLocalizedText("missingMapTitle"), Texts.getInstance().getLocalizedText("missingMapMessage"));
+            ErrorDialog.getInstance().show(Texts.getInstance().getLocalizedText("missingMapTitle"), Texts.getInstance().getLocalizedText("missingMapMessage"));
             return;
         }
 

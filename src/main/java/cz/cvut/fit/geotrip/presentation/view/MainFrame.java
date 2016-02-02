@@ -75,8 +75,6 @@ public class MainFrame extends javax.swing.JFrame {
 
         model.registerInstalledMapsObserver(new InstalledMapsObserver(this));
         model.registerCenterMapObserver(new CenterMapObserver(this));
-        model.registerInformationDialog(new InformationDialog());
-        model.registerErrorDialog(new ErrorDialog());
         model.registerPlanningDialogObserver(new PlanningDialogObserver(this));
     }
 
@@ -89,7 +87,6 @@ public class MainFrame extends javax.swing.JFrame {
 
     public void registerController(MainController controller) {
         this.controller = controller;
-        controller.registerErrorDialog(new ErrorDialog());
     }
 
     private void setIcon(URL img) {

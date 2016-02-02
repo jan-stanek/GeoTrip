@@ -12,8 +12,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import javax.swing.JOptionPane;
-import static javax.swing.JOptionPane.ERROR_MESSAGE;
 import org.mapsforge.core.model.Point;
 import org.mapsforge.map.layer.Layer;
 import org.mapsforge.map.layer.Layers;
@@ -25,8 +23,6 @@ public class MainController {
     private final MainModel model;
     private final MainFrame view;
     
-    ErrorDialog errorDialog;
-
     public MainController(MainModel model, MainFrame view) {
         this.model = model;
         this.view = view;
@@ -40,10 +36,6 @@ public class MainController {
         return view;
     }
     
-    public void registerErrorDialog(ErrorDialog errorDialog) {
-        this.errorDialog = errorDialog;
-    }
-
     public void getSelectedLayer(MapView mapView, Layers layers, int x, int y) {
         view.hideCacheInfo();
 
@@ -129,10 +121,10 @@ public class MainController {
             if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
                 desktop.browse(uri);
             } else {
-                errorDialog.show(Texts.getInstance().getLocalizedText("openLinkErrorTitle"), Texts.getInstance().getLocalizedText("openLinkErrorMessage"));
+                ErrorDialog.getInstance().show(Texts.getInstance().getLocalizedText("openLinkErrorTitle"), Texts.getInstance().getLocalizedText("openLinkErrorMessage"));
             }
         } catch (URISyntaxException | IOException ex) {
-            errorDialog.show(Texts.getInstance().getLocalizedText("openLinkErrorTitle"), Texts.getInstance().getLocalizedText("openLinkErrorMessage"));
+            ErrorDialog.getInstance().show(Texts.getInstance().getLocalizedText("openLinkErrorTitle"), Texts.getInstance().getLocalizedText("openLinkErrorMessage"));
         }
     }
 }
