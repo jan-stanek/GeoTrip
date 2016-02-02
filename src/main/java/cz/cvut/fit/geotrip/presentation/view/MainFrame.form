@@ -67,6 +67,7 @@
   </SyntheticProperties>
   <Events>
     <EventHandler event="componentResized" listener="java.awt.event.ComponentListener" parameters="java.awt.event.ComponentEvent" handler="componentResized"/>
+    <EventHandler event="windowClosing" listener="java.awt.event.WindowListener" parameters="java.awt.event.WindowEvent" handler="formWindowClosing"/>
   </Events>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
@@ -154,7 +155,7 @@
                       <EmptySpace min="-2" pref="4" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
-                              <Component id="fieldDelka" max="32767" attributes="0"/>
+                              <Component id="fieldLength" max="32767" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="labelKm" min="-2" max="-2" attributes="0"/>
                           </Group>
@@ -168,7 +169,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="fieldDelka" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="fieldLength" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="labelLength" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="labelKm" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -194,7 +195,7 @@
                 </Property>
               </Properties>
             </Component>
-            <Component class="javax.swing.JTextField" name="fieldDelka">
+            <Component class="javax.swing.JTextField" name="fieldLength">
               <Properties>
                 <Property name="horizontalAlignment" type="int" value="4"/>
                 <Property name="text" type="java.lang.String" value="0"/>

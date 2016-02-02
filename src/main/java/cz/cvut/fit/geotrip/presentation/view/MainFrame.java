@@ -1,6 +1,7 @@
 package cz.cvut.fit.geotrip.presentation.view;
 
 import com.jidesoft.swing.RangeSlider;
+import cz.cvut.fit.geotrip.GeoTrip;
 import cz.cvut.fit.geotrip.presentation.controller.MainController;
 import cz.cvut.fit.geotrip.presentation.controller.MapImportAction;
 import cz.cvut.fit.geotrip.presentation.controller.MapSelectAction;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.prefs.Preferences;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -54,6 +56,8 @@ public class MainFrame extends javax.swing.JFrame {
     private RangeSlider sliderDifficulty;
     private RangeSlider sliderTerrain;
 
+    private Preferences prefs;
+
     private final GpxExportAction gpxExportAction;
     private final MapImportAction mapImportAction;
     private final List<JRadioButtonMenuItem> mapMenuItems;
@@ -83,6 +87,7 @@ public class MainFrame extends javax.swing.JFrame {
         hideTripInfo();
         createMapView();
         setIcon();
+        loadSettings();
     }
 
     public void registerController(MainController controller) {
@@ -252,6 +257,113 @@ public class MainFrame extends javax.swing.JFrame {
         setIconImages(icons);
     }
 
+    private void loadSettings() {
+        prefs = Preferences.userNodeForPackage(GeoTrip.class);
+
+        fieldLength.setText(prefs.get("length", "0"));
+        comboRouting.setSelectedIndex(prefs.getInt("routing", 0));
+        comboTripType.setSelectedIndex(prefs.getInt("tripType", 0));
+
+        if (prefs.getBoolean("notFound", false)) {
+            radioNotFound.setSelected(true);
+        } else {
+            radioAll.setSelected(true);
+        }
+
+        checkMicro.setSelected(prefs.getBoolean("micro", true));
+        checkSmall.setSelected(prefs.getBoolean("small", true));
+        checkRegular.setSelected(prefs.getBoolean("regular", true));
+        checkLarge.setSelected(prefs.getBoolean("large", true));
+        checkOther.setSelected(prefs.getBoolean("other", true));
+
+        sliderDifficulty.setLowValue(prefs.getInt("difficultyLow", 1));
+        sliderDifficulty.setHighValue(prefs.getInt("difficultyHigh", 9));
+        sliderTerrain.setLowValue(prefs.getInt("terrainLow", 1));
+        sliderTerrain.setHighValue(prefs.getInt("terrainHigh", 9));
+
+        switch (prefs.getInt("preferenceContainer", 0)) {
+            case 0:
+                radioContainerIgnore.setSelected(true);
+                break;
+            case 1:
+                radioContainerSmall.setSelected(true);
+                break;
+            case 2:
+                radioContainerLarge.setSelected(true);
+        }
+        
+        switch (prefs.getInt("preferenceDifficulty", 0)) {
+            case 0:
+                radioDifficultyIgnore.setSelected(true);
+                break;
+            case 1:
+                radioDifficultySmall.setSelected(true);
+                break;
+            case 2:
+                radioDifficultyGreat.setSelected(true);
+        }
+        
+        switch (prefs.getInt("preferenceTerrain", 0)) {
+            case 0:
+                radioTerrainIgnore.setSelected(true);
+                break;
+            case 1:
+                radioTerrainLight.setSelected(true);
+                break;
+            case 2:
+                radioTerrainDifficult.setSelected(true);
+        }
+    }
+
+    private void saveSettings() {
+        prefs.put("length", fieldLength.getText());
+        prefs.putInt("routing", comboRouting.getSelectedIndex());
+        prefs.putInt("tripType", comboTripType.getSelectedIndex());
+
+        prefs.putBoolean("notFound", radioNotFound.isSelected());
+
+        prefs.putBoolean("micro", checkMicro.isSelected());
+        prefs.putBoolean("small", checkSmall.isSelected());
+        prefs.putBoolean("regular", checkRegular.isSelected());
+        prefs.putBoolean("large", checkLarge.isSelected());
+        prefs.putBoolean("other", checkOther.isSelected());
+
+        prefs.putInt("difficultyLow", sliderDifficulty.getLowValue());
+        prefs.putInt("difficultyHigh", sliderDifficulty.getHighValue());
+        prefs.putInt("terrainLow", sliderTerrain.getLowValue());
+        prefs.putInt("terrainHigh", sliderTerrain.getHighValue());
+
+        if (radioContainerIgnore.isSelected()) {
+            prefs.putInt("preferenceContainer", 0);
+        } else {
+            if (radioContainerSmall.isSelected()) {
+                prefs.putInt("preferenceContainer", 1);
+            } else {
+                prefs.putInt("preferenceContainer", 2);
+            }
+        }
+
+        if (radioDifficultyIgnore.isSelected()) {
+            prefs.putInt("preferenceDifficulty", 0);
+        } else {
+            if (radioDifficultySmall.isSelected()) {
+                prefs.putInt("preferenceDifficulty", 1);
+            } else {
+                prefs.putInt("preferenceDifficulty", 2);
+            }
+        }
+
+        if (radioTerrainIgnore.isSelected()) {
+            prefs.putInt("preferenceTerrain", 0);
+        } else {
+            if (radioTerrainLight.isSelected()) {
+                prefs.putInt("preferenceTerrain", 1);
+            } else {
+                prefs.putInt("preferenceTerrain", 2);
+            }
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -268,7 +380,7 @@ public class MainFrame extends javax.swing.JFrame {
         panelLeft = new javax.swing.JPanel();
         panelTrip = new javax.swing.JPanel();
         labelLength = new javax.swing.JLabel();
-        fieldDelka = new javax.swing.JTextField();
+        fieldLength = new javax.swing.JTextField();
         labelRouting = new javax.swing.JLabel();
         comboRouting = new javax.swing.JComboBox();
         labelKm = new javax.swing.JLabel();
@@ -338,14 +450,19 @@ public class MainFrame extends javax.swing.JFrame {
                 MainFrame.this.componentResized(evt);
             }
         });
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         panelTrip.setBorder(javax.swing.BorderFactory.createTitledBorder("Výlet"));
 
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("texts"); // NOI18N
         labelLength.setText(bundle.getString("labelLength")); // NOI18N
 
-        fieldDelka.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        fieldDelka.setText("0");
+        fieldLength.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        fieldLength.setText("0");
 
         labelRouting.setText(bundle.getString("labelVehicle")); // NOI18N
 
@@ -371,7 +488,7 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGap(4, 4, 4)
                 .addGroup(panelTripLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelTripLayout.createSequentialGroup()
-                        .addComponent(fieldDelka)
+                        .addComponent(fieldLength)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(labelKm))
                     .addComponent(comboRouting, 0, 223, Short.MAX_VALUE)
@@ -381,7 +498,7 @@ public class MainFrame extends javax.swing.JFrame {
             panelTripLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelTripLayout.createSequentialGroup()
                 .addGroup(panelTripLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(fieldDelka, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(fieldLength, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(labelLength)
                     .addComponent(labelKm))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -956,7 +1073,7 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_sliderZoomStateChanged
 
     private void buttonPlanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonPlanActionPerformed
-        controller.planTrip(fieldDelka.getText(), (RoutingTypes) comboRouting.getSelectedItem(), (TripTypes) comboTripType.getSelectedItem(), radioAll.isSelected(),
+        controller.planTrip(fieldLength.getText(), (RoutingTypes) comboRouting.getSelectedItem(), (TripTypes) comboTripType.getSelectedItem(), radioAll.isSelected(),
                 checkMicro.isSelected(), checkSmall.isSelected(), checkRegular.isSelected(), checkLarge.isSelected(), checkOther.isSelected(),
                 sliderDifficulty.getLowValue(), sliderDifficulty.getHighValue(), sliderTerrain.getLowValue(), sliderTerrain.getHighValue(),
                 radioContainerIgnore.isSelected(), radioContainerSmall.isSelected(), radioContainerLarge.isSelected(),
@@ -972,6 +1089,10 @@ public class MainFrame extends javax.swing.JFrame {
         controller.zoomOut();
     }//GEN-LAST:event_buttonZoomMinusActionPerformed
 
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        saveSettings();
+    }//GEN-LAST:event_formWindowClosing
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonLink;
     private javax.swing.JButton buttonPlan;
@@ -984,7 +1105,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JCheckBox checkSmall;
     private javax.swing.JComboBox comboRouting;
     private javax.swing.JComboBox comboTripType;
-    private javax.swing.JTextField fieldDelka;
+    private javax.swing.JTextField fieldLength;
     private javax.swing.ButtonGroup groupContainer;
     private javax.swing.ButtonGroup groupDifficulty;
     private javax.swing.ButtonGroup groupState;
