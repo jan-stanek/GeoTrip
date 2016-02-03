@@ -96,16 +96,21 @@ public class RouterGH implements Router {
 
                 GeoPoint from = nodes.get(i);
                 GeoPoint to = nodes.get(j);
-
+                
                 GHRequest req = new GHRequest(from.getLat(), from.getLon(), to.getLat(), to.getLon());
                 req.getHints().put("instruction", false);
                 req.setAlgorithm(AlgorithmOptions.ASTAR_BI);
                 req.setVehicle(vehicle);
 
                 GHResponse res = gh.route(req);
-                distanceMatrix[i][j] = countDistance(from, to, res);
-                routeMatrix[i][j] = createRoute(from, to, res);
-                timeMatrix[i][j] = (long) (res.getTime() * (distanceMatrix[i][j] / res.getDistance()));
+                if (!res.hasErrors()) {
+                    distanceMatrix[i][j] = countDistance(from, to, res);
+                    routeMatrix[i][j] = createRoute(from, to, res);
+                    timeMatrix[i][j] = (long) (res.getTime() * (distanceMatrix[i][j] / res.getDistance()));
+                }
+                else {
+                    distanceMatrix[i][j] = Double.POSITIVE_INFINITY;
+                }
             }
         }
     }
