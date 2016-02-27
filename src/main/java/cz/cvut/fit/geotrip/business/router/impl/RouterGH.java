@@ -15,6 +15,7 @@ import cz.cvut.fit.geotrip.data.entities.GeoPlace;
 import cz.cvut.fit.geotrip.data.entities.GeoPoint;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -33,7 +34,7 @@ public class RouterGH implements Router {
     private List<GeoPoint>[][] routeMatrix;
 
     @Override
-    public void init(String mapName, RoutingTypes vehicle, GeoPlace ref, List<GeoCache> caches) {
+    public void init(String mapName, RoutingTypes vehicle, GeoPlace ref, Collection<GeoCache> caches) {
         this.vehicle = vehicleToString(vehicle);
         gh = new GraphHopper().setEncodingManager(new EncodingManager(this.vehicle)).forDesktop();
         gh.load(GeoTrip.DATA_DIRECTORY + GH_DIRECTORY + mapName + "/" + this.vehicle);
@@ -74,7 +75,7 @@ public class RouterGH implements Router {
         }
     }
 
-    private void countMatrix(GeoPlace ref, List<GeoCache> caches) {
+    private void countMatrix(GeoPlace ref, Collection<GeoCache> caches) {
         List<GeoPoint> nodes = new ArrayList<>();
         nodes.add(ref.getCoordinates());
         for (GeoCache c : caches) {
