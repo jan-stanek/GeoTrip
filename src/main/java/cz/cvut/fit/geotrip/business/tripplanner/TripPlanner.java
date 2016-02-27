@@ -11,6 +11,7 @@ import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import cz.cvut.fit.geotrip.data.entities.GeoPlace;
 import cz.cvut.fit.geotrip.data.entities.GeoPoint;
 import cz.cvut.fit.geotrip.presentation.view.PlanningDialogObserver;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,11 +30,11 @@ public class TripPlanner implements Runnable {
     private final int difficultyPriority;
     private final int terrainPriority;
     
-    private PlanningDialogObserver planningDialogObserver;
+    private final PlanningDialogObserver planningDialogObserver;
 
     private int nodes;
     private List<Integer> route;
-    private List<GeoCache> caches;
+    private final List<GeoCache> caches;
     private RankedCacheList rankedCaches;
     private double[][] distanceMatrix;
     private long[][] timeMatrix;
@@ -64,17 +65,11 @@ public class TripPlanner implements Runnable {
         Planner planner;
 
         if (nodes > MATRIX_MAX) {
-            distanceMatrix = new double[nodes][nodes];
+            distanceMatrix = countAproxDistanceMatrix();
             timeMatrix = new long[nodes][nodes];
             routeMatrix = new LinkedList[nodes][nodes];
 
-            for (int i = 0; i < nodes - 1; i++) {
-                GeoCache tmp = caches.get(i);
-                for (int j = 0; j < i; j++) {
-                    distanceMatrix[i][j] = distanceMatrix[j][i] = tmp.getCircleDistance(caches.get(j));
-                }
-            }
-
+            rankCaches();
             removeTooDistantCaches();
 
             while (nodes > MATRIX_MAX) {
@@ -94,6 +89,8 @@ public class TripPlanner implements Runnable {
         distanceMatrix = router.getDistanceMatrix();
         timeMatrix = router.getTimeMatrix();
         routeMatrix = router.getRouteMatrix();
+        
+        rankCaches();
         removeTooDistantCaches();
 
         while (true) {
@@ -112,7 +109,7 @@ public class TripPlanner implements Runnable {
             }
         }
         route = planner.getRoute();
-
+        
         planningDialogObserver.hide();
     }
 
@@ -167,7 +164,6 @@ public class TripPlanner implements Runnable {
                 i--;
             }
         }
-        rankCaches();
     }
 
     private void removeCache(GeoCache cache) {
@@ -179,14 +175,13 @@ public class TripPlanner implements Runnable {
 
         int i2 = 0, j2;
         for (int i = 0; i < nodes; i++) {
-            if (i == index) {
+            if (i == index)
                 continue;
-            }
+
             j2 = 0;
             for (int j = 0; j < nodes; j++) {
-                if (j == index) {
+                if (j == index)
                     continue;
-                }
                 tmpDistanceMatrix[i2][j2] = distanceMatrix[i][j];
                 tmpTimeMatrix[i2][j2] = timeMatrix[i][j];
                 tmpRouteMatrix[i2][j2] = routeMatrix[i][j];
@@ -285,5 +280,21 @@ public class TripPlanner implements Runnable {
 
     private long getCacheTime(int cache) {
         return caches.get(cache - 1).getDifficulty() * 5 * 60 * 1000;
+    }
+    
+    private double[][] countAproxDistanceMatrix() {
+        double [][] tmpDistanceMatrix = new double [nodes][nodes];
+        
+        for (int i = 1; i < nodes; i++)
+            tmpDistanceMatrix[0][i] = tmpDistanceMatrix[i][0] = ref.getCircleDistance(caches.get(i-1));
+        
+        for (int i = 1; i < nodes; i++) {
+            GeoCache tmp = caches.get(i-1);
+            for (int j = 1; j < i; j++) {
+                tmpDistanceMatrix[i][j] = tmpDistanceMatrix[j][i] = tmp.getCircleDistance(caches.get(j-1));
+            }
+        }
+        
+        return tmpDistanceMatrix;
     }
 }
