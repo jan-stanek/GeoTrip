@@ -22,17 +22,17 @@ public enum TripTypes implements TripType {
 
                 @Override
                 public double getContainerWeight() {
-                    return 15;
+                    return 20;
                 }
 
                 @Override
                 public double getDifficultyWeight() {
-                    return 15;
+                    return 20;
                 }
 
                 @Override
                 public double getTerrainWeight() {
-                    return 15;
+                    return 20;
                 }
 
                 @Override
@@ -109,7 +109,7 @@ public enum TripTypes implements TripType {
 
                 @Override
                 public double getFavoritesWeight() {
-                    return 0;
+                    return 10;
                 }
             },
     FAVORITES {
