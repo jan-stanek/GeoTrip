@@ -11,7 +11,6 @@ import cz.cvut.fit.geotrip.data.entities.GeoCache;
 import cz.cvut.fit.geotrip.data.entities.GeoPlace;
 import cz.cvut.fit.geotrip.data.entities.GeoPoint;
 import cz.cvut.fit.geotrip.presentation.view.PlanningDialogObserver;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 

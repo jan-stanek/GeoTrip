@@ -44,7 +44,7 @@ public class RankedCacheList {
         double favoritesRank = 0;
         
         double totalRank;
-        double lengthWeight = Math.max(0.5, maxLength / currentLength);
+        double lengthWeight = maxLength / currentLength;
         
         for (RankedCache rc : list) {
             if (othDistanceMax != othDistanceMin) 
