@@ -69,7 +69,6 @@ public class TripPlanner implements Runnable {
             routeMatrix = new LinkedList[nodes][nodes];
 
             rankCaches();
-            removeTooDistantCaches();
 
             while (nodes > MATRIX_MAX) {
                 planner = new FastPlanner();
