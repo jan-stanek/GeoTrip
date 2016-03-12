@@ -17,7 +17,7 @@ import java.util.List;
 public class TripPlanner implements Runnable {
 
     final static int EXACT_MAX = 17;
-    final static int MATRIX_MAX = 50;
+    final static int ROUTING_MAX = 50;
 
     private final String mapName;
     private final RoutingTypes vehicle;
@@ -63,14 +63,14 @@ public class TripPlanner implements Runnable {
         nodes = caches.size() + 1;
         Planner planner;
 
-        if (nodes > MATRIX_MAX) {
+        if (nodes > ROUTING_MAX) {
             distanceMatrix = countAproxDistanceMatrix();
             timeMatrix = new long[nodes][nodes];
             routeMatrix = new LinkedList[nodes][nodes];
 
             rankCaches();
 
-            while (nodes > MATRIX_MAX) {
+            while (nodes > ROUTING_MAX) {
                 planner = new FastPlanner();
                 planner.plan(nodes, distanceMatrix);
                 length = planner.getLength();
