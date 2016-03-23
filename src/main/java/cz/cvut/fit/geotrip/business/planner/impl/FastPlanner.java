@@ -50,8 +50,9 @@ public class FastPlanner implements Planner {
 
         for (int i = 0; i < nodes; i++) {
             for (int j = i; j < nodes; j++) {
-                symetricMatrix[i][j] = distanceMatrix[i][j];
-                symetricMatrix[j][i] = distanceMatrix[i][j];
+                double avg = (distanceMatrix[i][j] + distanceMatrix[j][i]) / 2;
+                symetricMatrix[i][j] = avg;
+                symetricMatrix[j][i] = avg;
             }
         }
 
