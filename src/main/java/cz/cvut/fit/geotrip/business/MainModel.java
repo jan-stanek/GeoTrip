@@ -21,6 +21,7 @@ import cz.cvut.fit.geotrip.presentation.view.MapImportDialogObserver;
 import cz.cvut.fit.geotrip.presentation.view.PlanningDialogObserver;
 import cz.cvut.fit.geotrip.utils.Texts;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +32,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 import org.mapsforge.core.graphics.Bitmap;
@@ -210,6 +213,33 @@ public class MainModel {
         countBoundingBox(route);
         printCaches(filteredCaches);
 
+        File csv = new File(GeoTrip.DATA_DIRECTORY + "list.csv");
+        
+        try { 
+            csv.createNewFile();
+        } catch (IOException ex) {
+            Logger.getLogger(MainModel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        try (FileWriter fw = new FileWriter(csv)) {
+            fw.write("lat;lon;container;difficulty;terrain;favorites\n");
+            
+            for (GeoPlace gp : trip) {
+                if (gp.getClass().equals(GeoCache.class)) {
+                    GeoCache gc = (GeoCache)gp;
+                    fw.append(gc.getLat() + ";" + gc.getLon() + ";" +
+                            gc.getContainer().getName() + ";" +
+                            gc.getDifficultyString() + ";" +
+                            gc.getTerrainString() + ";" +
+                            gc.getFavorites() + "\n");
+                }
+            }
+            
+            fw.flush();
+        } catch (IOException ex) {
+            Logger.getLogger(MainModel.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+        
         return true;
     }
 
