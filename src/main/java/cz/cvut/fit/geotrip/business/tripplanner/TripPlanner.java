@@ -16,7 +16,7 @@ import java.util.List;
 
 public class TripPlanner implements Runnable {
 
-    final static int EXACT_MAX = 17;
+    final static int EXACT_MAX = 18;
     final static int ROUTING_MAX = 50;
 
     private final String mapName;
