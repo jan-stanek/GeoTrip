@@ -277,19 +277,19 @@ public class TripPlanner implements Runnable {
     }
 
     private long getCacheTime(int cache) {
-        return caches.get(cache - 1).getDifficulty() * 5 * 60 * 1000;
+        return ((10 + (getCache(cache).getDifficulty() - 1) * 5) * 60 * 1000) / 2;
     }
     
     private double[][] countAproxDistanceMatrix() {
         double [][] tmpDistanceMatrix = new double [nodes][nodes];
         
         for (int i = 1; i < nodes; i++)
-            tmpDistanceMatrix[0][i] = tmpDistanceMatrix[i][0] = ref.getCircleDistance(caches.get(i-1));
+            tmpDistanceMatrix[0][i] = tmpDistanceMatrix[i][0] = ref.getCircleDistance(getCache(i));
         
         for (int i = 1; i < nodes; i++) {
-            GeoCache tmp = caches.get(i-1);
+            GeoCache tmp = getCache(i);
             for (int j = 1; j < i; j++) {
-                tmpDistanceMatrix[i][j] = tmpDistanceMatrix[j][i] = tmp.getCircleDistance(caches.get(j-1));
+                tmpDistanceMatrix[i][j] = tmpDistanceMatrix[j][i] = tmp.getCircleDistance(getCache(j));
             }
         }
         
