@@ -23,6 +23,12 @@ public class GpxExport {
         this.file = file;
     }
 
+    /**
+     * Exports current trip to gpx.
+     * 
+     * @param route list of points
+     * @return true if export was successful
+     */
     public boolean export(List<GeoPlace> route) {
         Document doc = new Document();
 

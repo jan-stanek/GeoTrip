@@ -105,6 +105,9 @@ public class MainModel {
         loadMarkersIcons();
     }
 
+    /**
+     * Inits map, prints caches
+     */
     public void init() {
         findInstalledMaps();
         loadMap();
@@ -132,15 +135,30 @@ public class MainModel {
         this.mapViewPosition = mapViewPosition;
     }
 
+    /**
+     * Changes map.
+     * @param mapName name of map 
+     */
     public void changeMap(String mapName) {
         prefs.put("map", mapName);
         loadMap();
     }
 
+    /**
+     * Returns selected map.
+     * 
+     * @return selected map
+     */
     public String getSelectedMap() {
         return prefs.get("map", null);
     }
 
+    /**
+     * Imports map.
+     * 
+     * @param mapFile .map file
+     * @param osmFile .osm file
+     */
     public void importMap(final File mapFile, final File osmFile) {
         new Thread() {
             @Override
@@ -173,18 +191,51 @@ public class MainModel {
         return layers;
     }
 
+    /**
+     * Returns cache by its layer.
+     * 
+     * @param layer
+     * @return cache
+     */
     public GeoCache getCacheByLayer(Layer layer) {
         return layersCache.get(layer);
     }
 
+    /**
+     * Returns ref point.
+     * 
+     * @return ref point
+     */
     public GeoPlace getRefPoint() {
         return refPoint;
     }
 
+    /**
+     * Returns bounding box.
+     * 
+     * @return bounding box
+     */
     public BoundingBox getBoundingBox() {
         return boundingBox;
     }
 
+    /**
+     * Starts trip planning
+     * 
+     * @param distance
+     * @param vehicle
+     * @param tripType
+     * @param found
+     * @param container
+     * @param difficultyLow
+     * @param difficultyHigh
+     * @param terrainLow
+     * @param terrainHigh
+     * @param containerPriority
+     * @param difficultyPriority
+     * @param terrainPriority
+     * @return true if successful
+     */
     public boolean planTrip(int distance, RoutingTypes vehicle, TripType tripType, boolean found, int container, int difficultyLow, int difficultyHigh, int terrainLow,
             int terrainHigh, int containerPriority, int difficultyPriority, int terrainPriority) {
         removeCacheMarkers();
@@ -213,10 +264,20 @@ public class MainModel {
         return true;
     }
 
+    /**
+     * Returns trip length.
+     * 
+     * @return trip length 
+     */
     public String getTripLength() {
         return String.format("%.1f", tripPlanner.getTripLength() / 1000);
     }
 
+    /**
+     * Returns trip total time.
+     * 
+     * @return trip total time
+     */
     public String getTripTime() {
         long time = tripPlanner.getTripTime() / (60 * 1000);
         long hours = time / 60;
@@ -224,10 +285,20 @@ public class MainModel {
         return String.format("%d:%02d", hours, minutes);
     }
 
+    /**
+     * Returns count of caches.
+     * 
+     * @return count of caches
+     */
     public String getTripCaches() {
         return String.format("%d", tripPlanner.getTripCaches());
     }
 
+    /**
+     * Exports to gpx.
+     * 
+     * @param file output file
+     */
     public void exportToGpx(File file) {
         GpxExport gpxExport = new GpxExport(file);
         gpxExport.export(trip);

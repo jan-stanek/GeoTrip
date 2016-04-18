@@ -72,7 +72,8 @@ public class ExactPlanner implements Planner {
             prevI = minI;
             route.add(prevI);
         }
-        route.add(0);
+        if (nodes > 1)
+            route.add(0);
     }
 
     /**

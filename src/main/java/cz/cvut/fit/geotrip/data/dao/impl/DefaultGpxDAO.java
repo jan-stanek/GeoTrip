@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -37,6 +35,9 @@ public class DefaultGpxDAO implements GpxDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public GeoPlace getRef() {
         Namespace ns = document.getRootElement().getNamespace();
@@ -50,6 +51,9 @@ public class DefaultGpxDAO implements GpxDAO {
         return new GeoPlace(new GeoPoint(lat, lon), name);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Collection<GeoCache> getAllCaches() {
         List<GeoCache> data = new ArrayList<>();

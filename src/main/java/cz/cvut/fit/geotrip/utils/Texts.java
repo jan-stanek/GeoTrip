@@ -18,6 +18,12 @@ public class Texts {
         return instance;
     }
 
+    /**
+     * Returns localized string by key.
+     * 
+     * @param key key of string
+     * @return localized string
+     */
     public String getLocalizedText(String key) {
         return resourceBundle.getString(key);
     }
