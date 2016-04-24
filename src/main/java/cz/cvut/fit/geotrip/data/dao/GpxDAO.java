@@ -6,7 +6,17 @@ import java.util.Collection;
 
 public interface GpxDAO {
 
+    /**
+     * Returns ref point.
+     * 
+     * @return ref point
+     */
     GeoPlace getRef();
 
+    /**
+     * Returns list of caches in GPX file.
+     * 
+     * @return list of caches in GPX file
+     */
     Collection<GeoCache> getAllCaches();
 }

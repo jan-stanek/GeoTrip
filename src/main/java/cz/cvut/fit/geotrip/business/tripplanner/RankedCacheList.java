@@ -17,10 +17,22 @@ public class RankedCacheList {
         list.add(rc);
     }
 
+    /**
+     * Returns worst cache.
+     * 
+     * @return worst cache 
+     */
     public RankedCache getLast() {
         return list.get(list.size() - 1);
     }
 
+    /**
+     * Counts rank and sorts caches.
+     * 
+     * @param tripType type of the trip
+     * @param maxLength maximal length of the trip
+     * @param currentLength current trip length
+     */
     public void sort(TripType tripType, double maxLength, double currentLength) {
         countTotalRank(tripType, maxLength, currentLength);
         sort();

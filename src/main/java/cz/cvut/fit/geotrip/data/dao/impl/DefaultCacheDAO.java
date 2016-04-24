@@ -21,11 +21,17 @@ public class DefaultCacheDAO implements CacheDAO {
         data.addAll(DAOFactory.getDAOFactory().getGpxDAO().getAllCaches());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Collection<GeoCache> getAll() {
         return new LinkedList<>(data);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Collection<GeoCache> getFiltered(Predicate<GeoCache> predicate) {
         return Lists.newLinkedList(Iterables.filter(data, predicate));

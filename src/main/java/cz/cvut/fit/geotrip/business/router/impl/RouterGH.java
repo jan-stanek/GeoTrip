@@ -33,6 +33,9 @@ public class RouterGH implements Router {
     private long[][] timeMatrix;
     private List<GeoPoint>[][] routeMatrix;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void init(String mapName, RoutingTypes vehicle, GeoPlace ref, Collection<GeoCache> caches) {
         this.vehicle = vehicleToString(vehicle);
@@ -41,21 +44,33 @@ public class RouterGH implements Router {
         countMatrix(ref, caches);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double[][] getDistanceMatrix() {
         return distanceMatrix;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long[][] getTimeMatrix() {
         return timeMatrix;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<GeoPoint>[][] getRouteMatrix() {
         return routeMatrix;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void importMap(String mapName) {
         Thread car = initMap(mapName, "car");

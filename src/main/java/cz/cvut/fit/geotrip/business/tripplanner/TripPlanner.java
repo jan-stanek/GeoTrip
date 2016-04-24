@@ -24,7 +24,7 @@ public class TripPlanner implements Runnable {
     private final TripType tripType;
     private final GeoPlace ref;
     private final double maxLength;
-    private double length;
+    private double length = Double.POSITIVE_INFINITY;
     private final int containerPriority;
     private final int difficultyPriority;
     private final int terrainPriority;
@@ -58,6 +58,9 @@ public class TripPlanner implements Runnable {
         this.planningDialogObserver = planningDialogObserver;
     }
 
+    /**
+     * Plans trip.
+     */
     @Override
     public void run() {
         nodes = caches.size() + 1;
@@ -111,10 +114,20 @@ public class TripPlanner implements Runnable {
         planningDialogObserver.hide();
     }
 
+    /**
+     * Retrurns length of trip.
+     * 
+     * @return length of trip
+     */
     public double getTripLength() {
         return length;
     }
 
+    /**
+     * Returns trip total time.
+     * 
+     * @return total time 
+     */
     public long getTripTime() {
         long time = 0;
         int i;
@@ -126,10 +139,20 @@ public class TripPlanner implements Runnable {
         return time;
     }
 
+    /**
+     * Returns list of trips caches.
+     * 
+     * @return list of trips caches
+     */
     public int getTripCaches() {
         return caches.size();
     }
 
+    /**
+     * Returns list of route points.
+     * 
+     * @return list of route points
+     */
     public List<GeoPoint> getTripRoutePoints() {
         if (caches.size() > 0) {
             LinkedList<GeoPoint> points = new LinkedList<>();
@@ -141,6 +164,11 @@ public class TripPlanner implements Runnable {
         return null;
     }
 
+    /**
+     * Returns list of trip points.
+     * 
+     * @return list of trip points
+     */
     public List<GeoPlace> getTripPoints() {
         if (caches.size() > 0) {
             LinkedList<GeoPlace> places = new LinkedList<>();
