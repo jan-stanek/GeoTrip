@@ -24,7 +24,7 @@ public class TripPlanner implements Runnable {
     private final TripType tripType;
     private final GeoPlace ref;
     private final double maxLength;
-    private double length;
+    private double length = Double.POSITIVE_INFINITY;
     private final int containerPriority;
     private final int difficultyPriority;
     private final int terrainPriority;
