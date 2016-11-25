@@ -23,6 +23,8 @@ public class GeoTrip {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) { }
        
         DATA_DIRECTORY = args[0];
+        if (!DATA_DIRECTORY.endsWith("/"))
+            DATA_DIRECTORY = DATA_DIRECTORY.concat("/");
         
         MainModel model = new MainModel();
         MainFrame mainFrame = new MainFrame(model);
